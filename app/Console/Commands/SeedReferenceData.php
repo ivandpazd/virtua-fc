@@ -267,8 +267,8 @@ class SeedReferenceData extends Command
      * like ESP3A/ESP3B) or promotion_playoffs entries (like ESP3PO). Unknown
      * codes are warned about and skipped.
      *
-     * Used by targeted one-off commands (e.g. AddPrimeraRfef) that want to
-     * add a handful of new competitions without re-touching unrelated data.
+     * Used by targeted one-off commands that want to add a handful of new
+     * competitions without re-touching unrelated data.
      *
      * @param  string[]  $competitionCodes
      */
@@ -687,7 +687,7 @@ class SeedReferenceData extends Command
             if ($existingTeam) {
                 $teamId = $existingTeam->id;
                 // Update mutable fields for existing teams so reference
-                // refreshes (e.g. app:add-primera-rfef) pick up new data.
+                // refreshes pick up new data.
                 $stadiumSeats = isset($club['stadiumSeats'])
                     ? (int) str_replace(['.', ','], '', $club['stadiumSeats'])
                     : 0;
