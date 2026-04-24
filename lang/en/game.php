@@ -408,6 +408,9 @@ return [
     'wc2026_name' => 'World Cup 2026',
     'career_unlock_hint' => 'Win the World Cup to unlock',
     'b_team_not_playable' => 'B teams are not playable in career mode',
+    'primera_federacion' => 'Primera Federación',
+    'group_1' => 'Group 1',
+    'group_2' => 'Group 2',
 
     // Season Goals
     'goal_title' => 'Win the League',

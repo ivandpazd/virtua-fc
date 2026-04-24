@@ -110,41 +110,67 @@
 
                 {{-- ===================== CAREER MODE: Club teams ===================== --}}
                 <div x-show="mode === 'career'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                    {{-- Competition tabs --}}
+                    {{-- Competition tabs. ESP3A/ESP3B collapse into a single virtual "Primera Federación" tab keyed 'ESP3'. --}}
+                    @php
+                        $allComps = collect($countries)->flatMap(fn ($c) => collect($c['tiers']))->values();
+                        $primeraRfefComps = $allComps->whereIn('id', ['ESP3A', 'ESP3B'])->values();
+                        $tabComps = $allComps->reject(fn ($c) => in_array($c->id, ['ESP3A', 'ESP3B'], true))->values();
+                        if ($primeraRfefComps->isNotEmpty()) {
+                            $first = $primeraRfefComps->first();
+                            $esp3Index = $allComps->search(fn ($c) => $c->id === 'ESP3A');
+                            $synthetic = (object) [
+                                'id' => 'ESP3',
+                                'name' => 'game.primera_federacion',
+                                'flag' => $first->flag,
+                                'country' => $first->country,
+                            ];
+                            $tabComps->splice($esp3Index !== false ? $esp3Index : $tabComps->count(), 0, [$synthetic]);
+                        }
+                    @endphp
                     <div class="flex gap-2 overflow-x-auto scrollbar-hide mb-4">
-                        @foreach($countries as $countryCode => $country)
-                            @foreach($country['tiers'] as $tier => $competition)
-                                <x-pill-button
-                                    @click="openTab = '{{ $competition->id }}'"
-                                    x-bind:class="openTab === '{{ $competition->id }}'
-                                        ? 'bg-accent-red text-white'
-                                        : 'bg-surface-700 text-text-secondary hover:text-text-body hover:bg-surface-600'"
-                                    class="gap-2 shrink-0">
-                                    <img class="w-5 h-4 rounded-sm shadow-sm" src="{{ Storage::disk('assets')->url('flags/' . $competition->flag . '.svg') }}" alt="">
-                                    <span>{{ __($competition->name) }}</span>
-                                </x-pill-button>
-                            @endforeach
+                        @foreach($tabComps as $competition)
+                            <x-pill-button
+                                @click="openTab = '{{ $competition->id }}'"
+                                x-bind:class="openTab === '{{ $competition->id }}'
+                                    ? 'bg-accent-red text-white'
+                                    : 'bg-surface-700 text-text-secondary hover:text-text-body hover:bg-surface-600'"
+                                class="gap-2 shrink-0">
+                                <img class="w-5 h-4 rounded-sm shadow-sm" src="{{ Storage::disk('assets')->url('flags/' . $competition->flag . '.svg') }}" alt="">
+                                <span>{{ __($competition->name) }}</span>
+                            </x-pill-button>
                         @endforeach
                     </div>
 
-                    {{-- Team grids per competition --}}
+                    {{-- Team grids per competition. ESP3A/ESP3B share the 'ESP3' tab and render as group sections. --}}
                     @foreach($countries as $countryCode => $country)
                         @foreach($country['tiers'] as $tier => $competition)
-                            <div x-show="openTab === '{{ $competition->id }}'" x-cloak>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                            @php
+                                $isPrimeraRfef = in_array($competition->id, ['ESP3A', 'ESP3B'], true);
+                                $activeTabId = $isPrimeraRfef ? 'ESP3' : $competition->id;
+                                $groupHeadingKey = match ($competition->id) {
+                                    'ESP3A' => 'game.group_1',
+                                    'ESP3B' => 'game.group_2',
+                                    default => null,
+                                };
+                            @endphp
+                            <div x-show="openTab === '{{ $activeTabId }}'" x-cloak @class(['mb-4' => $isPrimeraRfef])>
+                                @if($groupHeadingKey)
+                                    <h3 class="font-heading text-sm md:text-base font-semibold uppercase tracking-wide text-text-secondary mb-2">{{ __($groupHeadingKey) }}</h3>
+                                @endif
+                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
                                     @foreach($competition->teams as $team)
                                         @if($team->isReserveTeam())
                                             <div x-data x-tooltip.raw="{{ __('game.b_team_not_playable') }}"
-                                                 class="flex items-center gap-3 rounded-lg border border-border-default p-3 md:p-4 opacity-60 cursor-not-allowed">
-                                                <x-team-crest :team="$team" class="w-10 h-10 shrink-0" />
-                                                <span class="text-sm md:text-base font-medium text-text-muted truncate">{{ $team->name }}</span>
+                                                 class="flex items-center gap-2 md:gap-3 rounded-lg border border-border-default p-2 md:p-4 opacity-60 cursor-not-allowed">
+                                                <x-team-crest :team="$team" class="w-7 h-7 md:w-10 md:h-10 shrink-0" />
+                                                <span class="text-xs md:text-base font-medium text-text-muted truncate">{{ $team->name }}</span>
                                             </div>
                                         @else
-                                            <label class="flex items-center gap-3 rounded-lg border border-border-default p-3 md:p-4 cursor-pointer transition-all
+                                            <label class="flex items-center gap-2 md:gap-3 rounded-lg border border-border-default p-2 md:p-4 cursor-pointer transition-all
                                                            hover:bg-accent-blue/5 hover:border-accent-blue/30
                                                            has-checked:ring-2 has-checked:ring-accent-blue has-checked:border-accent-blue/30 has-checked:bg-accent-blue/5">
-                                                <x-team-crest :team="$team" class="w-10 h-10 shrink-0" />
-                                                <span class="text-sm md:text-base font-medium text-text-body truncate">{{ $team->name }}</span>
+                                                <x-team-crest :team="$team" class="w-7 h-7 md:w-10 md:h-10 shrink-0" />
+                                                <span class="text-xs md:text-base font-medium text-text-body truncate">{{ $team->name }}</span>
                                                 <input x-bind:required="mode === 'career'" x-bind:disabled="mode !== 'career'" type="radio" name="team_id" value="{{ $team->id }}" class="hidden">
                                             </label>
                                         @endif

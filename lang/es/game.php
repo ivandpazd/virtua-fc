@@ -408,6 +408,9 @@ return [
     'wc2026_name' => 'Copa del Mundo 2026',
     'career_unlock_hint' => 'Gana el Mundial para desbloquearlo',
     'b_team_not_playable' => 'No es posible jugar con filiales en modo carrera',
+    'primera_federacion' => 'Primera Federación',
+    'group_1' => 'Grupo 1',
+    'group_2' => 'Grupo 2',
 
     // Season Goals
     'goal_title' => 'Ganar la Liga',
