@@ -5,7 +5,7 @@
     "clubs": [
         { "id": "12", "name": "AS Roma", "country": "IT", "pot": 1 },
         { "id": "720", "name": "FC Porto", "country": "PT", "pot": 1 },
-        { "id": "124", "name": "Rangers FC", "country": "SC", "pot": 1 },
+        { "id": "124", "name": "Rangers FC", "country": "GB-SCT", "pot": 1 },
         { "id": "234", "name": "Feyenoord Rotterdam", "country": "NL", "pot": 1 },
         { "id": "1082", "name": "LOSC Lille", "country": "FR", "pot": 1 },
         { "id": "419", "name": "GNK Dinamo Zagreb", "country": "HR", "pot": 1 },
@@ -20,7 +20,7 @@
         { "id": "1091", "name": "PAOK FC", "country": "GR", "pot": 2 },
         { "id": "941", "name": "Viktoria Plzeň", "country": "CZ", "pot": 2 },
         { "id": "279", "name": "Ferencváros TC", "country": "HU", "pot": 2 },
-        { "id": "371", "name": "Celtic FC", "country": "SC", "pot": 2 },
+        { "id": "371", "name": "Celtic FC", "country": "GB-SCT", "pot": 2 },
         { "id": "119", "name": "Maccabi Tel-Aviv", "country": "IL", "pot": 2 },
 
         { "id": "452", "name": "BSC Young Boys", "country": "CH", "pot": 3 },
