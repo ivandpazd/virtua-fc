@@ -6,7 +6,6 @@ use App\Models\ClubProfile;
 use App\Models\Competition;
 use App\Models\Game;
 use App\Models\GameMatch;
-use App\Models\GameStanding;
 use App\Models\MatchAttendance;
 use App\Models\Team;
 use App\Models\TeamReputation;
@@ -31,6 +30,11 @@ class MatchAttendanceService
     public function __construct(
         private readonly DemandCurveService $demandCurve,
     ) {}
+
+    /** Per-request caches — MatchAttendanceService is resolved fresh per request. */
+    private array $reputationCache = [];
+    private array $clubProfileCache = [];
+    private array $teamCache = [];
 
     /**
      * Return the MatchAttendance for this fixture, computing and persisting
@@ -110,7 +114,7 @@ class MatchAttendanceService
             return null;
         }
 
-        $home = Team::find($match->home_team_id);
+        $home = $this->loadTeam($match->home_team_id);
         if (!$home) {
             return null;
         }
@@ -120,27 +124,29 @@ class MatchAttendanceService
         $homeRep = $this->loadReputation($game->id, $home->id);
         $awayRep = $this->loadReputation($game->id, $match->away_team_id);
 
-        $homePosition = null;
-        if ($competition && $competition->role === Competition::ROLE_LEAGUE) {
-            $homePosition = GameStanding::where('game_id', $game->id)
-                ->where('competition_id', $competition->id)
-                ->where('team_id', $home->id)
-                ->value('position');
-            $homePosition = $homePosition !== null ? (int) $homePosition : null;
-        }
-
         $attendance = $this->demandCurve->project(
             $home,
             $homeRep,
             $awayRep,
             $competition,
-            $homePosition,
         );
 
         return [
             'attendance' => $attendance,
             'capacity' => (int) ($home->stadium_seats ?? 0),
         ];
+    }
+
+    /**
+     * Season-average attendance for a team's home fixtures. Skips the
+     * per-fixture queries that projectForMatch() performs — BudgetProjectionService
+     * only needs an expected gate to multiply by the home-match count.
+     */
+    public function projectBaselineForTeam(string $gameId, Team $home): int
+    {
+        $homeRep = $this->loadReputation($gameId, $home->id);
+
+        return $this->demandCurve->projectBaseline($home, $homeRep);
     }
 
     private function isSoldOutRound(GameMatch $match): bool
@@ -158,7 +164,16 @@ class MatchAttendanceService
             return (int) $match->neutral_venue_capacity;
         }
 
-        return (int) (Team::find($match->home_team_id)?->stadium_seats ?? 0);
+        return (int) ($this->loadTeam($match->home_team_id)?->stadium_seats ?? 0);
+    }
+
+    private function loadTeam(string $teamId): ?Team
+    {
+        if (! array_key_exists($teamId, $this->teamCache)) {
+            $this->teamCache[$teamId] = Team::find($teamId);
+        }
+
+        return $this->teamCache[$teamId];
     }
 
     /**
@@ -168,15 +183,23 @@ class MatchAttendanceService
      */
     private function loadReputation(string $gameId, string $teamId): TeamReputation
     {
+        $key = "$gameId|$teamId";
+        if (array_key_exists($key, $this->reputationCache)) {
+            return $this->reputationCache[$key];
+        }
+
         $rep = TeamReputation::where('game_id', $gameId)
             ->where('team_id', $teamId)
             ->first();
 
         if ($rep) {
-            return $rep;
+            return $this->reputationCache[$key] = $rep;
         }
 
-        $profile = ClubProfile::where('team_id', $teamId)->first();
+        if (! array_key_exists($teamId, $this->clubProfileCache)) {
+            $this->clubProfileCache[$teamId] = ClubProfile::where('team_id', $teamId)->first();
+        }
+        $profile = $this->clubProfileCache[$teamId];
         $level = $profile->reputation_level ?? ClubProfile::REPUTATION_LOCAL;
         $anchor = (int) ($profile->fan_loyalty ?? ClubProfile::FAN_LOYALTY_DEFAULT);
         $loyalty = $anchor * 10;
@@ -190,6 +213,6 @@ class MatchAttendanceService
         $synthetic->base_loyalty = $loyalty;
         $synthetic->loyalty_points = $loyalty;
 
-        return $synthetic;
+        return $this->reputationCache[$key] = $synthetic;
     }
 }
