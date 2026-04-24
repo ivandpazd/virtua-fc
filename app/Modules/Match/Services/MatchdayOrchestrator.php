@@ -369,10 +369,13 @@ class MatchdayOrchestrator
                 break;
             }
 
+            // Retry on 40P01 (deadlock) — the bulk UPDATE … IN (…) pattern in
+            // GamePlayerMatchState locks rows in heap-scan order, so even a single
+            // unaudited concurrent writer can collide. Deadlock is safely retriable.
             DB::transaction(function () use ($gameId, $nextBatch) {
                 $lockedGame = Game::where('id', $gameId)->lockForUpdate()->first();
                 $this->processBatch($lockedGame, $nextBatch);
-            });
+            }, attempts: 3);
 
             // Reload fresh game for next iteration (outside transaction scope)
             $game = Game::find($gameId);

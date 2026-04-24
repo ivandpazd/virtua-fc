@@ -13,6 +13,7 @@ use App\Models\Game;
 use App\Models\GameMatch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
@@ -87,20 +88,29 @@ class ProcessTacticalActions
         }
 
         try {
-            $result = $this->tacticalChangeService->processLiveMatchChanges(
-                $match,
-                $game,
-                $validated['minute'],
-                $validated['previousSubstitutions'] ?? [],
-                $validated['substitutions'] ?? [],
-                $validated['formation'] ?? null,
-                $validated['mentality'] ?? null,
-                $validated['playing_style'] ?? null,
-                $validated['pressing'] ?? null,
-                $validated['defensive_line'] ?? null,
-                isExtraTime: $isExtraTime,
-                manualSlotPins: $validated['manual_slot_pins'] ?? [],
-            );
+            // Serialize against ProcessRemainingBatches / FinalizeMatch / ProcessCareerActions,
+            // which all take Game::lockForUpdate. Resimulation writes to game_player_match_state
+            // rows for both teams in this match, and those rows overlap with the opponent's
+            // rows touched by the background AI-only batch job — concurrent bulk UPDATEs with
+            // IN-lists lock in heap-scan order and deadlock.
+            $result = DB::transaction(function () use ($match, $game, $validated, $isExtraTime) {
+                Game::where('id', $game->id)->lockForUpdate()->first();
+
+                return $this->tacticalChangeService->processLiveMatchChanges(
+                    $match,
+                    $game,
+                    $validated['minute'],
+                    $validated['previousSubstitutions'] ?? [],
+                    $validated['substitutions'] ?? [],
+                    $validated['formation'] ?? null,
+                    $validated['mentality'] ?? null,
+                    $validated['playing_style'] ?? null,
+                    $validated['pressing'] ?? null,
+                    $validated['defensive_line'] ?? null,
+                    isExtraTime: $isExtraTime,
+                    manualSlotPins: $validated['manual_slot_pins'] ?? [],
+                );
+            }, attempts: 3);
         } catch (\Throwable $e) {
             Log::error('ProcessTacticalActions failed', [
                 'match_id' => $match->id,

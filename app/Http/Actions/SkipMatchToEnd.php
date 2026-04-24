@@ -10,6 +10,7 @@ use App\Modules\Lineup\Services\SubstitutionService;
 use App\Modules\Lineup\Services\TacticalChangeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -85,15 +86,22 @@ class SkipMatchToEnd
         }
 
         try {
-            $result = $this->tacticalChangeService->processLiveMatchChanges(
-                $match,
-                $game,
-                $minute,
-                $previousSubstitutions,
-                newSubstitutions: [],
-                isExtraTime: false,
-                autoSubUserTeam: true,
-            );
+            // Serialize against ProcessRemainingBatches / FinalizeMatch / ProcessCareerActions,
+            // which all take Game::lockForUpdate. See ProcessTacticalActions for the deadlock
+            // rationale — resimulation touches opponent rows that the background job also writes.
+            $result = DB::transaction(function () use ($match, $game, $minute, $previousSubstitutions) {
+                Game::where('id', $game->id)->lockForUpdate()->first();
+
+                return $this->tacticalChangeService->processLiveMatchChanges(
+                    $match,
+                    $game,
+                    $minute,
+                    $previousSubstitutions,
+                    newSubstitutions: [],
+                    isExtraTime: false,
+                    autoSubUserTeam: true,
+                );
+            }, attempts: 3);
         } catch (\Throwable $e) {
             Log::error('SkipMatchToEnd failed', [
                 'match_id' => $match->id,
