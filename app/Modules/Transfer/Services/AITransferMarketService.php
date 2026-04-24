@@ -205,7 +205,6 @@ class AITransferMarketService
     {
         $teamRosters = $this->loadAIRosters($game);
         $teamAverages = $teamRosters->map(fn ($players) => $this->calculateTeamAverage($players));
-        $teams = Team::whereIn('id', $teamRosters->keys())->get()->keyBy('id');
         $takenNumbers = $this->preloadSquadNumbers($game->id);
         $reputationLevels = TeamReputation::resolveLevels($game->id, $teamRosters->keys()->all());
 
@@ -299,7 +298,7 @@ class AITransferMarketService
 
             $signed = $this->signBestFreeAgentForTeam(
                 $game, $need['teamId'], $need['group'], $freeAgents, $teamRosters,
-                $teamAverages, $teams, $takenNumbers, $seasonYear,
+                $teamAverages, $takenNumbers, $seasonYear,
                 $playerUpdates, $transferInserts, $signings, $newSeason,
                 reputationLevels: $reputationLevels,
             );
@@ -325,7 +324,7 @@ class AITransferMarketService
 
             $signed = $this->signBestFreeAgentForTeam(
                 $game, $bestTeamId, null, $freeAgents, $teamRosters,
-                $teamAverages, $teams, $takenNumbers, $seasonYear,
+                $teamAverages, $takenNumbers, $seasonYear,
                 $playerUpdates, $transferInserts, $signings, $newSeason,
                 specificAgent: $fa,
                 reputationLevels: $reputationLevels,
@@ -395,11 +394,9 @@ class AITransferMarketService
             $contractYears = $freeAgent->age($game->current_date) >= 32 ? 1 : mt_rand(1, 2);
             $newContractEnd = Carbon::createFromDate($seasonYear + $contractYears + 1, 6, 30);
 
-            $team = $teams->get($teamId);
-            $minimumWage = $team ? $this->contractService->getMinimumWageForTeam($team) : 0;
             $newWage = $this->contractService->calculateAnnualWage(
                 $freeAgent->market_value_cents,
-                $minimumWage,
+                $this->contractService->getDefaultMinimumWage(),
                 $freeAgent->age($game->current_date),
             );
 
@@ -536,7 +533,7 @@ class AITransferMarketService
                 $buyerRepIndex = $this->getReputationIndex($buyerTeamId, $teamReputations);
                 $maxFee = self::MAX_FEE_BY_REPUTATION_INDEX[$buyerRepIndex] ?? 500_000_000;
                 $fee = min($player->market_value_cents, $maxFee);
-                $this->prepareTransfer($game, $player, $sellerTeamId, $buyerTeamId, $teams->get($buyerTeamId), $window, $assignedNumber, $playerUpdates, $transferInserts, buyerReputationIndex: $buyerRepIndex);
+                $this->prepareTransfer($game, $player, $sellerTeamId, $buyerTeamId, $window, $assignedNumber, $playerUpdates, $transferInserts, buyerReputationIndex: $buyerRepIndex);
                 $count++;
                 $transferredPlayerIds[$player->id] = true;
 
@@ -1073,7 +1070,6 @@ class AITransferMarketService
         GamePlayer $player,
         string $fromTeamId,
         string $toTeamId,
-        ?Team $toTeam,
         string $window,
         int $assignedNumber,
         array &$playerUpdates,
@@ -1088,10 +1084,9 @@ class AITransferMarketService
         $contractYears = mt_rand($minContractYears, $maxContractYears);
         $newContractEnd = Carbon::createFromDate($seasonYear + $contractYears + 1, 6, 30);
 
-        $minimumWage = $toTeam ? $this->contractService->getMinimumWageForTeam($toTeam) : 0;
         $newWage = $this->contractService->calculateAnnualWage(
             $player->market_value_cents,
-            $minimumWage,
+            $this->contractService->getDefaultMinimumWage(),
             $player->age($game->current_date),
         );
 
@@ -1185,7 +1180,6 @@ class AITransferMarketService
         Collection &$freeAgents,
         Collection &$teamRosters,
         Collection $teamAverages,
-        Collection $teams,
         Collection &$takenNumbers,
         int $seasonYear,
         array &$playerUpdates,
@@ -1248,11 +1242,9 @@ class AITransferMarketService
         $contractYears = $bestAgent->age($game->current_date) >= 32 ? 1 : mt_rand(1, 2);
         $newContractEnd = Carbon::createFromDate($seasonYear + $contractYears, 6, 30);
 
-        $team = $teams->get($teamId);
-        $minimumWage = $team ? $this->contractService->getMinimumWageForTeam($team) : 0;
         $newWage = $this->contractService->calculateAnnualWage(
             $bestAgent->market_value_cents,
-            $minimumWage,
+            $this->contractService->getDefaultMinimumWage(),
             $bestAgent->age($game->current_date),
         );
 
