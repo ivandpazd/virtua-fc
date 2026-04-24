@@ -31,11 +31,18 @@ class TeamRegionalOrigins
         'Deportivo Alavés' => self::REGION_BASQUE,
         'CA Osasuna' => self::REGION_BASQUE,
         'SD Eibar' => self::REGION_BASQUE,
+        'Barakaldo CF' => self::REGION_BASQUE,
+        'Bilbao Athletic' => self::REGION_BASQUE,
+        'Arenas Club' => self::REGION_BASQUE,
+        'CA Osasuna Promesas' => self::REGION_BASQUE,
 
         // Catalan clubs (Catalunya).
         'FC Barcelona' => self::REGION_CATALAN,
         'RCD Espanyol Barcelona' => self::REGION_CATALAN,
         'Girona FC' => self::REGION_CATALAN,
+        'Gimnàstic de Tarragona' => self::REGION_CATALAN,
+        'CE Sabadell FC' => self::REGION_CATALAN,
+        'CE Europa' => self::REGION_CATALAN,
     ];
 
     /**
