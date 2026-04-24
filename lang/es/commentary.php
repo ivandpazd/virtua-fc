@@ -237,10 +237,10 @@ return [
     'goal_penalty' => [
         '¡Penalti! :player (:team) lanza con decisión y marca. Sin opción para el portero',
         ':player (:team) se planta ante el balón, arranca y la clava por la escuadra. ¡Gol de penalti!',
-        'Penalti para :team. :player toma carrera y engaña al portero con un disparo cruzado',
+        'Penalti para :el_team. :player toma carrera y engaña al portero con un disparo cruzado',
         ':player (:team) asume la responsabilidad desde los once metros y no falla. Inapelable',
         '¡Gol de penalti! :player (:team) la envía al centro de la portería mientras el portero se lanza',
-        'Máxima pena para :team. :player espera al portero, lo ve moverse y coloca el balón al otro lado',
+        'Pena máxima para :el_team. :player espera al portero, lo ve moverse y coloca el balón al otro lado',
     ],
     // Sabor táctico en los goles
     'goal_counter_attack' => [
