@@ -256,7 +256,10 @@ class MatchdayOrchestrator
 
         $t0 = microtime(true);
         $competitionIds = $matches->pluck('competition_id')->unique()->toArray();
-        $suspendedByCompetition = PlayerSuspension::whereIn('competition_id', $competitionIds)
+        // game_id is required to hit the partial index
+        // player_suspensions_active_idx (game_id, competition_id) WHERE matches_remaining > 0.
+        $suspendedByCompetition = PlayerSuspension::where('game_id', $game->id)
+            ->whereIn('competition_id', $competitionIds)
             ->where('matches_remaining', '>', 0)
             ->get(['game_player_id', 'competition_id'])
             ->groupBy('competition_id')

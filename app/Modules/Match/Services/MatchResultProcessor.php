@@ -88,7 +88,7 @@ class MatchResultProcessor
                 $preLoadedPlayerIds = array_values(array_diff($preLoadedPlayerIds, $deferredPlayerIds));
             }
         }
-        $this->batchServeSuspensions($matches, $matchResults, $preLoadedPlayerIds, $allPlayers);
+        $this->batchServeSuspensions($gameId, $matches, $matchResults, $preLoadedPlayerIds, $allPlayers);
         $suspensionsMs = (microtime(true) - $t0) * 1000;
 
         // 4. Bulk insert all match events across all matches
@@ -225,7 +225,7 @@ class MatchResultProcessor
      * @param  array  $preLoadedPlayerIds  Eligible player IDs (deferred match teams already excluded by caller)
      * @param  \Illuminate\Support\Collection|null  $allPlayers  Players grouped by team_id (for team lookup)
      */
-    private function batchServeSuspensions($matches, array $matchResults, array $preLoadedPlayerIds, $allPlayers = null): void
+    private function batchServeSuspensions(string $gameId, $matches, array $matchResults, array $preLoadedPlayerIds, $allPlayers = null): void
     {
         $competitionIds = [];
         foreach ($matchResults as $result) {
@@ -270,8 +270,11 @@ class MatchResultProcessor
             }
         }
 
-        // Load suspensions with player and competition info for filtering
-        $suspensions = PlayerSuspension::whereIn('competition_id', array_keys($competitionIds))
+        // Load suspensions with player and competition info for filtering.
+        // game_id is required to hit the partial index
+        // player_suspensions_active_idx (game_id, competition_id) WHERE matches_remaining > 0.
+        $suspensions = PlayerSuspension::where('game_id', $gameId)
+            ->whereIn('competition_id', array_keys($competitionIds))
             ->where('matches_remaining', '>', 0)
             ->whereIn('game_player_id', $preLoadedPlayerIds)
             ->get(['id', 'game_player_id', 'competition_id']);

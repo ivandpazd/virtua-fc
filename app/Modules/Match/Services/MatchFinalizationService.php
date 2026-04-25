@@ -179,7 +179,10 @@ class MatchFinalizationService
             ->whereIn('event_type', [MatchEvent::TYPE_RED_CARD, MatchEvent::TYPE_YELLOW_CARD])
             ->select('game_player_id');
 
-        PlayerSuspension::where('competition_id', $match->competition_id)
+        // game_id is required to hit the partial index
+        // player_suspensions_active_idx (game_id, competition_id) WHERE matches_remaining > 0.
+        PlayerSuspension::where('game_id', $match->game_id)
+            ->where('competition_id', $match->competition_id)
             ->where('matches_remaining', '>', 0)
             ->whereIn('game_player_id', $teamPlayerSubquery)
             ->whereNotIn('game_player_id', $cardPlayerSubquery)
