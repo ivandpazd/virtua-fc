@@ -7,6 +7,7 @@ use App\Models\GamePlayerMatchState;
 use App\Modules\Match\Services\EnergyCalculator;
 use App\Modules\Player\PlayerAge;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class PlayerConditionService
 {
@@ -44,6 +45,7 @@ class PlayerConditionService
      */
     public function batchUpdateAfterMatchday($matches, array $matchResults, $allPlayersByTeam, array $recoveryDaysByTeam, Carbon $currentDate): void
     {
+        $computeStart = microtime(true);
         $updates = [];
 
         // Index by matchId for O(1) lookups instead of O(n) per match
@@ -89,8 +91,18 @@ class PlayerConditionService
                 ];
             }
         }
+        $computeMs = (microtime(true) - $computeStart) * 1000;
 
+        $writeStart = microtime(true);
         $this->bulkUpdateConditions($updates);
+        $writeMs = (microtime(true) - $writeStart) * 1000;
+
+        Log::info(sprintf(
+            '[MatchdayAdvance]       conditions breakdown: compute(%d players) %dms | write %dms',
+            count($updates),
+            (int) round($computeMs),
+            (int) round($writeMs),
+        ));
     }
 
     /**

@@ -221,13 +221,14 @@ class MatchdayOrchestrator
         $isAIOnlyBatch = ! $playerMatch && config('match_simulation.ai_resolver_enabled', false);
 
         // --- Load players ---
-        $t0 = microtime(true);
+        $loadStart = microtime(true);
         $teamIds = $matches->pluck('home_team_id')
             ->merge($matches->pluck('away_team_id'))
             ->push($game->team_id)
             ->unique()
             ->values();
 
+        $t0 = microtime(true);
         $allPlayers = GamePlayer::select([
                 'id', 'game_id', 'player_id', 'team_id', 'number', 'position',
                 'durability',
@@ -240,7 +241,10 @@ class MatchdayOrchestrator
             ->where('game_id', $game->id)
             ->whereIn('team_id', $teamIds)
             ->get();
+        $playerQueryMs = (microtime(true) - $t0) * 1000;
+        $playerCount = $allPlayers->count();
 
+        $t0 = microtime(true);
         // Set game relation in-memory to prevent lazy-loading per player
         // (avoids ~220 queries from the age accessor)
         foreach ($allPlayers as $player) {
@@ -248,7 +252,9 @@ class MatchdayOrchestrator
         }
 
         $allPlayers = $allPlayers->groupBy('team_id');
+        $inMemMs = (microtime(true) - $t0) * 1000;
 
+        $t0 = microtime(true);
         $competitionIds = $matches->pluck('competition_id')->unique()->toArray();
         $suspendedByCompetition = PlayerSuspension::whereIn('competition_id', $competitionIds)
             ->where('matches_remaining', '>', 0)
@@ -256,7 +262,17 @@ class MatchdayOrchestrator
             ->groupBy('competition_id')
             ->map(fn ($group) => $group->pluck('game_player_id')->toArray())
             ->toArray();
-        $loadMs = (microtime(true) - $t0) * 1000;
+        $suspensionsQueryMs = (microtime(true) - $t0) * 1000;
+        $loadMs = (microtime(true) - $loadStart) * 1000;
+
+        Log::info(sprintf(
+            '[MatchdayAdvance]     load breakdown: players(%d teams, %d rows) %dms | inMem %dms | suspensions %dms',
+            $teamIds->count(),
+            $playerCount,
+            (int) round($playerQueryMs),
+            (int) round($inMemMs),
+            (int) round($suspensionsQueryMs),
+        ));
 
         $t0 = microtime(true);
         if ($isAIOnlyBatch) {
