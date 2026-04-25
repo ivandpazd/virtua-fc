@@ -69,7 +69,12 @@ class SwissKnockoutGenerator
     /**
      * Generate matchups for a knockout round.
      *
-     * @return array<array{0: string, 1: string}> Array of [homeTeamId, awayTeamId] pairs
+     * Tuple shape: [homeTeamId, awayTeamId, bracketPosition]. `bracketPosition`
+     * is the playoff bracket index (0-3) for round 1, and null for later rounds.
+     * Persisting it on the playoff CupTie lets R16 group winners by their
+     * original bracket without re-deriving from (potentially shifted) standings.
+     *
+     * @return array<array{0: string, 1: string, 2: ?int}>
      */
     public function generateMatchups(Game $game, string $competitionId, int $round): array
     {
@@ -92,7 +97,7 @@ class SwissKnockoutGenerator
         $standings = $this->getLeaguePhaseStandings($game->id, $competitionId);
         $matchups = [];
 
-        foreach (self::PLAYOFF_BRACKETS as $bracket) {
+        foreach (self::PLAYOFF_BRACKETS as $bracketIndex => $bracket) {
             [$higherPositions, $lowerPositions] = $bracket;
 
             // Pick one team from each side of the bracket
@@ -100,8 +105,11 @@ class SwissKnockoutGenerator
             $lowerTeams = collect($lowerPositions)->map(fn ($pos) => $standings[$pos] ?? null)->filter()->shuffle();
 
             for ($i = 0; $i < min($higherTeams->count(), $lowerTeams->count()); $i++) {
-                // Lower seed hosts first leg, higher seed hosts second leg
-                $matchups[] = [$lowerTeams[$i], $higherTeams[$i]];
+                // Lower seed hosts first leg, higher seed hosts second leg.
+                // Stamp the bracket index so R16 can group winners without
+                // re-deriving from current standings (which may have shifted
+                // due to non-deterministic ordering of tied teams).
+                $matchups[] = [$lowerTeams[$i], $higherTeams[$i], $bracketIndex];
             }
         }
 
@@ -127,10 +135,14 @@ class SwissKnockoutGenerator
             ->where('completed', true)
             ->get();
 
-        // Map playoff winners back to their brackets
+        // Map playoff winners back to their brackets. Prefer the persisted
+        // bracket_position (canonical, set at playoff creation); fall back to
+        // findPlayoffBracket for legacy ties created before this column was
+        // populated.
         $bracketWinners = [];
         foreach ($playoffTies as $tie) {
-            $bracketIndex = $this->findPlayoffBracket($tie, $standings);
+            $bracketIndex = $tie->bracket_position
+                ?? $this->findPlayoffBracket($tie, $standings);
             $bracketWinners[$bracketIndex][] = $tie->winner_id;
         }
 
@@ -146,14 +158,16 @@ class SwissKnockoutGenerator
 
             for ($i = 0; $i < min($topTeams->count(), $opponents->count()); $i++) {
                 // Playoff winner hosts first leg, top seed hosts second leg
-                $matchups[] = [$opponents[$i], $topTeams[$i]];
+                $matchups[] = [$opponents[$i], $topTeams[$i], null];
             }
         }
 
         if (count($matchups) !== 8) {
+            $distribution = collect($bracketWinners)->map->count()->all();
             throw new \RuntimeException(
                 "R16 generation failed: expected 8 matchups, got " . count($matchups)
                 . ". Completed playoff ties: " . $playoffTies->count()
+                . ". Bracket distribution: " . json_encode($distribution)
             );
         }
 
@@ -191,7 +205,7 @@ class SwissKnockoutGenerator
 
         for ($i = 0; $i < $winners->count(); $i += 2) {
             if ($i + 1 < $winners->count()) {
-                $matchups[] = [$winners[$i], $winners[$i + 1]];
+                $matchups[] = [$winners[$i], $winners[$i + 1], null];
             }
         }
 
@@ -214,7 +228,7 @@ class SwissKnockoutGenerator
             throw new \RuntimeException('Cannot generate final: semi-finals not complete');
         }
 
-        return [[$winners[0], $winners[1]]];
+        return [[$winners[0], $winners[1], null]];
     }
 
     /**
@@ -233,17 +247,25 @@ class SwissKnockoutGenerator
 
     /**
      * Determine which playoff bracket a tie belongs to, based on the teams' league positions.
+     *
+     * Legacy fallback used only for ties created before bracket_position was
+     * persisted at playoff generation. Uses disjoint-set membership across the
+     * bracket's full position list (higher + lower) rather than min() against
+     * higherPositions only — that earlier approach silently fell through to
+     * bracket 0 whenever standings re-sorts shifted a tied team's position
+     * outside its original higherPositions slot.
      */
     private function findPlayoffBracket(CupTie $tie, array $standings): int
     {
         $positions = array_flip($standings);
-        $homePos = $positions[$tie->home_team_id] ?? 99;
-        $awayPos = $positions[$tie->away_team_id] ?? 99;
-        $higherSeedPos = min($homePos, $awayPos);
+        $homePos = $positions[$tie->home_team_id] ?? null;
+        $awayPos = $positions[$tie->away_team_id] ?? null;
 
         foreach (self::PLAYOFF_BRACKETS as $index => $bracket) {
-            [$higherPositions] = $bracket;
-            if (in_array($higherSeedPos, $higherPositions)) {
+            [$higherPositions, $lowerPositions] = $bracket;
+            $allPositions = array_merge($higherPositions, $lowerPositions);
+
+            if (in_array($homePos, $allPositions, true) && in_array($awayPos, $allPositions, true)) {
                 return $index;
             }
         }

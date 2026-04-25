@@ -148,8 +148,8 @@ class SwissFormatHandler extends CupCompetitionHandler
         $config = $this->knockoutGenerator->getRoundConfig($round, $competitionId, $game->season);
         $matchups = $this->knockoutGenerator->generateMatchups($game, $competitionId, $round);
 
-        foreach ($matchups as [$homeTeamId, $awayTeamId]) {
-            $this->createTie($game, $competitionId, $homeTeamId, $awayTeamId, $config);
+        foreach ($matchups as [$homeTeamId, $awayTeamId, $bracketPosition]) {
+            $this->createTie($game, $competitionId, $homeTeamId, $awayTeamId, $config, $bracketPosition);
         }
     }
 
