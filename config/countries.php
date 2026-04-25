@@ -84,6 +84,31 @@ return [
             'cup_entry_round' => 3,
         ],
 
+        // Rules for which teams from playable tiers qualify for each domestic
+        // cup at the start of the following season. Reserve teams never
+        // qualify regardless of their finishing position.
+        //
+        // - auto_qualify_tiers: every team currently in these tiers qualifies.
+        // - top_per_group: top N teams in each competition at this tier
+        //   (including siblings — e.g. ESP3A and ESP3B) qualify.
+        //
+        // Reserves occupying auto-qualify slots cascade down: for each
+        // ineligible reserve in an auto_qualify tier, one extra seat is
+        // added to top_per_group, distributed round-robin across groups so
+        // the cup keeps its expected size even as reserves climb divisions.
+        //
+        // Teams in ESPCUP that are not registered in any playable tier (the
+        // lower-division teams seeded from the data/<season>/ESPCUP/ pool) are
+        // left untouched, so regional qualifiers keep their cup place.
+        'cup_qualification' => [
+            'ESPCUP' => [
+                'auto_qualify_tiers' => [1, 2],
+                'top_per_group' => [
+                    3 => 5,
+                ],
+            ],
+        ],
+
         'promotions' => [
             [
                 'top_division' => 'ESP1',
