@@ -353,12 +353,18 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
             ON CONFLICT (game_id, player_id) DO NOTHING
         SQL, [$this->gameId, $this->season]);
 
+        // Join on team_id too: the same player_id can appear in templates
+        // for multiple teams in the same season (e.g. league + national),
+        // and we want fitness/morale from the template that matches the
+        // game_player's actual team.
         DB::insert(<<<'SQL'
             INSERT INTO game_player_match_state (game_player_id, game_id, fitness, morale)
             SELECT gp.id, gp.game_id, t.fitness, t.morale
             FROM game_players gp
             JOIN game_player_templates t
-              ON t.player_id = gp.player_id AND t.season = ?
+              ON t.player_id = gp.player_id
+             AND t.team_id = gp.team_id
+             AND t.season = ?
             WHERE gp.game_id = ?
             ON CONFLICT (game_player_id) DO NOTHING
         SQL, [$this->season, $this->gameId]);

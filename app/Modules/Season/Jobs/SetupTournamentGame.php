@@ -8,7 +8,6 @@ use App\Models\CompetitionTeam;
 use App\Models\Game;
 use App\Models\GameMatch;
 use App\Models\GamePlayer;
-use App\Models\GamePlayerMatchState;
 use App\Models\GameStanding;
 use App\Models\Team;
 use Illuminate\Bus\Queueable;
@@ -66,8 +65,7 @@ class SetupTournamentGame implements ShouldQueue
             $this->createGroupStandings($groupsData, $teamKeyMap);
 
             // Step 4: Create game players from pre-computed templates
-            $wcTeamIds = $nationalTeams->pluck('id')->toArray();
-            $this->createGamePlayersFromTemplates($wcTeamIds);
+            $this->createGamePlayersFromTemplates();
 
             // Send welcome notification
             $teamName = $nationalTeams->firstWhere('id', $this->teamId)?->getRawOriginal('name') ?? '';
@@ -181,68 +179,50 @@ class SetupTournamentGame implements ShouldQueue
 
     /**
      * Copy pre-computed templates into game_players (mirrors SetupNewGame pattern).
-     *
-     * @param array<string> $wcTeamIds
      */
-    private function createGamePlayersFromTemplates(array $wcTeamIds): void
+    private function createGamePlayersFromTemplates(): void
     {
         if (GamePlayer::where('game_id', $this->gameId)->exists()) {
             return;
         }
 
-        $gameId = $this->gameId;
-        $userTeamId = $this->teamId;
-
         // Tournament mode (WC2026) only loads teams the user actually faces,
         // so every player here is "active" — they all need a match-state
-        // satellite row from the start.
-        DB::table('game_player_templates')
-            ->where('season', '2025')
-            ->whereIn('team_id', $wcTeamIds)
-            ->where('team_id', '!=', $userTeamId)
-            ->orderBy('player_id')
-            ->chunk(500, function ($templates) use ($gameId) {
-                $rows = [];
-                $matchStateRows = [];
+        // satellite row from the start. Two single INSERT...SELECT statements
+        // run entirely in Postgres; the match_state insert joins on player_id
+        // *and* team_id so that, if the same player_id appears in multiple
+        // templates for season 2025 (e.g., league + national), we copy
+        // fitness/morale from the template that matches the inserted
+        // game_player's team.
+        DB::insert(<<<'SQL'
+            INSERT INTO game_players (
+                id, game_id, player_id, team_id, number, position,
+                market_value, market_value_cents, contract_until, annual_wage, durability,
+                game_technical_ability, game_physical_ability,
+                potential, potential_low, potential_high, tier
+            )
+            SELECT
+                gen_random_uuid(), ?, t.player_id, t.team_id, NULL, t.position,
+                t.market_value, t.market_value_cents, t.contract_until, t.annual_wage, t.durability,
+                t.game_technical_ability, t.game_physical_ability,
+                t.potential, t.potential_low, t.potential_high, t.tier
+            FROM game_player_templates t
+            WHERE t.season = '2025'
+              AND t.team_id IN (SELECT id FROM teams WHERE type = 'national' AND fifa_code IS NOT NULL)
+              AND t.team_id <> ?
+            ON CONFLICT (game_id, player_id) DO NOTHING
+        SQL, [$this->gameId, $this->teamId]);
 
-                foreach ($templates as $t) {
-                    $gamePlayerId = Str::uuid()->toString();
-
-                    $rows[] = [
-                        'id' => $gamePlayerId,
-                        'game_id' => $gameId,
-                        'player_id' => $t->player_id,
-                        'team_id' => $t->team_id,
-                        'number' => null,
-                        'position' => $t->position,
-                        'market_value' => $t->market_value,
-                        'market_value_cents' => $t->market_value_cents,
-                        'contract_until' => $t->contract_until,
-                        'annual_wage' => $t->annual_wage,
-                        'durability' => $t->durability,
-                        'game_technical_ability' => $t->game_technical_ability,
-                        'game_physical_ability' => $t->game_physical_ability,
-                        'potential' => $t->potential,
-                        'potential_low' => $t->potential_low,
-                        'potential_high' => $t->potential_high,
-                        'tier' => $t->tier,
-                    ];
-
-                    $matchStateRows[] = [
-                        'game_player_id' => $gamePlayerId,
-                        'game_id' => $gameId,
-                        'fitness' => $t->fitness,
-                        'morale' => $t->morale,
-                    ];
-                }
-
-                if (!empty($rows)) {
-                    GamePlayer::insert($rows);
-                }
-
-                if (!empty($matchStateRows)) {
-                    GamePlayerMatchState::createForPlayers($matchStateRows);
-                }
-            });
+        DB::insert(<<<'SQL'
+            INSERT INTO game_player_match_state (game_player_id, game_id, fitness, morale)
+            SELECT gp.id, gp.game_id, t.fitness, t.morale
+            FROM game_players gp
+            JOIN game_player_templates t
+              ON t.player_id = gp.player_id
+             AND t.team_id = gp.team_id
+             AND t.season = '2025'
+            WHERE gp.game_id = ?
+            ON CONFLICT (game_player_id) DO NOTHING
+        SQL, [$this->gameId]);
     }
 }
