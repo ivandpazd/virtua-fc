@@ -43,20 +43,14 @@ class MatchdayOrchestrator
     public function advance(Game $game, bool $fastForward = false): MatchdayAdvanceResult
     {
         $this->careerActionTicks = 0;
-        $advanceStart = microtime(true);
-        $batchIndex = 0;
 
-        $result = DB::transaction(function () use ($game, $fastForward, &$batchIndex) {
+        $result = DB::transaction(function () use ($game, $fastForward) {
             // Lock the game row to prevent concurrent matchday advancement
-            $t0 = microtime(true);
             $game = Game::where('id', $game->id)->lockForUpdate()->first();
-            Log::info('[MatchdayAdvance] lockForUpdate completed in '.(int) round((microtime(true) - $t0) * 1000).'ms');
 
             // Safety net: finalize any pending match from a previous matchday
             // (e.g. user closed browser without clicking "Continue")
-            $t0 = microtime(true);
             $this->finalizePendingMatch($game);
-            Log::info('[MatchdayAdvance] finalizePendingMatch completed in '.(int) round((microtime(true) - $t0) * 1000).'ms');
 
             // Block advancement if career actions from a previous advance are still processing
             $game->clearStuckCareerActions();
@@ -75,34 +69,20 @@ class MatchdayOrchestrator
             }
 
             // Mark all existing notifications as read before processing new matchday
-            $t0 = microtime(true);
             $this->notificationService->markAllAsRead($game->id);
-            Log::info('[MatchdayAdvance] markAllAsRead completed in '.(int) round((microtime(true) - $t0) * 1000).'ms');
 
             // Process batches until one involves the player's team or the season ends
             while (true) {
-                $t0 = microtime(true);
                 $batch = $this->matchdayService->getNextMatchBatch($game);
-                Log::info('[MatchdayAdvance] getNextMatchBatch completed in '.(int) round((microtime(true) - $t0) * 1000).'ms');
                 if (! $batch) {
                     break;
                 }
-                $batchIndex++;
                 // Simulate every match in the batch inline so the live-match
                 // "other scores" ticker has real sibling events to reveal.
                 // FullMatchSimulationService routes siblings through the fast
                 // statistical AIMatchResolver so only the user's match pays the
                 // full MatchSimulator cost.
-                $batchStart = microtime(true);
                 $result = $this->processBatch($game, $batch, $fastForward);
-                $batchMs = (int) round((microtime(true) - $batchStart) * 1000);
-                Log::info(sprintf(
-                    '[MatchdayAdvance] batch #%d (%d matches, player=%s) completed in %dms',
-                    $batchIndex,
-                    $batch['matches']->count(),
-                    $result['playerMatch'] ? 'yes' : 'no',
-                    $batchMs,
-                ));
 
                 if ($result['playerMatch']) {
                     if ($fastForward) {
@@ -113,9 +93,7 @@ class MatchdayOrchestrator
                         // normal flow.
                         $playerMatch = GameMatch::find($result['playerMatch']->id);
                         if ($playerMatch) {
-                            $t0 = microtime(true);
                             $this->finalizationService->finalize($playerMatch, $game->refresh());
-                            Log::info('[MatchdayAdvance] finalize (fastForward) completed in '.(int) round((microtime(true) - $t0) * 1000).'ms');
                         }
 
                         return MatchdayAdvanceResult::done();
@@ -132,9 +110,7 @@ class MatchdayOrchestrator
                     ->exists();
 
                 if (! $playerHasMoreMatches) {
-                    $t0 = microtime(true);
                     $this->autoSimulateRemainingBatches($game);
-                    Log::info('[MatchdayAdvance] autoSimulateRemainingBatches completed in '.(int) round((microtime(true) - $t0) * 1000).'ms');
 
                     // Re-check: new matches (e.g. playoffs) may have been generated
                     $playerNowHasMatches = GameMatch::where('game_id', $game->id)
@@ -168,25 +144,10 @@ class MatchdayOrchestrator
         // serializes batch processing per game, so we no longer need the
         // 40P01 deadlock retry that the previous queued path had to carry.
         if ($result->type === 'live_match') {
-            $t0 = microtime(true);
             $this->processRemainingBatches($game, $this->careerActionTicks);
-            Log::info('[MatchdayAdvance] processRemainingBatches (inline) completed in '.(int) round((microtime(true) - $t0) * 1000).'ms');
         } elseif ($this->careerActionTicks > 0) {
-            $t0 = microtime(true);
             $this->dispatchCareerActions($game->id, $this->careerActionTicks);
-            Log::info('[MatchdayAdvance] dispatchCareerActions completed in '.(int) round((microtime(true) - $t0) * 1000).'ms');
         }
-
-        $totalMs = (int) round((microtime(true) - $advanceStart) * 1000);
-        $peakMb = (int) round(memory_get_peak_usage(true) / 1024 / 1024);
-        Log::info(sprintf(
-            '[MatchdayAdvance] advance() total %dms (game %s, type %s, batches %d, peak %dMB)',
-            $totalMs,
-            $game->id,
-            $result->type,
-            $batchIndex,
-            $peakMb,
-        ));
 
         return $result;
     }
@@ -211,9 +172,7 @@ class MatchdayOrchestrator
         // stable figure instead of re-computing (and potentially drifting from)
         // the demand curve at view time. Idempotent — matches that already
         // have a row from an earlier path are a no-op.
-        $t0 = microtime(true);
         $this->matchAttendanceService->resolveBatch($matches, $game);
-        $attendanceMs = (microtime(true) - $t0) * 1000;
 
         $playerMatch = $matches->first(fn ($m) => $m->involvesTeam($game->team_id));
 
@@ -221,14 +180,12 @@ class MatchdayOrchestrator
         $isAIOnlyBatch = ! $playerMatch && config('match_simulation.ai_resolver_enabled', false);
 
         // --- Load players ---
-        $loadStart = microtime(true);
         $teamIds = $matches->pluck('home_team_id')
             ->merge($matches->pluck('away_team_id'))
             ->push($game->team_id)
             ->unique()
             ->values();
 
-        $t0 = microtime(true);
         $allPlayers = GamePlayer::select([
                 'id', 'game_id', 'player_id', 'team_id', 'number', 'position',
                 'durability',
@@ -241,10 +198,7 @@ class MatchdayOrchestrator
             ->where('game_id', $game->id)
             ->whereIn('team_id', $teamIds)
             ->get();
-        $playerQueryMs = (microtime(true) - $t0) * 1000;
-        $playerCount = $allPlayers->count();
 
-        $t0 = microtime(true);
         // Set game relation in-memory to prevent lazy-loading per player
         // (avoids ~220 queries from the age accessor)
         foreach ($allPlayers as $player) {
@@ -252,9 +206,7 @@ class MatchdayOrchestrator
         }
 
         $allPlayers = $allPlayers->groupBy('team_id');
-        $inMemMs = (microtime(true) - $t0) * 1000;
 
-        $t0 = microtime(true);
         $competitionIds = $matches->pluck('competition_id')->unique()->toArray();
         // game_id is required to hit the partial index
         // player_suspensions_active_idx (game_id, competition_id) WHERE matches_remaining > 0.
@@ -265,19 +217,7 @@ class MatchdayOrchestrator
             ->groupBy('competition_id')
             ->map(fn ($group) => $group->pluck('game_player_id')->toArray())
             ->toArray();
-        $suspensionsQueryMs = (microtime(true) - $t0) * 1000;
-        $loadMs = (microtime(true) - $loadStart) * 1000;
 
-        Log::info(sprintf(
-            '[MatchdayAdvance]     load breakdown: players(%d teams, %d rows) %dms | inMem %dms | suspensions %dms',
-            $teamIds->count(),
-            $playerCount,
-            (int) round($playerQueryMs),
-            (int) round($inMemMs),
-            (int) round($suspensionsQueryMs),
-        ));
-
-        $t0 = microtime(true);
         if ($isAIOnlyBatch) {
             // --- Fast AI resolution path ---
             // Skips: FormationRecommender, full LineupService, MatchSimulator,
@@ -285,7 +225,6 @@ class MatchdayOrchestrator
             // The AIMatchResolver handles lineup selection (with rotation) and
             // statistical result generation in a single lightweight pass.
             $matchResults = $this->aiMatchResolver->resolveMatches($matches, $allPlayers, $game, $suspendedByCompetition);
-            $simPath = 'ai';
         } else {
             // --- Full simulation path (player-involved batches) ---
             // Fast mode rides this same path — the live-match engine — but
@@ -294,24 +233,18 @@ class MatchdayOrchestrator
             $resolution = $this->fullMatchSimulation->resolveMatches($matches, $game, $allPlayers, $suspendedByCompetition, $fastForward);
             $matchResults = $resolution['matchResults'];
             $playerMatch = $resolution['playerMatch'];
-            $simPath = 'full';
         }
-        $simulateMs = (microtime(true) - $t0) * 1000;
 
         // Identify user's match — its score-dependent effects are deferred to finalization
         $deferMatchId = $playerMatch?->id;
 
         // --- Process results ---
-        $t0 = microtime(true);
         // Derive competitions from already-loaded match relations to avoid re-querying
         $competitions = $matches->pluck('competition')->filter()->unique('id')->keyBy('id');
         $this->matchResultProcessor->processAll($game, $currentDate, $matchResults, $deferMatchId, $allPlayers, $matches, $competitions);
-        $processMs = (microtime(true) - $t0) * 1000;
 
         // --- Recalculate positions ---
-        $t0 = microtime(true);
         $this->recalculateLeaguePositions($game->id, $matches);
-        $positionsMs = (microtime(true) - $t0) * 1000;
 
         // Mark user's match as pending finalization BEFORE post-match actions
         if ($playerMatch) {
@@ -355,21 +288,8 @@ class MatchdayOrchestrator
         }
 
         // --- Post-match actions ---
-        $t0 = microtime(true);
         $game->refresh()->setRelations([]);
         $this->processPostMatchActions($game, $matches, $handlers, $allPlayers, $deferMatchId);
-        $postMs = (microtime(true) - $t0) * 1000;
-
-        Log::info(sprintf(
-            '[MatchdayAdvance]   processBatch breakdown: path=%s | attendance %dms | load %dms | simulate %dms | process %dms | positions %dms | post %dms',
-            $simPath,
-            (int) round($attendanceMs),
-            (int) round($loadMs),
-            (int) round($simulateMs),
-            (int) round($processMs),
-            (int) round($positionsMs),
-            (int) round($postMs),
-        ));
 
         return ['playerMatch' => $playerMatch];
     }
@@ -496,12 +416,9 @@ class MatchdayOrchestrator
             $this->careerActionTicks++;
         }
 
-        $t0 = microtime(true);
         // Roll for training injuries (non-playing squad members)
         $this->processTrainingInjuries($game, $matches, $allPlayers);
-        $trainingInjuriesMs = (microtime(true) - $t0) * 1000;
 
-        $t0 = microtime(true);
         // Batch-load recent low-fitness notifications to avoid per-player queries
         $recentNotificationPlayerIds = GameNotification::where('game_id', $game->id)
             ->where('type', GameNotification::TYPE_LOW_FITNESS)
@@ -513,14 +430,10 @@ class MatchdayOrchestrator
 
         // Check for low fitness players
         $this->checkLowFitnessPlayers($game, $allPlayers, $recentNotificationPlayerIds);
-        $lowFitnessMs = (microtime(true) - $t0) * 1000;
 
-        $t0 = microtime(true);
         // Clean up old read notifications
         $this->notificationService->cleanupOldNotifications($game);
-        $cleanupMs = (microtime(true) - $t0) * 1000;
 
-        $t0 = microtime(true);
         // Competition-specific post-match actions for each handler
         foreach ($handlers as $competitionId => $handler) {
             $competitionMatches = $matches->filter(fn ($m) => $m->competition_id === $competitionId);
@@ -531,25 +444,12 @@ class MatchdayOrchestrator
                 $handler->afterMatches($game, $competitionMatches, $allPlayers);
             }
         }
-        $handlersMs = (microtime(true) - $t0) * 1000;
 
-        $t0 = microtime(true);
         // Check competition progress (advancement/elimination) after handlers have resolved ties
         $matchesForProgress = $deferMatchId
             ? $matches->reject(fn ($m) => $m->id === $deferMatchId)
             : $matches;
         $this->checkCompetitionProgress($game, $matchesForProgress, $handlers);
-        $progressMs = (microtime(true) - $t0) * 1000;
-
-        Log::info(sprintf(
-            '[MatchdayAdvance]     post breakdown: trainingInjuries %dms | lowFitness %dms | cleanup %dms | handlers(%d) %dms | progress %dms',
-            (int) round($trainingInjuriesMs),
-            (int) round($lowFitnessMs),
-            (int) round($cleanupMs),
-            count($handlers),
-            (int) round($handlersMs),
-            (int) round($progressMs),
-        ));
     }
 
     /**

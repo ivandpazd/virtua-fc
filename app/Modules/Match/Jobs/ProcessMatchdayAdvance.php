@@ -45,8 +45,6 @@ class ProcessMatchdayAdvance implements ShouldQueue, ShouldBeUnique
 
     public function handle(MatchdayOrchestrator $orchestrator, ActivationTracker $activationTracker): ?MatchdayAdvanceResult
     {
-        $jobStart = microtime(true);
-
         $game = Game::find($this->gameId);
 
         if (! $game || ! $game->isAdvancingMatchday()) {
@@ -56,7 +54,6 @@ class ProcessMatchdayAdvance implements ShouldQueue, ShouldBeUnique
         try {
             $result = $orchestrator->advance($game, fastForward: $this->fastForward);
 
-            $t0 = microtime(true);
             $game->refresh();
             $this->dispatchSeasonCompletedIfDone($game, $result);
             $this->recordActivationEvents($game, $activationTracker);
@@ -65,10 +62,6 @@ class ProcessMatchdayAdvance implements ShouldQueue, ShouldBeUnique
                 'matchday_advance_result' => $result->toArray(),
                 'matchday_advancing_at' => null,
             ]);
-            Log::info('[MatchdayAdvance] post-orchestrator (refresh+seasonComplete+activation+update) completed in '.(int) round((microtime(true) - $t0) * 1000).'ms');
-
-            $totalMs = (int) round((microtime(true) - $jobStart) * 1000);
-            Log::info("[MatchdayAdvance] job total {$totalMs}ms (game {$this->gameId}, type {$result->type}, fastForward ".($this->fastForward ? '1' : '0').')');
 
             return $result;
         } catch (\Throwable $e) {

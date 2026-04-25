@@ -11,7 +11,6 @@ use App\Models\MatchEvent;
 use App\Models\PlayerSuspension;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Modules\Competition\Services\StandingsCalculator;
 use App\Modules\Squad\Services\EligibilityService;
@@ -44,21 +43,16 @@ class MatchResultProcessor
         // 1. Update game state — only advance current_date forward.
         // Background batch processing must not regress the date that was
         // already set by the player's batch.
-        $t0 = microtime(true);
         $newDate = Carbon::parse($currentDate);
         if (! $game->current_date || $newDate->gte($game->current_date)) {
             Game::where('id', $gameId)->update(['current_date' => $newDate->toDateString()]);
             $game->current_date = $newDate;
         }
-        $dateMs = (microtime(true) - $t0) * 1000;
 
         // 2. Bulk update match records (scores + played)
-        $t0 = microtime(true);
         $this->bulkUpdateMatchScores($matchResults);
-        $scoresMs = (microtime(true) - $t0) * 1000;
 
         // Use pre-loaded matches when available, otherwise query
-        $t0 = microtime(true);
         $matchIds = array_column($matchResults, 'matchId');
         $matches = $batchMatches
             ? $batchMatches->keyBy('id')
@@ -67,13 +61,11 @@ class MatchResultProcessor
         // Use pre-loaded competitions when available, otherwise query
         $competitions = $preloadedCompetitions
             ?? Competition::whereIn('id', collect($matchResults)->pluck('competitionId')->unique())->get()->keyBy('id');
-        $loadMs = (microtime(true) - $t0) * 1000;
 
         // 3. Serve suspensions for all matches (batch, using pre-loaded player IDs)
         // Exclude players from the deferred match's teams — their suspensions
         // will be served during finalization, so they remain ineligible for
         // substitution while the user plays the live match.
-        $t0 = microtime(true);
         $preLoadedPlayerIds = $allPlayers ? $allPlayers->flatten()->pluck('id')->toArray() : [];
         if ($deferMatchId && $allPlayers) {
             $deferredMatch = $matches->get($deferMatchId);
@@ -89,39 +81,27 @@ class MatchResultProcessor
             }
         }
         $this->batchServeSuspensions($gameId, $matches, $matchResults, $preLoadedPlayerIds, $allPlayers);
-        $suspensionsMs = (microtime(true) - $t0) * 1000;
 
         // 4. Bulk insert all match events across all matches
-        $t0 = microtime(true);
         $this->bulkInsertMatchEvents($gameId, $matchResults);
-        $eventsMs = (microtime(true) - $t0) * 1000;
 
         // 5. Batch process player stats across all matches
-        $t0 = microtime(true);
         $this->batchProcessPlayerStats($game, $matchResults, $matches, $competitions, $deferMatchId, $allPlayers);
-        $statsMs = (microtime(true) - $t0) * 1000;
 
         // 6. Bulk update appearances across all matches (including auto-subbed-in players)
-        $t0 = microtime(true);
         $this->bulkUpdateAppearances($matches, $matchResults);
-        $appearancesMs = (microtime(true) - $t0) * 1000;
 
         // 6b. Record auto-substitutions in match substitutions JSON
-        $t0 = microtime(true);
         $this->recordAutoSubstitutions($matches, $matchResults);
-        $autoSubsMs = (microtime(true) - $t0) * 1000;
 
         // 7. Batch update conditions (exclude deferred match — finalization handles it)
-        $t0 = microtime(true);
         $conditionMatches = $deferMatchId ? $matches->except($deferMatchId) : $matches;
         $conditionResults = $deferMatchId
             ? array_filter($matchResults, fn ($r) => $r['matchId'] !== $deferMatchId)
             : $matchResults;
         $this->batchUpdateConditions($conditionMatches, $conditionResults, $allPlayers ?? collect());
-        $conditionsMs = (microtime(true) - $t0) * 1000;
 
         // 8. Batch update goalkeeper stats (skip deferred match)
-        $t0 = microtime(true);
         $gkResults = $deferMatchId
             ? array_filter($matchResults, fn ($r) => $r['matchId'] !== $deferMatchId)
             : $matchResults;
@@ -129,10 +109,8 @@ class MatchResultProcessor
             ? $matches->except($deferMatchId)->keyBy('id')
             : $matches;
         $this->batchUpdateGoalkeeperStats($gkMatches, $gkResults, $allPlayers);
-        $gkMs = (microtime(true) - $t0) * 1000;
 
         // 9. Update standings per league in bulk (skip deferred match)
-        $t0 = microtime(true);
         $leagueResultsByCompetition = [];
         foreach ($matchResults as $result) {
             if ($result['matchId'] === $deferMatchId) {
@@ -154,22 +132,6 @@ class MatchResultProcessor
             $matchIds = array_column($results, 'matchId');
             GameMatch::whereIn('id', $matchIds)->update(['standings_applied' => true]);
         }
-        $standingsMs = (microtime(true) - $t0) * 1000;
-
-        Log::info(sprintf(
-            '[MatchdayAdvance]     processAll breakdown: date %dms | scores %dms | load %dms | suspensions %dms | events %dms | stats %dms | appearances %dms | autoSubs %dms | conditions %dms | gk %dms | standings %dms',
-            (int) round($dateMs),
-            (int) round($scoresMs),
-            (int) round($loadMs),
-            (int) round($suspensionsMs),
-            (int) round($eventsMs),
-            (int) round($statsMs),
-            (int) round($appearancesMs),
-            (int) round($autoSubsMs),
-            (int) round($conditionsMs),
-            (int) round($gkMs),
-            (int) round($standingsMs),
-        ));
     }
 
     /**
