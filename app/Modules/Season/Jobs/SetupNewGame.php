@@ -14,7 +14,6 @@ use App\Models\CompetitionEntry;
 use App\Models\CompetitionTeam;
 use App\Models\Game;
 use App\Models\GamePlayer;
-use App\Models\GamePlayerMatchState;
 use App\Models\TeamReputation;
 use App\Modules\Stadium\Services\FanLoyaltyService;
 use Carbon\Carbon;
@@ -329,62 +328,39 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
             );
         }
 
-        $gameId = $this->gameId;
+        // Bulk-insert directly from templates with a single round trip per table.
+        // The match_state insert joins the just-inserted game_players back to
+        // templates by player_id to copy fitness/morale. Every game_player gets
+        // a satellite row (Pool players carry template defaults they never read
+        // in practice, but the invariant "every game_player has a matchState
+        // row" lets simulation code assume presence without a lazy-ensure
+        // fallback at matchday time).
+        DB::insert(<<<'SQL'
+            INSERT INTO game_players (
+                id, game_id, player_id, team_id, number, position, secondary_positions,
+                market_value, market_value_cents, contract_until, annual_wage, durability,
+                game_technical_ability, game_physical_ability,
+                potential, potential_low, potential_high, tier
+            )
+            SELECT
+                gen_random_uuid(), ?, t.player_id, t.team_id, t.number, t.position, t.secondary_positions,
+                t.market_value, t.market_value_cents, t.contract_until, t.annual_wage, t.durability,
+                t.game_technical_ability, t.game_physical_ability,
+                t.potential, t.potential_low, t.potential_high, t.tier
+            FROM game_player_templates t
+            WHERE t.season = ?
+              AND t.team_id NOT IN (SELECT id FROM teams WHERE type = 'national')
+            ON CONFLICT (game_id, player_id) DO NOTHING
+        SQL, [$this->gameId, $this->season]);
 
-        DB::table('game_player_templates')
-            ->where('season', $this->season)
-            ->whereNotIn('team_id', function ($query) {
-                $query->select('id')->from('teams')->where('type', 'national');
-            })
-            ->orderBy('player_id')
-            ->chunk(1000, function ($templates) use ($gameId) {
-                $rows = [];
-                $matchStateRows = [];
-
-                foreach ($templates as $t) {
-                    $gamePlayerId = Str::uuid()->toString();
-
-                    $rows[] = [
-                        'id' => $gamePlayerId,
-                        'game_id' => $gameId,
-                        'player_id' => $t->player_id,
-                        'team_id' => $t->team_id,
-                        'number' => $t->number,
-                        'position' => $t->position,
-                        'secondary_positions' => $t->secondary_positions,
-                        'market_value' => $t->market_value,
-                        'market_value_cents' => $t->market_value_cents,
-                        'contract_until' => $t->contract_until,
-                        'annual_wage' => $t->annual_wage,
-                        'durability' => $t->durability,
-                        'game_technical_ability' => $t->game_technical_ability,
-                        'game_physical_ability' => $t->game_physical_ability,
-                        'potential' => $t->potential,
-                        'potential_low' => $t->potential_low,
-                        'potential_high' => $t->potential_high,
-                        'tier' => $t->tier,
-                    ];
-
-                    // Every game_player gets a satellite row. Pool players
-                    // (foreign leagues) carry template defaults they never read
-                    // in practice, but the invariant "every game_player has a
-                    // matchState row" lets simulation code assume presence
-                    // without a lazy-ensure fallback at matchday time.
-                    $matchStateRows[] = [
-                        'game_player_id' => $gamePlayerId,
-                        'game_id' => $gameId,
-                        'fitness' => $t->fitness,
-                        'morale' => $t->morale,
-                    ];
-                }
-
-                if (!empty($rows)) {
-                    GamePlayer::insertOrIgnore($rows);
-                }
-
-                if (!empty($matchStateRows)) {
-                    GamePlayerMatchState::createForPlayers($matchStateRows);
-                }
-            });
+        DB::insert(<<<'SQL'
+            INSERT INTO game_player_match_state (game_player_id, game_id, fitness, morale)
+            SELECT gp.id, gp.game_id, t.fitness, t.morale
+            FROM game_players gp
+            JOIN game_player_templates t
+              ON t.player_id = gp.player_id AND t.season = ?
+            WHERE gp.game_id = ?
+            ON CONFLICT (game_player_id) DO NOTHING
+        SQL, [$this->season, $this->gameId]);
     }
 }
