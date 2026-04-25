@@ -493,9 +493,12 @@ class MatchdayOrchestrator
             $this->careerActionTicks++;
         }
 
+        $t0 = microtime(true);
         // Roll for training injuries (non-playing squad members)
         $this->processTrainingInjuries($game, $matches, $allPlayers);
+        $trainingInjuriesMs = (microtime(true) - $t0) * 1000;
 
+        $t0 = microtime(true);
         // Batch-load recent low-fitness notifications to avoid per-player queries
         $recentNotificationPlayerIds = GameNotification::where('game_id', $game->id)
             ->where('type', GameNotification::TYPE_LOW_FITNESS)
@@ -507,10 +510,14 @@ class MatchdayOrchestrator
 
         // Check for low fitness players
         $this->checkLowFitnessPlayers($game, $allPlayers, $recentNotificationPlayerIds);
+        $lowFitnessMs = (microtime(true) - $t0) * 1000;
 
+        $t0 = microtime(true);
         // Clean up old read notifications
         $this->notificationService->cleanupOldNotifications($game);
+        $cleanupMs = (microtime(true) - $t0) * 1000;
 
+        $t0 = microtime(true);
         // Competition-specific post-match actions for each handler
         foreach ($handlers as $competitionId => $handler) {
             $competitionMatches = $matches->filter(fn ($m) => $m->competition_id === $competitionId);
@@ -521,12 +528,25 @@ class MatchdayOrchestrator
                 $handler->afterMatches($game, $competitionMatches, $allPlayers);
             }
         }
+        $handlersMs = (microtime(true) - $t0) * 1000;
 
+        $t0 = microtime(true);
         // Check competition progress (advancement/elimination) after handlers have resolved ties
         $matchesForProgress = $deferMatchId
             ? $matches->reject(fn ($m) => $m->id === $deferMatchId)
             : $matches;
         $this->checkCompetitionProgress($game, $matchesForProgress, $handlers);
+        $progressMs = (microtime(true) - $t0) * 1000;
+
+        Log::info(sprintf(
+            '[MatchdayAdvance]     post breakdown: trainingInjuries %dms | lowFitness %dms | cleanup %dms | handlers(%d) %dms | progress %dms',
+            (int) round($trainingInjuriesMs),
+            (int) round($lowFitnessMs),
+            (int) round($cleanupMs),
+            count($handlers),
+            (int) round($handlersMs),
+            (int) round($progressMs),
+        ));
     }
 
     /**
