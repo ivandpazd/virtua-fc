@@ -9,6 +9,7 @@ use App\Models\GameMatch;
 use App\Models\MatchAttendance;
 use App\Models\Team;
 use App\Models\TeamReputation;
+use Illuminate\Support\Str;
 
 /**
  * Resolves the per-fixture MatchAttendance record. Idempotent — calling
@@ -61,6 +62,111 @@ class MatchAttendanceService
             'attendance' => $computed['attendance'],
             'capacity_at_match' => $computed['capacity'],
         ]);
+    }
+
+    /**
+     * Batch variant of resolveForMatch for an entire matchday batch.
+     * Pre-warms the team and reputation caches in bulk, then writes all
+     * missing MatchAttendance rows in a single insert. Idempotent: matches
+     * that already have a row are skipped.
+     *
+     * @param  iterable<GameMatch>  $matches
+     */
+    public function resolveBatch(iterable $matches, Game $game): void
+    {
+        $matchIds = collect($matches)->pluck('id')->all();
+        if (empty($matchIds)) {
+            return;
+        }
+
+        $existingIds = MatchAttendance::whereIn('game_match_id', $matchIds)
+            ->pluck('game_match_id')
+            ->all();
+        $existingIds = array_flip($existingIds);
+
+        $remaining = collect($matches)->reject(fn ($m) => isset($existingIds[$m->id]));
+        if ($remaining->isEmpty()) {
+            return;
+        }
+
+        // Pre-warm team + reputation caches so describeForMatch's per-match
+        // calls hit the in-memory map instead of issuing N queries.
+        $teamIds = $remaining
+            ->flatMap(fn ($m) => [$m->home_team_id, $m->away_team_id])
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (! empty($teamIds)) {
+            $missingTeamIds = array_filter(
+                $teamIds,
+                fn ($id) => ! array_key_exists($id, $this->teamCache),
+            );
+            if (! empty($missingTeamIds)) {
+                foreach (Team::whereIn('id', $missingTeamIds)->get() as $team) {
+                    $this->teamCache[$team->id] = $team;
+                }
+                // Cache nulls for any team IDs that didn't resolve so
+                // loadTeam() doesn't issue follow-up queries for them.
+                foreach ($missingTeamIds as $id) {
+                    if (! array_key_exists($id, $this->teamCache)) {
+                        $this->teamCache[$id] = null;
+                    }
+                }
+            }
+
+            $missingRepKeys = [];
+            foreach ($teamIds as $tid) {
+                $key = "{$game->id}|{$tid}";
+                if (! array_key_exists($key, $this->reputationCache)) {
+                    $missingRepKeys[$tid] = $key;
+                }
+            }
+            if (! empty($missingRepKeys)) {
+                $reps = TeamReputation::where('game_id', $game->id)
+                    ->whereIn('team_id', array_keys($missingRepKeys))
+                    ->get();
+                foreach ($reps as $rep) {
+                    $this->reputationCache["{$game->id}|{$rep->team_id}"] = $rep;
+                }
+
+                // Pre-load ClubProfile for teams that need a synthetic rep.
+                $needsProfile = array_diff(
+                    array_keys($missingRepKeys),
+                    $reps->pluck('team_id')->all(),
+                );
+                $needsProfile = array_filter(
+                    $needsProfile,
+                    fn ($id) => ! array_key_exists($id, $this->clubProfileCache),
+                );
+                if (! empty($needsProfile)) {
+                    foreach (ClubProfile::whereIn('team_id', $needsProfile)->get() as $profile) {
+                        $this->clubProfileCache[$profile->team_id] = $profile;
+                    }
+                }
+            }
+        }
+
+        $rows = [];
+        foreach ($remaining as $match) {
+            $computed = $this->describeForMatch($match, $game);
+            if ($computed === null) {
+                continue;
+            }
+
+            $rows[] = [
+                'id' => Str::uuid()->toString(),
+                'game_id' => $game->id,
+                'game_match_id' => $match->id,
+                'attendance' => $computed['attendance'],
+                'capacity_at_match' => $computed['capacity'],
+            ];
+        }
+
+        if (! empty($rows)) {
+            MatchAttendance::insert($rows);
+        }
     }
 
     /**

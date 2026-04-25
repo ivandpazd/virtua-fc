@@ -212,9 +212,7 @@ class MatchdayOrchestrator
         // the demand curve at view time. Idempotent — matches that already
         // have a row from an earlier path are a no-op.
         $t0 = microtime(true);
-        foreach ($matches as $match) {
-            $this->matchAttendanceService->resolveForMatch($match, $game);
-        }
+        $this->matchAttendanceService->resolveBatch($matches, $game);
         $attendanceMs = (microtime(true) - $t0) * 1000;
 
         $playerMatch = $matches->first(fn ($m) => $m->involvesTeam($game->team_id));
