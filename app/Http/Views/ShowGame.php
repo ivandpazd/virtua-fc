@@ -100,6 +100,7 @@ class ShowGame
                 'game' => $game,
                 'title' => __('game.processing_career_actions'),
                 'message' => __('game.processing_career_actions_message'),
+                'showCrest' => true,
             ]);
         }
 
