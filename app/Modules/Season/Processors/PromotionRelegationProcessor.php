@@ -80,6 +80,12 @@ class PromotionRelegationProcessor implements SeasonProcessor
                 $ruleData[] = compact('rule', 'promoted', 'relegated');
             }
 
+            // Validation pass — verify the combined plan is internally consistent
+            // before committing any writes. Per-rule count checks above don't catch
+            // duplicates within a list (e.g. a playoff winner that's also a direct
+            // promotion would pass count==count but mutate inconsistently).
+            $this->validatePlan($ruleData);
+
             // Pass 2: Write — execute swaps now that all reads are done.
             foreach ($ruleData as ['rule' => $rule, 'promoted' => $promoted, 'relegated' => $relegated]) {
                 if ($rule instanceof SelfSwappingPromotionRule) {
@@ -131,6 +137,83 @@ class PromotionRelegationProcessor implements SeasonProcessor
 
             return $data;
         });
+    }
+
+    /**
+     * Validate the combined promotion/relegation plan across every rule before
+     * any writes happen. Throwing here rolls back the surrounding transaction
+     * and preserves pre-pipeline state, which is the contract callers rely on.
+     *
+     * Catches inconsistencies that per-rule count checks miss:
+     * - A team appearing twice in a single rule's promoted (or relegated) list,
+     *   e.g. a playoff winner who's also a direct promotion. The two writes
+     *   would silently no-op the second one and commit a short-by-one roster.
+     * - A team appearing in two different rules' promoted lists, or in both
+     *   promoted and relegated across the whole plan. These shouldn't be
+     *   possible under the current cascade rules, but the cost of asserting
+     *   it is trivial and the failure mode is otherwise silent corruption.
+     *
+     * @param  array<array{rule: \App\Modules\Competition\Contracts\PromotionRelegationRule, promoted: array, relegated: array}>  $ruleData
+     */
+    private function validatePlan(array $ruleData): void
+    {
+        $allPromotedIds = [];
+        $allRelegatedIds = [];
+
+        foreach ($ruleData as $entry) {
+            $rule = $entry['rule'];
+            $promotedIds = array_column($entry['promoted'], 'teamId');
+            $relegatedIds = array_column($entry['relegated'], 'teamId');
+
+            $this->assertUnique(
+                $promotedIds,
+                "Duplicate team in {$rule->getBottomDivision()}→{$rule->getTopDivision()} promotions",
+            );
+            $this->assertUnique(
+                $relegatedIds,
+                "Duplicate team in {$rule->getTopDivision()}→{$rule->getBottomDivision()} relegations",
+            );
+
+            $crossPromote = array_intersect($promotedIds, $allPromotedIds);
+            if (!empty($crossPromote)) {
+                throw new \RuntimeException(
+                    'Team(s) appear in multiple rules\' promotion lists: ' .
+                    implode(', ', array_unique($crossPromote)),
+                );
+            }
+
+            $crossRelegate = array_intersect($relegatedIds, $allRelegatedIds);
+            if (!empty($crossRelegate)) {
+                throw new \RuntimeException(
+                    'Team(s) appear in multiple rules\' relegation lists: ' .
+                    implode(', ', array_unique($crossRelegate)),
+                );
+            }
+
+            $allPromotedIds = array_merge($allPromotedIds, $promotedIds);
+            $allRelegatedIds = array_merge($allRelegatedIds, $relegatedIds);
+        }
+
+        $bothWays = array_intersect($allPromotedIds, $allRelegatedIds);
+        if (!empty($bothWays)) {
+            throw new \RuntimeException(
+                'Team(s) appear in both promotions and relegations: ' .
+                implode(', ', array_unique($bothWays)),
+            );
+        }
+    }
+
+    /**
+     * @param  string[]  $ids
+     */
+    private function assertUnique(array $ids, string $context): void
+    {
+        if (count($ids) === count(array_unique($ids))) {
+            return;
+        }
+
+        $duplicates = array_unique(array_diff_assoc($ids, array_unique($ids)));
+        throw new \RuntimeException("{$context}: " . implode(', ', $duplicates));
     }
 
     /**
