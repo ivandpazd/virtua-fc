@@ -144,7 +144,13 @@ class MatchdayOrchestrator
         // serializes batch processing per game, so we no longer need the
         // 40P01 deadlock retry that the previous queued path had to carry.
         if ($result->type === 'live_match') {
-            $this->processRemainingBatches($game, $this->careerActionTicks);
+            // Reload from DB: the outer $game was captured by value into the
+            // transaction closure, so writes inside (notably
+            // pending_finalization_match_id) never reached this instance.
+            // Stale attributes here let LeagueWithPlayoffHandler's bracket
+            // guard miss the deferred user match and generate a playoff
+            // round from standings that don't yet reflect that match's score.
+            $this->processRemainingBatches(Game::find($game->id), $this->careerActionTicks);
         } elseif ($this->careerActionTicks > 0) {
             $this->dispatchCareerActions($game->id, $this->careerActionTicks);
         }
