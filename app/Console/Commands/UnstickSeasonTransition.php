@@ -180,21 +180,39 @@ class UnstickSeasonTransition extends Command
         foreach ($countryConfig->playableCountryCodes() as $countryCode) {
             foreach ($countryConfig->promotions($countryCode) as $rule) {
                 $top = $rule['top_division'];
-                $bottom = $rule['bottom_division'];
+
+                // The "bottom" of a rule may span multiple competitions — e.g.
+                // ESP2↔ESP3 pulls from ESP3A and ESP3B (Primera RFEF's two
+                // groups). playoff_source_divisions enumerates the full set
+                // when present; otherwise it's just bottom_division.
+                $bottomGroup = array_values(array_unique(array_merge(
+                    [$rule['bottom_division']],
+                    $rule['playoff_source_divisions'] ?? [],
+                )));
 
                 $topImbalance = $byCompetition[$top] ?? null;
-                $bottomImbalance = $byCompetition[$bottom] ?? null;
-
                 if (!$topImbalance || $topImbalance['delta'] >= 0) {
                     continue;
                 }
-
                 $missing = -$topImbalance['delta'];
 
-                if (!$bottomImbalance || $bottomImbalance['delta'] !== $missing) {
+                // Identify which bottom-group competitions are "long" (delta > 0).
+                // Repairs only pull from long competitions — pulling from a
+                // balanced one would just create a new imbalance.
+                $longBottoms = []; // cid => remaining surplus to consume
+                $surplus = 0;
+                foreach ($bottomGroup as $bid) {
+                    $b = $byCompetition[$bid] ?? null;
+                    if ($b && $b['delta'] > 0) {
+                        $longBottoms[$bid] = $b['delta'];
+                        $surplus += $b['delta'];
+                    }
+                }
+
+                if ($surplus !== $missing) {
                     $this->warn(sprintf(
-                        'Skipping %s↔%s: top short by %d, bottom delta is %s — can\'t pair cleanly.',
-                        $top, $bottom, $missing, $bottomImbalance['delta'] ?? 'n/a',
+                        'Skipping %s↔%s: top short by %d, bottom-group surplus is %d — can\'t pair cleanly.',
+                        $top, implode('+', $bottomGroup), $missing, $surplus,
                     ));
                     continue;
                 }
@@ -202,7 +220,7 @@ class UnstickSeasonTransition extends Command
                 $candidates = $this->findReplacementCandidates(
                     $game,
                     $top,
-                    $bottom,
+                    $longBottoms,
                     $missing,
                     $alreadyChosen,
                     $playoffFactory,
@@ -212,7 +230,7 @@ class UnstickSeasonTransition extends Command
                 if (count($candidates) < $missing) {
                     $this->warn(sprintf(
                         'Could not find %d replacement(s) for %s↔%s; only found %d.',
-                        $missing, $top, $bottom, count($candidates),
+                        $missing, $top, implode('+', $bottomGroup), count($candidates),
                     ));
                     return null;
                 }
@@ -221,7 +239,7 @@ class UnstickSeasonTransition extends Command
                     $repairs[] = [
                         'team_id' => $c['team_id'],
                         'team_name' => $c['team_name'],
-                        'from' => $bottom,
+                        'from' => $c['from'],
                         'to' => $top,
                         'source' => $c['source'],
                     ];
@@ -234,19 +252,21 @@ class UnstickSeasonTransition extends Command
     }
 
     /**
-     * Find $count replacement teams for a top↔bottom pair. Tries playoff runner-up
-     * first (if a Completed playoff exists for the bottom division), then walks
-     * the bottom division's standings/simulated season for the next eligible
-     * teams (skipping reserves whose parent is in the top division and teams
-     * already in the top division or previously chosen in this run).
+     * Find $count replacement teams for a top division, drawing only from
+     * long-bottom competitions (each capped at its own surplus). For
+     * single-feeder rules tries playoff runner-up first; otherwise walks
+     * each long bottom's standings/simulated season for the next eligible
+     * team (skipping reserves whose parent is in the top division and any
+     * team already in the top division or previously chosen in this run).
      *
+     * @param  array<string, int>  $longBottoms  competition_id => remaining surplus
      * @param  list<string>  $alreadyChosen
-     * @return list<array{team_id: string, team_name: string, source: string}>
+     * @return list<array{team_id: string, team_name: string, from: string, source: string}>
      */
     private function findReplacementCandidates(
         Game $game,
         string $top,
-        string $bottom,
+        array $longBottoms,
         int $count,
         array $alreadyChosen,
         PlayoffGeneratorFactory $playoffFactory,
@@ -260,13 +280,25 @@ class UnstickSeasonTransition extends Command
 
         $blocklist = array_merge($topTeamIds, $alreadyChosen);
 
-        // 1. Try playoff runner-up.
-        $generator = $playoffFactory->forCompetition($bottom);
+        // 1. Try playoff runner-up. The runner-up's *actual* current competition
+        // (looked up from competition_entries) must be one of the long bottoms —
+        // otherwise moving them would leave a stale entry in their real
+        // division and create a fresh imbalance there.
+        $firstBid = array_key_first($longBottoms);
+        $generator = $firstBid ? $playoffFactory->forCompetition($firstBid) : null;
         if ($generator && $generator->state($game) === PlayoffState::Completed) {
-            $runnerUp = $this->findPlayoffRunnerUp($game->id, $bottom, $generator);
+            $runnerUp = $this->findPlayoffRunnerUp($game->id, $generator->getCompetitionId(), $generator);
             if ($runnerUp && !in_array($runnerUp['team_id'], $blocklist, true)) {
-                $picked[] = $runnerUp + ['source' => 'playoff_runner_up'];
-                $blocklist[] = $runnerUp['team_id'];
+                $actualFrom = CompetitionEntry::where('game_id', $game->id)
+                    ->where('team_id', $runnerUp['team_id'])
+                    ->whereIn('competition_id', array_keys($longBottoms))
+                    ->value('competition_id');
+
+                if ($actualFrom && ($longBottoms[$actualFrom] ?? 0) > 0) {
+                    $picked[] = $runnerUp + ['source' => 'playoff_runner_up', 'from' => $actualFrom];
+                    $blocklist[] = $runnerUp['team_id'];
+                    $longBottoms[$actualFrom]--;
+                }
             }
         }
 
@@ -274,23 +306,33 @@ class UnstickSeasonTransition extends Command
             return array_slice($picked, 0, $count);
         }
 
-        // 2. Walk bottom-division standings/simulated for next eligible.
-        $candidates = $this->getBottomDivisionCandidates($game, $bottom);
+        // 2. Walk each long bottom's standings/simulated for next eligible,
+        // capping picks per bottom at that bottom's remaining surplus.
         $topTeamIdsCollection = collect($topTeamIds);
-        $parentMap = $reserveFilter->loadParentTeamIds(array_column($candidates, 'team_id'));
+        foreach ($longBottoms as $bid => $remaining) {
+            if ($remaining <= 0 || count($picked) >= $count) {
+                continue;
+            }
+            $candidates = $this->getBottomDivisionCandidates($game, $bid);
+            $parentMap = $reserveFilter->loadParentTeamIds(array_column($candidates, 'team_id'));
 
-        foreach ($candidates as $candidate) {
-            if (count($picked) >= $count) {
-                break;
+            foreach ($candidates as $candidate) {
+                if ($remaining <= 0 || count($picked) >= $count) {
+                    break;
+                }
+                if (in_array($candidate['team_id'], $blocklist, true)) {
+                    continue;
+                }
+                if ($reserveFilter->isBlockedReserveTeam($candidate['team_id'], $topTeamIdsCollection, $parentMap)) {
+                    continue;
+                }
+                $picked[] = $candidate + [
+                    'source' => "{$bid}_pos_{$candidate['position']}",
+                    'from' => $bid,
+                ];
+                $blocklist[] = $candidate['team_id'];
+                $remaining--;
             }
-            if (in_array($candidate['team_id'], $blocklist, true)) {
-                continue;
-            }
-            if ($reserveFilter->isBlockedReserveTeam($candidate['team_id'], $topTeamIdsCollection, $parentMap)) {
-                continue;
-            }
-            $picked[] = $candidate + ['source' => 'next_eligible_pos_' . $candidate['position']];
-            $blocklist[] = $candidate['team_id'];
         }
 
         return $picked;
