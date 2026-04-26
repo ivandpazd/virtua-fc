@@ -15,6 +15,7 @@ use App\Models\GameMatch;
 use App\Models\GameStanding;
 use App\Models\SimulatedSeason;
 use App\Models\Team;
+use Illuminate\Support\Collection;
 
 /**
  * Promotion/relegation rule for ESP2 ↔ Primera RFEF (ESP3A + ESP3B + ESP3PO).
@@ -314,13 +315,17 @@ class PrimeraRFEFPromotionRule implements SelfSwappingPromotionRule
     }
 
     /**
-     * Fallback for when the playoff wasn't actually played (e.g. when the
-     * player isn't in Primera RFEF and SeasonSimulationProcessor produced
-     * SimulatedSeason rows without kicking off the mid-season bracket).
+     * Fallback for when the playoff wasn't actually played (e.g. the bracket
+     * was never generated, or the player isn't in Primera RFEF and
+     * SeasonSimulationProcessor produced SimulatedSeason rows instead).
      *
-     * We synthesise two promotion spots by taking position 2 from each group,
-     * skipping any team that's already in the directly-promoted list to avoid
-     * double-counting.
+     * Synthesise two promotion spots by taking the next eligible position
+     * after the direct-promotion spot in each group, skipping any team
+     * already in the promoted list and reserve teams whose parent is in ESP2.
+     * Each group is resolved independently against whichever data source
+     * exists for it — GameStanding when the player's group has been played
+     * live, SimulatedSeason otherwise. Mixing the two is normal: one group
+     * is the player's, the other is simulated.
      *
      * @param array<array{teamId: string, position: int|string, teamName: string, origin: string}> $alreadyPromoted
      * @return array<array{teamId: string, position: int|string, teamName: string, origin: string}>
@@ -336,38 +341,100 @@ class PrimeraRFEFPromotionRule implements SelfSwappingPromotionRule
 
         $results = [];
         foreach ([self::GROUP_A_ID, self::GROUP_B_ID] as $groupId) {
-            $simulated = SimulatedSeason::where('game_id', $game->id)
-                ->where('season', $game->season)
-                ->where('competition_id', $groupId)
-                ->first();
+            $standIn = $this->resolveStandInFromStandings($game, $groupId, $already, $filter, $topDivisionTeamIds)
+                ?? $this->resolveStandInFromSimulated($game, $groupId, $already, $filter, $topDivisionTeamIds);
 
-            if (!$simulated) {
-                continue;
-            }
-
-            $candidates = array_slice($simulated->results ?? [], 1); // skip winner
-            $parentMap = $filter->loadParentTeamIds($candidates);
-
-            foreach ($candidates as $teamId) {
-                if (in_array($teamId, $already, true)) {
-                    continue;
-                }
-                if ($filter->isBlockedReserveTeam($teamId, $topDivisionTeamIds, $parentMap)) {
-                    continue;
-                }
-
-                $team = Team::find($teamId);
-                $results[] = [
-                    'teamId' => $teamId,
-                    'position' => 'Playoff',
-                    'teamName' => $team->name ?? 'Unknown',
-                    'origin' => $groupId,
-                ];
-                break;
+            if ($standIn) {
+                $results[] = $standIn;
             }
         }
 
         return $results;
+    }
+
+    /**
+     * @return array{teamId: string, position: string, teamName: string, origin: string}|null
+     */
+    private function resolveStandInFromStandings(
+        Game $game,
+        string $groupId,
+        array $already,
+        ReserveTeamFilter $filter,
+        Collection $topDivisionTeamIds,
+    ): ?array {
+        $candidates = GameStanding::with('team')
+            ->where('game_id', $game->id)
+            ->where('competition_id', $groupId)
+            ->where('position', '>', 1) // skip direct-promoted winner
+            ->orderBy('position')
+            ->get();
+
+        if ($candidates->isEmpty()) {
+            return null;
+        }
+
+        $parentMap = $filter->loadParentTeamIds($candidates->pluck('team_id')->all());
+
+        foreach ($candidates as $standing) {
+            if (in_array($standing->team_id, $already, true)) {
+                continue;
+            }
+            if ($filter->isBlockedReserveTeam($standing->team_id, $topDivisionTeamIds, $parentMap)) {
+                continue;
+            }
+
+            return [
+                'teamId' => $standing->team_id,
+                'position' => 'Playoff',
+                'teamName' => $standing->team->name ?? 'Unknown',
+                'origin' => $groupId,
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array{teamId: string, position: string, teamName: string, origin: string}|null
+     */
+    private function resolveStandInFromSimulated(
+        Game $game,
+        string $groupId,
+        array $already,
+        ReserveTeamFilter $filter,
+        Collection $topDivisionTeamIds,
+    ): ?array {
+        $simulated = SimulatedSeason::where('game_id', $game->id)
+            ->where('season', $game->season)
+            ->where('competition_id', $groupId)
+            ->first();
+
+        if (!$simulated) {
+            return null;
+        }
+
+        $candidates = array_slice($simulated->results ?? [], 1); // skip winner
+        $parentMap = $filter->loadParentTeamIds($candidates);
+
+        foreach ($candidates as $teamId) {
+            if (in_array($teamId, $already, true)) {
+                continue;
+            }
+            if ($filter->isBlockedReserveTeam($teamId, $topDivisionTeamIds, $parentMap)) {
+                continue;
+            }
+
+            $team = Team::find($teamId);
+
+            return [
+                'teamId' => $teamId,
+                'position' => 'Playoff',
+                'teamName' => $team->name ?? 'Unknown',
+                'origin' => $groupId,
+            ];
+        }
+
+        return null;
     }
 
     /**
