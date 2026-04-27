@@ -80,13 +80,14 @@ class SeasonSetupPipeline
                     'processor' => get_class($processor),
                     'step' => $globalStep,
                     'game_id' => $game->id,
+                    'user_id' => $game->user_id,
                     'error' => $e->getMessage(),
                 ]);
                 throw $e;
             }
 
             $elapsed = round((microtime(true) - $start) * 1000);
-            Log::info("[SeasonSetup] {$processorName} (priority {$processor->priority()}) completed in {$elapsed}ms");
+            Log::info("[SeasonSetup {$game->id}] {$processorName} (priority {$processor->priority()}) completed in {$elapsed}ms");
 
             // Checkpoint: persist completed step and DTO for crash recovery
             $game->updateQuietly([

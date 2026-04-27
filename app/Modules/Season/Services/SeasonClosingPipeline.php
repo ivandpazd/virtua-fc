@@ -126,13 +126,14 @@ class SeasonClosingPipeline
                     'processor' => get_class($processor),
                     'step' => $index,
                     'game_id' => $game->id,
+                    'user_id' => $game->user_id,
                     'error' => $e->getMessage(),
                 ]);
                 throw $e;
             }
 
             $elapsed = round((microtime(true) - $start) * 1000);
-            Log::info("[SeasonClosing] {$processorName} (priority {$processor->priority()}) completed in {$elapsed}ms");
+            Log::info("[SeasonClosing {$game->id}] {$processorName} (priority {$processor->priority()}) completed in {$elapsed}ms");
 
             // Checkpoint: persist completed step and DTO for crash recovery
             $game->updateQuietly([
