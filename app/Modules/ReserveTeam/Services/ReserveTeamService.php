@@ -51,7 +51,7 @@ class ReserveTeamService
 
         return GamePlayer::ownedByTeam($game->reserve_team_id)
             ->where('game_id', $game->id)
-            ->with(['player', 'activeLoan'])
+            ->with(['player', 'activeLoan', 'careerRecord'])
             ->get();
     }
 
@@ -193,11 +193,22 @@ class ReserveTeamService
             // Permanent move to first team. Null the reserve number first so
             // the (game_id, team_id, number) unique constraint can't fire on
             // the team_id flip.
+            $reserveTeamName = $game->reserveTeam?->name;
             $player->update(['number' => null, 'team_id' => $game->team_id]);
             $number = $this->squadNumberService->assignNumberForNewPlayer($game, $player);
             if ($number !== null) {
                 $player->update(['number' => $number]);
             }
+
+            \App\Models\UserSquadCareerRecord::updateOrCreate(
+                ['game_player_id' => $player->id],
+                [
+                    'game_id' => $game->id,
+                    'team_id' => $game->team_id,
+                    'joined_season' => (int) $game->season,
+                    'joined_from' => $reserveTeamName ?? \App\Models\UserSquadCareerRecord::ORIGIN_ACADEMY,
+                ],
+            );
 
             GameTransfer::record(
                 gameId: $game->id,
@@ -257,6 +268,17 @@ class ReserveTeamService
             }
 
             $loan->update(['status' => Loan::STATUS_COMPLETED]);
+
+            $reserveTeamName = $game->reserveTeam?->name;
+            \App\Models\UserSquadCareerRecord::updateOrCreate(
+                ['game_player_id' => $player->id],
+                [
+                    'game_id' => $game->id,
+                    'team_id' => $game->team_id,
+                    'joined_season' => (int) $game->season,
+                    'joined_from' => $reserveTeamName ?? \App\Models\UserSquadCareerRecord::ORIGIN_ACADEMY,
+                ],
+            );
 
             GameTransfer::record(
                 gameId: $game->id,

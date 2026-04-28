@@ -17,7 +17,7 @@ class ShowPlayerDetail
     {
         $game = Game::findOrFail($gameId);
 
-        $gamePlayer = GamePlayer::with(['player', 'activeLoan'])
+        $gamePlayer = GamePlayer::with(['player', 'careerRecord', 'activeLoan'])
             ->where('game_id', $gameId)
             ->userOwned($game)
             ->findOrFail($playerId);
