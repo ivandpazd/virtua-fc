@@ -546,7 +546,7 @@ class TransferService
     {
         $responseDate = $game->current_date->subDays(TransferOffer::PRE_CONTRACT_RESPONSE_DAYS);
 
-        $pendingOffers = TransferOffer::with(['gamePlayer.player'])
+        $pendingOffers = TransferOffer::with(['gamePlayer.player', 'offeringTeam'])
             ->where('game_id', $game->id)
             ->where('direction', TransferOffer::DIRECTION_INCOMING)
             ->where('offer_type', TransferOffer::TYPE_PRE_CONTRACT)
@@ -557,7 +557,7 @@ class TransferService
         $resolvedOffers = collect();
 
         foreach ($pendingOffers as $offer) {
-            $demand = $this->contractService->calculateWageDemand($offer->gamePlayer, NegotiationScenario::PRE_CONTRACT);
+            $demand = $this->contractService->calculateWageDemand($offer->gamePlayer, NegotiationScenario::PRE_CONTRACT, $offer->offeringTeam);
             $evaluation = $this->dispositionService->evaluatePreContractOffer($offer->gamePlayer, $offer->offered_wage, $demand['wage'], $game->team);
 
             $offer->update([
@@ -1239,7 +1239,7 @@ class TransferService
                 throw new \InvalidArgumentException(__('transfers.already_bidding'));
             }
 
-            $transferDemand = $this->contractService->calculateWageDemand($player, NegotiationScenario::TRANSFER);
+            $transferDemand = $this->contractService->calculateWageDemand($player, NegotiationScenario::TRANSFER, $game->team);
 
             $offer = TransferOffer::create([
                 'game_id' => $game->id,

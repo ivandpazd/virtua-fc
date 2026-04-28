@@ -37,7 +37,7 @@ class SignFreeAgent
                 ->with('error', __('messages.free_agent_reputation_too_low'));
         }
 
-        $demand = $this->contractService->calculateWageDemand($player, NegotiationScenario::FREE_AGENT);
+        $demand = $this->contractService->calculateWageDemand($player, NegotiationScenario::FREE_AGENT, $game->team);
 
         $offer = $this->transferService->signFreeAgent($game, $player, $demand['wage']);
         $this->notificationService->notifyTransferComplete($game, $offer);

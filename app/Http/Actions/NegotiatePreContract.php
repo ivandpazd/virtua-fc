@@ -84,6 +84,8 @@ class NegotiatePreContract
             ->where('terms_status', 'countered')
             ->first();
 
+        $wageFloorEuros = (int) ($this->contractService->getMinimumWageForTeam($game->team) / 100);
+
         if ($existing) {
             $mood = $this->dispositionService->willingnessMoodIndicator($player, $game);
 
@@ -92,6 +94,7 @@ class NegotiatePreContract
                 'negotiation_status' => 'terms_open',
                 'round' => $existing->terms_round,
                 'max_rounds' => self::MAX_ROUNDS,
+                'wage_floor' => $wageFloorEuros,
                 'messages' => [
                     $this->agentMessage('counter', [
                         'text' => __('transfers.chat_pre_contract_counter', [
@@ -135,7 +138,7 @@ class NegotiatePreContract
         }
 
         // Calculate wage demand (deterministic — no variance)
-        $demand = $this->contractService->calculateWageDemand($player, NegotiationScenario::PRE_CONTRACT);
+        $demand = $this->contractService->calculateWageDemand($player, NegotiationScenario::PRE_CONTRACT, $game->team);
         $mood = $this->dispositionService->willingnessMoodIndicator($player, $game);
         $demandInEuros = (int) ($demand['wage'] / 100);
 
@@ -144,6 +147,7 @@ class NegotiatePreContract
             'negotiation_status' => 'terms_open',
             'round' => 0,
             'max_rounds' => self::MAX_ROUNDS,
+            'wage_floor' => $wageFloorEuros,
             'messages' => [
                 $this->agentMessage('demand', [
                     'text' => __('transfers.chat_pre_contract_demand', [

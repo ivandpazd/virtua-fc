@@ -316,6 +316,8 @@ class NegotiateTransfer
             ], 422);
         }
 
+        $wageFloorEuros = (int) ($this->contractService->getMinimumWageForTeam($game->team) / 100);
+
         // Check for existing countered terms to resume
         if ($offer->terms_status === 'countered') {
             $disposition = $this->contractService->calculateDisposition($player, NegotiationScenario::TRANSFER, $game, $offer->terms_round ?? 1);
@@ -326,6 +328,7 @@ class NegotiateTransfer
                 'negotiation_status' => 'terms_open',
                 'round' => $offer->terms_round ?? 0,
                 'max_rounds' => self::MAX_ROUNDS,
+                'wage_floor' => $wageFloorEuros,
                 'messages' => [
                     $this->agentMessage('counter', [
                         'text' => __('transfers.chat_player_counter_transfer', [
@@ -371,7 +374,7 @@ class NegotiateTransfer
                 'formattedWage' => Money::format($offer->player_demand),
             ];
         } else {
-            $demand = $this->contractService->calculateWageDemand($player, NegotiationScenario::TRANSFER);
+            $demand = $this->contractService->calculateWageDemand($player, NegotiationScenario::TRANSFER, $game->team);
             $offer->update([
                 'player_demand' => $demand['wage'],
                 'preferred_years' => $demand['contractYears'],
@@ -386,6 +389,7 @@ class NegotiateTransfer
             'negotiation_status' => 'terms_open',
             'round' => 0,
             'max_rounds' => self::MAX_ROUNDS,
+            'wage_floor' => $wageFloorEuros,
             'messages' => [
                 $this->agentMessage('demand', [
                     'text' => __('transfers.chat_player_demand_transfer', [

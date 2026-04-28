@@ -772,7 +772,7 @@ class ScoutingService
      */
     public function evaluatePreContractOffer(GamePlayer $player, int $offeredWage, Team $biddingTeam): array
     {
-        $demand = $this->contractService->calculateWageDemand($player, NegotiationScenario::PRE_CONTRACT);
+        $demand = $this->contractService->calculateWageDemand($player, NegotiationScenario::PRE_CONTRACT, $biddingTeam);
 
         return $this->dispositionService->evaluatePreContractOffer($player, $offeredWage, $demand['wage'], $biddingTeam);
     }
@@ -784,14 +784,14 @@ class ScoutingService
     {
         $isFreeAgent = $player->team_id === null;
         $askingPrice = $isFreeAgent ? 0 : $this->calculateAskingPrice($player, $game->current_date);
-        $transferDemand = $this->contractService->calculateWageDemand($player, NegotiationScenario::TRANSFER);
+        $transferDemand = $this->contractService->calculateWageDemand($player, NegotiationScenario::TRANSFER, $game->team);
         $wageDemand = $transferDemand['wage'];
         $importance = $isFreeAgent ? 0.0 : $this->calculatePlayerImportance($player);
 
         // For expiring-contract players, show the premium wage demand
         $isExpiring = $player->contract_until && $player->contract_until <= $game->getSeasonEndDate();
         $preContractWageDemand = $isExpiring
-            ? $this->contractService->calculateWageDemand($player, NegotiationScenario::PRE_CONTRACT)['wage']
+            ? $this->contractService->calculateWageDemand($player, NegotiationScenario::PRE_CONTRACT, $game->team)['wage']
             : null;
 
         $investment = $game->currentInvestment;

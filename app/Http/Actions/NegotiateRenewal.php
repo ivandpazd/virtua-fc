@@ -64,6 +64,7 @@ class NegotiateRenewal
                 'negotiation_status' => 'open',
                 'round' => $existing->round,
                 'max_rounds' => self::MAX_ROUNDS,
+                'wage_floor' => (int) ($this->contractService->getMinimumWageForTeam($game->team) / 100),
                 'messages' => [
                     $this->agentMessage('counter', [
                         'text' => __('transfers.chat_counter_resume', [
@@ -119,12 +120,14 @@ class NegotiateRenewal
         $demand = $this->contractService->calculateWageDemand($player, NegotiationScenario::RENEWAL);
         $disposition = $this->contractService->calculateDisposition($player, NegotiationScenario::RENEWAL);
         $mood = $this->contractService->getMoodIndicator($disposition);
+        $wageFloorEuros = (int) ($this->contractService->getMinimumWageForTeam($game->team) / 100);
 
         return response()->json([
             'status' => 'ok',
             'negotiation_status' => 'open',
             'round' => 0,
             'max_rounds' => self::MAX_ROUNDS,
+            'wage_floor' => $wageFloorEuros,
             'messages' => [
                 $this->agentMessage('demand', [
                     'text' => __('transfers.chat_agent_demand', [

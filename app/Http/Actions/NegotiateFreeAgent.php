@@ -64,6 +64,8 @@ class NegotiateFreeAgent
             ], 422);
         }
 
+        $wageFloorEuros = (int) ($this->contractService->getMinimumWageForTeam($game->team) / 100);
+
         // Check for existing countered offer to resume
         $existing = $this->findPendingFreeAgentOffer($game, $player, 'countered');
 
@@ -75,6 +77,7 @@ class NegotiateFreeAgent
                 'negotiation_status' => 'terms_open',
                 'round' => $existing->terms_round,
                 'max_rounds' => self::MAX_ROUNDS,
+                'wage_floor' => $wageFloorEuros,
                 'messages' => [
                     $this->agentMessage('counter', [
                         'text' => __('transfers.chat_free_agent_counter', [
@@ -118,7 +121,7 @@ class NegotiateFreeAgent
             ], 422);
         }
 
-        $demand = $this->contractService->calculateWageDemand($player, NegotiationScenario::FREE_AGENT);
+        $demand = $this->contractService->calculateWageDemand($player, NegotiationScenario::FREE_AGENT, $game->team);
         $mood = $this->dispositionService->willingnessMoodIndicator($player, $game);
         $demandInEuros = (int) ($demand['wage'] / 100);
 
@@ -127,6 +130,7 @@ class NegotiateFreeAgent
             'negotiation_status' => 'terms_open',
             'round' => 0,
             'max_rounds' => self::MAX_ROUNDS,
+            'wage_floor' => $wageFloorEuros,
             'messages' => [
                 $this->agentMessage('demand', [
                     'text' => __('transfers.chat_free_agent_demand', [

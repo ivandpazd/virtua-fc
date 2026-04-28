@@ -175,6 +175,23 @@ class ContractService
         return self::DEFAULT_MINIMUM_WAGE;
     }
 
+    /**
+     * Resolve the wage floor to use when computing a player's demand. The
+     * buying club's tier minimum applies whenever the player is being signed
+     * by a different club (transfer / pre-contract / free agent); renewals
+     * fall back to the current team's minimum.
+     */
+    private function resolveDemandMinimumWage(GamePlayer $player, ?Team $buyingClub): int
+    {
+        if ($buyingClub !== null) {
+            return $this->getMinimumWageForTeam($buyingClub);
+        }
+
+        return $player->team
+            ? $this->getMinimumWageForTeam($player->team)
+            : $this->getDefaultMinimumWage();
+    }
+
     public function getMinimumWageForTeam(Team $team): int
     {
         if (isset($this->minimumWageCache[$team->id])) {
@@ -255,13 +272,17 @@ class ContractService
      * drives the premium multiplier and contract length. Renewals additionally
      * floor the demand against the player's current wage.
      *
+     * When $buyingClub is provided (transfer/pre-contract/free-agent signings),
+     * the wage floor is the buying club's competition-tier minimum — a La Liga
+     * club signing a Primera Federación player can't pay below the La Liga
+     * regulatory minimum. Without $buyingClub (renewals), the player's current
+     * team minimum applies.
+     *
      * @return array{wage: int, contractYears: int, formattedWage: string}
      */
-    public function calculateWageDemand(GamePlayer $player, NegotiationScenario $scenario): array
+    public function calculateWageDemand(GamePlayer $player, NegotiationScenario $scenario, ?Team $buyingClub = null): array
     {
-        $minimumWage = $player->team
-            ? $this->getMinimumWageForTeam($player->team)
-            : $this->getDefaultMinimumWage();
+        $minimumWage = $this->resolveDemandMinimumWage($player, $buyingClub);
 
         $age = $player->age($player->game->current_date);
 
@@ -927,6 +948,7 @@ class ContractService
         Game $buyingClubGame,
     ): array {
         $player = $offer->gamePlayer;
+        $buyingClubFloor = $this->getMinimumWageForTeam($buyingClubGame->team);
 
         if ($offer->terms_status === 'countered') {
             $offer->update([
@@ -935,7 +957,7 @@ class ContractService
                 'offered_years' => $offeredYears,
             ]);
         } else {
-            $demand = $this->calculateWageDemand($player, $scenario);
+            $demand = $this->calculateWageDemand($player, $scenario, $buyingClubGame->team);
             $offer->update([
                 'terms_status' => 'pending',
                 'terms_round' => 1,
@@ -959,6 +981,7 @@ class ContractService
             disposition: $disposition,
             round: $offer->terms_round,
             maxRounds: self::MAX_NEGOTIATION_ROUNDS,
+            salaryFloor: $buyingClubFloor,
             previousCounter: $offer->wage_counter_offer,
             flexibilityRatio: $scenario->flexibilityRatio(),
         );

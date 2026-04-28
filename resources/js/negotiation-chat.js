@@ -25,6 +25,10 @@ export default function negotiationChat() {
         offerWage: 0,
         offerYears: 3,
         counterFloor: 0,
+        // League regulatory minimum wage (euros). Set from server on start.
+        // Only applies to wage modes (renewal/personal_terms/pre_contract/free_agent),
+        // not transfer_fee.
+        wageFloor: 0,
 
         // Budget cap state (transfer fee mode)
         availableBudget: 0,
@@ -47,7 +51,9 @@ export default function negotiationChat() {
         },
 
         get canSubmit() {
-            return !this.loading && !this.isTerminal && this.offerWage > 0;
+            if (this.loading || this.isTerminal || this.offerWage <= 0) return false;
+            if (this.mode !== 'transfer_fee' && this.wageFloor > 0 && this.offerWage < this.wageFloor) return false;
+            return true;
         },
 
         get isBudgetConstrained() {
@@ -79,7 +85,12 @@ export default function negotiationChat() {
         },
 
         decrementWage() {
-            const floor = this.phase === 'counter_offer' ? this.counterFloor : 0;
+            let floor = 0;
+            if (this.phase === 'counter_offer') {
+                floor = this.counterFloor;
+            } else if (this.mode !== 'transfer_fee') {
+                floor = this.wageFloor || 0;
+            }
             this.offerWage = Math.max(this.offerWage - this.wageStep, floor);
         },
 
@@ -107,6 +118,7 @@ export default function negotiationChat() {
             this.negotiationStatus = null;
             this.offerWage = 0;
             this.offerYears = 3;
+            this.wageFloor = 0;
             this.availableBudget = 0;
             this.budgetLoanAvailable = false;
             this.budgetLoanUrl = '';
@@ -121,6 +133,7 @@ export default function negotiationChat() {
                 if (data.available_budget !== undefined) this.availableBudget = data.available_budget;
                 if (data.budget_loan_available !== undefined) this.budgetLoanAvailable = data.budget_loan_available;
                 if (data.budget_loan_url) this.budgetLoanUrl = data.budget_loan_url;
+                if (data.wage_floor !== undefined) this.wageFloor = data.wage_floor;
                 this.appendMessages(data.messages);
 
                 // Fee already agreed from a previous session — go straight to personal terms
@@ -350,6 +363,7 @@ export default function negotiationChat() {
                 this.negotiationStatus = data.negotiation_status;
                 this.round = data.round || 0;
                 this.maxRounds = data.max_rounds || 3;
+                if (data.wage_floor !== undefined) this.wageFloor = data.wage_floor;
                 this.appendMessages(data.messages);
                 this.prefillFromOptions();
             }
@@ -415,7 +429,10 @@ export default function negotiationChat() {
 
         prefillFromOptions() {
             const lastMsg = this.messages[this.messages.length - 1];
-            if (lastMsg?.options?.suggestedWage) this.offerWage = lastMsg.options.suggestedWage;
+            if (lastMsg?.options?.suggestedWage) {
+                const floor = this.mode !== 'transfer_fee' ? (this.wageFloor || 0) : 0;
+                this.offerWage = Math.max(lastMsg.options.suggestedWage, floor);
+            }
             if (lastMsg?.options?.suggestedFee) {
                 let fee = lastMsg.options.suggestedFee;
                 if (this.mode === 'transfer_fee' && this.availableBudget > 0 && fee > this.availableBudget) {
