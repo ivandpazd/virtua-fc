@@ -240,20 +240,21 @@ class AdvanceMatchdayTest extends TestCase
 
     public function test_resolves_single_leg_cup_tie(): void
     {
-        // Create a cup tie
+        // Use the final (round 7) so the post-resolution listener finds no
+        // next round in schedule.json — keeping this test focused on tie
+        // resolution rather than the next-round draw path.
         $cupTie = CupTie::factory()->create([
             'game_id' => $this->game->id,
             'competition_id' => $this->cupCompetition->id,
-            'round_number' => 1,
+            'round_number' => 7,
             'home_team_id' => $this->playerTeam->id,
             'away_team_id' => $this->opponentTeam->id,
         ]);
 
-        // Create cup match
         $cupMatch = GameMatch::factory()->create([
             'game_id' => $this->game->id,
             'competition_id' => $this->cupCompetition->id,
-            'round_number' => 1,
+            'round_number' => 7,
             'home_team_id' => $this->playerTeam->id,
             'away_team_id' => $this->opponentTeam->id,
             'scheduled_date' => Carbon::parse('2024-11-01'),

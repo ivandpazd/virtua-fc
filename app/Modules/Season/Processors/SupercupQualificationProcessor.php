@@ -10,15 +10,29 @@ use App\Models\Game;
 use App\Models\CompetitionEntry;
 use App\Models\GameStanding;
 use App\Models\SimulatedSeason;
+use RuntimeException;
 
 /**
- * Determines supercup qualifiers for the next season,
- * driven by country config.
+ * Determines supercup qualifiers for the next season, driven by country config.
  *
- * Qualification rules (per country's supercup config):
- * - The two domestic cup finalists
- * - League champion and runner-up
- * - If there's overlap, the next highest league team qualifies
+ * Qualification rules (RFEF for ESP, generalised for any country):
+ *  1. The two cup finalists always qualify (cup winner + cup runner-up).
+ *  2. The league champion qualifies, unless already in slot 1–2.
+ *  3. The league runner-up qualifies, unless already in slot 1–3.
+ *  4. If either cup finalist also finished league 1st or 2nd, the *league*
+ *     slot they would have taken cascades down to 3rd / 4th to fill the
+ *     four-team field. The cup-finalist slot itself is never displaced.
+ *
+ * RFEF wording (Copa del Rey → Supercopa de España):
+ *   "Si el campeón o subcampeón de Copa del Rey ya está clasificado entre
+ *    los dos primeros de Liga, la plaza de la Supercopa se otorga al 3º
+ *    (y 4º si fuera necesario) clasificado de la Liga para completar los
+ *    cuatro participantes."
+ *
+ * The "plaza" (spot) that advances is the league's, not the cup's — the
+ * cup finalists keep priority and the league simply fills whatever
+ * remains. Implementing this priority order also matters for downstream
+ * display: the persisted entry order labels each slot's role.
  *
  * Priority: 25 (runs after stats reset but before fixture generation)
  */
@@ -54,14 +68,43 @@ class SupercupQualificationProcessor implements SeasonProcessor
         $supercupId = $config['competition'];
         $cupFinalRound = $config['cup_final_round'];
 
+        // Skip when this country isn't part of the game (no top-league
+        // entries). The 4-qualifier guard below catches partial-data bugs
+        // — wholly absent data is a different signal and shouldn't trip it.
+        $hasLeague = CompetitionEntry::where('game_id', $game->id)
+            ->where('competition_id', $leagueId)
+            ->exists();
+        if (!$hasLeague) {
+            return;
+        }
+
         // Get cup finalists
         $cupFinalists = $this->getCupFinalists($game->id, $cupId, $cupFinalRound);
 
-        // Get league top teams (enough to handle overlaps)
+        // Fetch league top 4 — enough to backfill 3rd/4th slots when both
+        // cup finalists overlap with the league champion/runner-up.
         $leagueTopTeams = $this->getLeagueTopTeams($game->id, $leagueId, 4);
 
         // Determine the 4 supercup qualifiers
         $qualifiers = $this->determineQualifiers($cupFinalists, $leagueTopTeams);
+
+        if (count($qualifiers) !== 4) {
+            // Source of Population A in the cup-draw incident: cup didn't
+            // run AND fewer than 4 league top teams are available, so the
+            // supercup ends up with < 4 entries and the downstream draw
+            // creates the wrong bracket. Surface this loudly — silent
+            // shortfalls are how the bug stayed hidden in the first place.
+            throw new RuntimeException(sprintf(
+                '[SupercupQualification] expected 4 qualifiers for %s in game %s, got %d. '
+                . 'cup_winner=%s cup_runnerup=%s league_top_teams=%d',
+                $supercupId,
+                $game->id,
+                count($qualifiers),
+                $cupFinalists['winner'] ?? 'null',
+                $cupFinalists['runnerUp'] ?? 'null',
+                count($leagueTopTeams),
+            ));
+        }
 
         // Update supercup competition_entries for this game
         $this->updateSupercupTeams($game->id, $supercupId, $qualifiers);
@@ -127,16 +170,22 @@ class SupercupQualificationProcessor implements SeasonProcessor
     }
 
     /**
-     * Determine the 4 supercup qualifiers, handling overlaps.
+     * Determine the 4 supercup qualifiers in RFEF priority order: the two
+     * cup finalists hold their slots regardless of league finish, then
+     * league positions fill what remains, in order. When a cup finalist
+     * also happens to be league 1st/2nd, the league's slot is what
+     * cascades down to 3rd / 4th — mirroring "la plaza de la Supercopa
+     * se otorga al 3º (y 4º si fuera necesario) clasificado de la Liga".
      *
-     * @return array<string> 4 team IDs
+     * @param  array{winner: string|null, runnerUp: string|null}  $cupFinalists
+     * @param  array<int, string>  $leagueTopTeams  league positions 1..N (1st first)
+     * @return array<string>  up to 4 team IDs
      */
     private function determineQualifiers(array $cupFinalists, array $leagueTopTeams): array
     {
         $qualifiers = [];
         $usedTeams = [];
 
-        // Add cup finalists first (if available)
         if ($cupFinalists['winner']) {
             $qualifiers[] = $cupFinalists['winner'];
             $usedTeams[$cupFinalists['winner']] = true;
@@ -146,7 +195,6 @@ class SupercupQualificationProcessor implements SeasonProcessor
             $usedTeams[$cupFinalists['runnerUp']] = true;
         }
 
-        // Add league teams until we have 4 qualifiers
         foreach ($leagueTopTeams as $teamId) {
             if (count($qualifiers) >= 4) {
                 break;
