@@ -267,44 +267,81 @@ class ReserveTeamService
                 continue;
             }
 
-            $loan->update(['status' => Loan::STATUS_COMPLETED]);
-
-            $reserveTeamName = $game->reserveTeam?->name;
-            \App\Models\UserSquadCareerRecord::updateOrCreate(
-                ['game_player_id' => $player->id],
-                [
-                    'game_id' => $game->id,
-                    'team_id' => $game->team_id,
-                    'joined_season' => (int) $game->season,
-                    'joined_from' => $reserveTeamName ?? \App\Models\UserSquadCareerRecord::ORIGIN_ACADEMY,
-                ],
-            );
-
-            GameTransfer::record(
-                gameId: $game->id,
-                gamePlayerId: $player->id,
-                fromTeamId: $game->reserve_team_id,
-                toTeamId: $game->team_id,
-                transferFee: 0,
-                type: GameTransfer::TYPE_INTERNAL_PROMOTION,
-                season: $game->season,
-                window: TransferWindowType::currentValue($game->current_date),
-            );
-
-            $this->notificationService->create(
-                game: $game,
-                type: \App\Models\GameNotification::TYPE_ACADEMY_PROSPECT,
-                title: __('notifications.reserve_overage_promoted_title'),
-                message: __('notifications.reserve_overage_promoted_message', [
-                    'player' => $player->player->name ?? '',
-                ]),
-                priority: \App\Models\GameNotification::PRIORITY_INFO,
-            );
-
+            $this->finalizeCalledUpPromotion($player, $loan, $game);
             $promoted->push($player);
         }
 
         return $promoted;
+    }
+
+    /**
+     * Permanently promote a single called-up reserve player to the first team
+     * outside the season-close sweep — used when the user lists the player for
+     * loan to a third club, which implicitly commits to keeping them on the
+     * first-team roster. Closes the active call-up loan and records the move
+     * as TYPE_INTERNAL_PROMOTION. No-op if the player isn't currently called
+     * up from the reserve.
+     */
+    public function permanentlyPromoteCalledUpPlayer(GamePlayer $player, Game $game): void
+    {
+        if ($game->reserve_team_id === null) {
+            return;
+        }
+
+        $loan = Loan::where('game_player_id', $player->id)
+            ->where('status', Loan::STATUS_ACTIVE)
+            ->where('parent_team_id', $game->reserve_team_id)
+            ->where('loan_team_id', $game->team_id)
+            ->first();
+
+        if ($loan === null) {
+            return;
+        }
+
+        $this->finalizeCalledUpPromotion($player, $loan, $game);
+    }
+
+    /**
+     * Shared promotion bookkeeping: close the call-up loan, write the squad
+     * career record, log the internal-promotion transfer, and notify the user.
+     * Player team_id is left as-is — the call-up already had the player on
+     * the first-team roster.
+     */
+    private function finalizeCalledUpPromotion(GamePlayer $player, Loan $loan, Game $game): void
+    {
+        $loan->update(['status' => Loan::STATUS_COMPLETED]);
+
+        $reserveTeamName = $game->reserveTeam?->name;
+        \App\Models\UserSquadCareerRecord::updateOrCreate(
+            ['game_player_id' => $player->id],
+            [
+                'game_id' => $game->id,
+                'team_id' => $game->team_id,
+                'joined_season' => (int) $game->season,
+                'joined_from' => $reserveTeamName ?? \App\Models\UserSquadCareerRecord::ORIGIN_ACADEMY,
+            ],
+        );
+
+        GameTransfer::record(
+            gameId: $game->id,
+            gamePlayerId: $player->id,
+            fromTeamId: $game->reserve_team_id,
+            toTeamId: $game->team_id,
+            transferFee: 0,
+            type: GameTransfer::TYPE_INTERNAL_PROMOTION,
+            season: $game->season,
+            window: TransferWindowType::currentValue($game->current_date),
+        );
+
+        $this->notificationService->create(
+            game: $game,
+            type: \App\Models\GameNotification::TYPE_ACADEMY_PROSPECT,
+            title: __('notifications.reserve_overage_promoted_title'),
+            message: __('notifications.reserve_overage_promoted_message', [
+                'player' => $player->player->name ?? '',
+            ]),
+            priority: \App\Models\GameNotification::PRIORITY_INFO,
+        );
     }
 
     private function assertFilial(Game $game): void

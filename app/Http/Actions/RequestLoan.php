@@ -2,6 +2,7 @@
 
 namespace App\Http\Actions;
 
+use App\Modules\ReserveTeam\Services\ReserveTeamService;
 use App\Modules\Transfer\Exceptions\SquadMinimumException;
 use App\Modules\Transfer\Services\LoanService;
 use App\Models\Game;
@@ -12,6 +13,7 @@ class RequestLoan
 {
     public function __construct(
         private readonly LoanService $loanService,
+        private readonly ReserveTeamService $reserveTeamService,
     ) {}
 
     public function __invoke(Request $request, string $gameId, string $playerId)
@@ -47,6 +49,14 @@ class RequestLoan
 
     private function handleLoanOut(Game $game, GamePlayer $player)
     {
+        // A reserve call-up loaned out to a third club is treated as a
+        // permanent promotion: close the call-up loan now so the loan-out
+        // proceeds from a clean first-team state. Listing the player is a
+        // clear commitment to keep them on the first-team roster.
+        if ($player->isCalledUpFromReserve($game)) {
+            $this->reserveTeamService->permanentlyPromoteCalledUpPlayer($player, $game);
+        }
+
         // Check player isn't already on loan
         if ($player->isOnLoan()) {
             return redirect()->back()
