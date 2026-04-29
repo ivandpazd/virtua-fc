@@ -61,6 +61,7 @@ class PlayerRetirementProcessor implements SeasonProcessor
             ->get();
 
         $retiredPlayers = [];
+        $retiringIds = [];
 
         foreach ($retiringPlayers as $player) {
             $retiredPlayers[] = [
@@ -72,8 +73,11 @@ class PlayerRetirementProcessor implements SeasonProcessor
                 'teamName' => $player->team?->name ?? 'Unknown',
                 'wasUserTeam' => $player->team_id === $game->team_id,
             ];
+            $retiringIds[] = $player->id;
+        }
 
-            $player->delete();
+        if (!empty($retiringIds)) {
+            GamePlayer::whereIn('id', $retiringIds)->delete();
         }
 
         return $retiredPlayers;
@@ -101,10 +105,9 @@ class PlayerRetirementProcessor implements SeasonProcessor
             ->filter(fn (GamePlayer $player) => $this->retirementService->shouldRetire($player));
 
         $announcements = [];
+        $announcedIds = [];
 
         foreach ($candidates as $player) {
-            $player->update(['retiring_at_season' => $data->newSeason]);
-
             $announcements[] = [
                 'playerId' => $player->id,
                 'playerName' => $player->name,
@@ -114,6 +117,11 @@ class PlayerRetirementProcessor implements SeasonProcessor
                 'teamName' => $player->team?->name ?? 'Unknown',
                 'wasUserTeam' => $player->team_id === $game->team_id,
             ];
+            $announcedIds[] = $player->id;
+        }
+
+        if (!empty($announcedIds)) {
+            GamePlayer::whereIn('id', $announcedIds)->update(['retiring_at_season' => $data->newSeason]);
         }
 
         return $announcements;
