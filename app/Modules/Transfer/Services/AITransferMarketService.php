@@ -82,6 +82,22 @@ class AITransferMarketService
         ClubProfile::REPUTATION_ELITE        => 4,
     ];
 
+    /**
+     * Maximum player tier a team will sign, keyed by reputation level.
+     *
+     * Without this ceiling, modest/local clubs would match any free agent
+     * within the loose ability-gap window, leading to immersion-breaking
+     * outcomes (e.g. Alcorcón signing Oblak or Watkins). Tier ladder:
+     *   1 = <€1M, 2 = €1–5M, 3 = €5–20M, 4 = €20–50M, 5 = €50M+ (world class).
+     */
+    private const MAX_TIER_BY_REPUTATION = [
+        ClubProfile::REPUTATION_LOCAL        => 2,
+        ClubProfile::REPUTATION_MODEST       => 3,
+        ClubProfile::REPUTATION_ESTABLISHED  => 4,
+        ClubProfile::REPUTATION_CONTINENTAL  => 5,
+        ClubProfile::REPUTATION_ELITE        => 5,
+    ];
+
     public function __construct(
         private readonly ContractService $contractService,
         private readonly NotificationService $notificationService,
@@ -168,7 +184,8 @@ class AITransferMarketService
         // Phase 1: Sign free agents
         $freeAgentCount = $this->processFreeAgentSignings(
             $game, $window, $teamRosters, $teamAverages, $teams,
-            $takenNumbers, $playerUpdates, $transferInserts, $alreadyTransferredSet
+            $takenNumbers, $playerUpdates, $transferInserts, $alreadyTransferredSet,
+            $reputationLevels,
         );
 
         // Phase 2: Remaining AI-to-AI transfers
@@ -354,10 +371,11 @@ class AITransferMarketService
         array &$playerUpdates,
         array &$transferInserts,
         array &$alreadyTransferredSet,
+        Collection $reputationLevels,
     ): int {
         $freeAgents = GamePlayer::with(['player:id,date_of_birth'])
             ->select([
-                'id', 'game_id', 'player_id', 'team_id', 'position',
+                'id', 'game_id', 'player_id', 'team_id', 'position', 'tier',
                 'market_value_cents', 'game_technical_ability', 'game_physical_ability',
                 'retiring_at_season', 'number', 'contract_until', 'annual_wage',
             ])
@@ -382,7 +400,7 @@ class AITransferMarketService
                 break;
             }
 
-            $bestTeam = $this->findBestTeamForFreeAgent($freeAgent, $teamRosters, $teamAverages, $teams);
+            $bestTeam = $this->findBestTeamForFreeAgent($freeAgent, $teamRosters, $teamAverages, $teams, $reputationLevels);
 
             if (! $bestTeam) {
                 continue;
@@ -1117,10 +1135,11 @@ class AITransferMarketService
     /**
      * Find the best AI team for a free agent to sign with.
      */
-    private function findBestTeamForFreeAgent(GamePlayer $freeAgent, Collection $teamRosters, Collection $teamAverages, Collection $teams): ?array
+    private function findBestTeamForFreeAgent(GamePlayer $freeAgent, Collection $teamRosters, Collection $teamAverages, Collection $teams, Collection $reputationLevels): ?array
     {
         $positionGroup = $this->getPositionGroup($freeAgent->position);
         $playerAbility = $this->getPlayerAbility($freeAgent);
+        $playerTier = $freeAgent->tier ?? 1;
         $bestScore = -1;
         $bestTeamId = null;
 
@@ -1131,6 +1150,15 @@ class AITransferMarketService
 
             // Skip AI teams configured to rely exclusively on their youth academy
             if ($this->exclusionList->contains($teamId)) {
+                continue;
+            }
+
+            // Reputation-based tier gate: keeps modest/local clubs out of the
+            // running for top-tier free agents (e.g. Alcorcón cannot sign Oblak).
+            $reputation = $reputationLevels->get($teamId) ?? ClubProfile::REPUTATION_LOCAL;
+            $minTier = self::MIN_TIER_BY_REPUTATION[$reputation] ?? 1;
+            $maxTier = self::MAX_TIER_BY_REPUTATION[$reputation] ?? 5;
+            if ($playerTier < $minTier || $playerTier > $maxTier) {
                 continue;
             }
 
@@ -1197,6 +1225,7 @@ class AITransferMarketService
         $teamAvg = $teamAverages[$teamId] ?? 55;
         $reputation = $reputationLevels?->get($teamId) ?? ClubProfile::REPUTATION_LOCAL;
         $minTier = self::MIN_TIER_BY_REPUTATION[$reputation] ?? 1;
+        $maxTier = self::MAX_TIER_BY_REPUTATION[$reputation] ?? 5;
 
         if ($specificAgent) {
             $bestAgent = $specificAgent;
@@ -1204,7 +1233,8 @@ class AITransferMarketService
             if (! $freeAgents->has($bestAgent->id)) {
                 return false;
             }
-            if (($bestAgent->tier ?? 1) < $minTier) {
+            $agentTier = $bestAgent->tier ?? 1;
+            if ($agentTier < $minTier || $agentTier > $maxTier) {
                 return false;
             }
         } else {
@@ -1217,7 +1247,8 @@ class AITransferMarketService
                     continue;
                 }
 
-                if (($fa->tier ?? 1) < $minTier) {
+                $faTier = $fa->tier ?? 1;
+                if ($faTier < $minTier || $faTier > $maxTier) {
                     continue;
                 }
 
@@ -1317,7 +1348,8 @@ class AITransferMarketService
 
             $reputation = $reputationLevels->get($teamId) ?? ClubProfile::REPUTATION_LOCAL;
             $minTier = self::MIN_TIER_BY_REPUTATION[$reputation] ?? 1;
-            if ($playerTier < $minTier) {
+            $maxTier = self::MAX_TIER_BY_REPUTATION[$reputation] ?? 5;
+            if ($playerTier < $minTier || $playerTier > $maxTier) {
                 continue;
             }
 
