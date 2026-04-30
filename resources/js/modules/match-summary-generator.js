@@ -261,7 +261,7 @@ export function generateMatchSummary(config) {
 
     sentences.push(buildOpening(t, replacements, {
         isDraw, isGoalless, isBlowout, isNarrowWin,
-        isKnockoutDecisive, isHighStakes, isFinal,
+        isCup, isKnockoutDecisive, isHighStakes, isFinal,
         hasExtraTime, penaltyResult,
         winnerId, homeTeamId,
     }));
@@ -327,7 +327,7 @@ export function generateMatchSummary(config) {
 function buildOpening(t, replacements, ctx) {
     const {
         isDraw, isGoalless, isBlowout, isNarrowWin,
-        isKnockoutDecisive, isHighStakes, isFinal,
+        isCup, isKnockoutDecisive, isHighStakes, isFinal,
         hasExtraTime, penaltyResult,
         winnerId, homeTeamId,
     } = ctx;
@@ -356,7 +356,10 @@ function buildOpening(t, replacements, ctx) {
         return pickTemplate(t.summaryOpeningCupWin, replacements);
     }
 
-    if (isKnockoutDecisive && isDraw && t.summaryOpeningCupDraw) {
+    // Cup ties without a decided winner (first leg of a two-legged tie, or a
+    // Swiss league-phase draw) must avoid league-only wording like "reparto de
+    // puntos" or "se reparten un punto" — there are no points at stake.
+    if (isCup && (isDraw || isGoalless) && t.summaryOpeningCupDraw) {
         return pickTemplate(t.summaryOpeningCupDraw, replacements);
     }
 
