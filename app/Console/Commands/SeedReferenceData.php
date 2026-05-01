@@ -777,8 +777,14 @@ class SeedReferenceData extends Command
                     default => null,
                 };
 
-                // Calculate abilities from market value, position, and age
+                // Calculate abilities from market value, position, and age.
+                // Transfermarkt occasionally lists fringe / youth squad players with
+                // no quoted value — floor those at €100K so they still get a usable
+                // ability baseline and a non-zero transfer price.
                 $marketValueCents = Money::parseMarketValue($player['marketValue'] ?? null);
+                if ($marketValueCents <= 0) {
+                    $marketValueCents = 10_000_000;
+                }
                 $position = $player['position'] ?? 'Central Midfield';
                 [$technical, $physical] = $valuationService->marketValueToAbilities($marketValueCents, $position, $age ?? 25);
 
