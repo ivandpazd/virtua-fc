@@ -315,6 +315,12 @@ class ClubProfilesSeeder extends Seeder
         'CR Flamengo' => ClubProfile::REPUTATION_CONTINENTAL,
         'SE Palmeiras' => ClubProfile::REPUTATION_CONTINENTAL,
 
+        // Established — Saudi Pro League powerhouses with global star rosters
+        'Al-Hilal SFC' => ClubProfile::REPUTATION_ESTABLISHED,
+        'Al-Nassr FC' => ClubProfile::REPUTATION_ESTABLISHED,
+        'Al-Ittihad Club' => ClubProfile::REPUTATION_ESTABLISHED,
+        'Al-Ahli SFC' => ClubProfile::REPUTATION_ESTABLISHED,
+
         // Established — strong domestic clubs and high-profile MLS sides
         'SC Corinthians Paulista' => ClubProfile::REPUTATION_ESTABLISHED,
         'Botafogo FR' => ClubProfile::REPUTATION_ESTABLISHED,

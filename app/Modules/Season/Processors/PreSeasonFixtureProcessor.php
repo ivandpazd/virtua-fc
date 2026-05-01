@@ -95,9 +95,12 @@ class PreSeasonFixtureProcessor implements SeasonProcessor
 
         $userCountry = $game->country ?? 'ES';
 
-        // Find foreign clubs with matching reputation (exclude national teams)
-        return Team::where('country', '!=', $userCountry)
-            ->where('type', 'club')
+        // Find foreign clubs with matching reputation. transferMarketEligible
+        // also excludes cup-only teams (e.g. Segunda Federación regional sides
+        // loaded from data/<year>/ESPCUP) which have a ClubProfile but no
+        // generated squad.
+        return Team::transferMarketEligible()
+            ->where('country', '!=', $userCountry)
             ->whereHas('clubProfile', function ($query) use ($validLevels) {
                 $query->whereIn('reputation_level', $validLevels);
             })
@@ -116,7 +119,8 @@ class PreSeasonFixtureProcessor implements SeasonProcessor
             ->where('team_id', '!=', $game->team_id)
             ->pluck('team_id');
 
-        return Team::whereIn('id', $segundaTeamIds)
+        return Team::transferMarketEligible()
+            ->whereIn('id', $segundaTeamIds)
             ->inRandomOrder()
             ->limit(self::NUM_MATCHES)
             ->get();
