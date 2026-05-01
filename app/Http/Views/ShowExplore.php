@@ -4,6 +4,7 @@ namespace App\Http\Views;
 
 use App\Models\Game;
 use App\Models\ShortlistedPlayer;
+use App\Modules\Competition\Services\CountryConfig;
 use App\Modules\Transfer\Services\ExploreService;
 use App\Modules\Transfer\Services\TransferHeaderService;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ class ShowExplore
     public function __construct(
         private readonly ExploreService $exploreService,
         private readonly TransferHeaderService $headerService,
+        private readonly CountryConfig $countryConfig,
     ) {}
 
     public function __invoke(Request $request, string $gameId)
@@ -22,7 +24,7 @@ class ShowExplore
 
         $competitions = $this->exploreService->getCompetitionsWithTeamCounts($gameId);
         $freeAgentCount = $this->exploreService->getFreeAgentCount($gameId);
-        $europeTeamCount = $this->exploreService->getEuropeanTeamCount($gameId);
+        $pools = $this->buildTransferPools($gameId, $game->country ?? 'ES');
         $nationalities = $this->exploreService->getDistinctNationalities($gameId);
 
         $shortlistedIds = ShortlistedPlayer::where('game_id', $gameId)
@@ -63,7 +65,7 @@ class ShowExplore
             'game' => $game,
             'competitions' => $competitions,
             'freeAgentCount' => $freeAgentCount,
-            'europeTeamCount' => $europeTeamCount,
+            'pools' => $pools,
             'nationalities' => $nationalities,
             'shortlistedIds' => $shortlistedIds,
             'searchMode' => $searchMode,
@@ -71,5 +73,65 @@ class ShowExplore
             'initialFilters' => $filters,
             ...$this->headerService->getHeaderData($game),
         ]);
+    }
+
+    /**
+     * Build the transfer-pool list (EUR / INT / future) for the explore
+     * dropdown, with each pool's team count and presentation metadata.
+     * Pools with zero teams are omitted so the dropdown only surfaces
+     * scopes the player can actually navigate to.
+     *
+     * @return array<int, array{id: string, label: string, flag: string, count: int}>
+     */
+    private function buildTransferPools(string $gameId, string $countryCode): array
+    {
+        $labels = [
+            'EUR' => __('transfers.explore_europe'),
+            'INT' => __('transfers.explore_international'),
+        ];
+        // Pools render either a country flag (EUR uses the EU one) or an
+        // emoji glyph when no single flag is appropriate. INT spans multiple
+        // continents — the Americas-centred globe is the most recognisable
+        // "rest of the world" mark.
+        $flags = [
+            'EUR' => 'eu',
+        ];
+        $emojis = [
+            'INT' => '🌎',
+        ];
+        $hints = [
+            'EUR' => __('transfers.explore_europe_hint'),
+            'INT' => __('transfers.explore_international_hint'),
+        ];
+
+        // Only `team_pool`-handler entries are real pools (Europe, International).
+        // The transfer_pool list also contains foreign leagues (ENG1, DEU1, …)
+        // which show up under their own "Liga" group via getCompetitionsWithTeamCounts —
+        // they would double-count if surfaced here as well.
+        $support = $this->countryConfig->support($countryCode);
+        $poolEntries = $support['transfer_pool'] ?? [];
+
+        $pools = [];
+        foreach ($poolEntries as $poolId => $poolConfig) {
+            if (($poolConfig['handler'] ?? null) !== 'team_pool') {
+                continue;
+            }
+
+            $count = $this->exploreService->getTeamPoolCount($gameId, $poolId);
+            if ($count === 0) {
+                continue;
+            }
+
+            $pools[] = [
+                'id' => $poolId,
+                'label' => $labels[$poolId] ?? $poolId,
+                'flag' => $flags[$poolId] ?? null,
+                'emoji' => $emojis[$poolId] ?? null,
+                'hint' => $hints[$poolId] ?? '',
+                'count' => $count,
+            ];
+        }
+
+        return $pools;
     }
 }

@@ -26,12 +26,144 @@
 
                     {{-- Explorer Content --}}
                     <div class="mt-6"
-                         x-data="exploreApp()"
-                         x-init="init()">
+                         x-data="explore({
+                             initialFilters: @js($initialFilters),
+                             searchMode: @js((bool) $searchMode),
+                             competitions: @js($competitions),
+                             pools: @js($pools),
+                             freeAgentCount: @js((int) $freeAgentCount),
+                             assetUrl: @js(rtrim(Storage::disk('assets')->url(''), '/')),
+                             gameId: @js($game->id),
+                             labels: {
+                                 freeAgents: @js(__('transfers.explore_free_agents')),
+                                 leagueKind: @js(__('transfers.league')),
+                                 poolKind: @js(__('transfers.explore_pool_picker_label')),
+                                 freeAgentsKind: @js(__('transfers.explore_free_agents')),
+                                 searchKind: @js(__('transfers.explore_search_scope_label')),
+                                 searchScope: @js(__('transfers.explore_search_scope_label')),
+                                 positionAll: @js(__('transfers.explore_filter_all')),
+                                 positionGk: @js(__('transfers.explore_goalkeepers')),
+                                 positionDef: @js(__('transfers.explore_defenders')),
+                                 positionMid: @js(__('transfers.explore_midfielders')),
+                                 positionFwd: @js(__('transfers.explore_forwards')),
+                             },
+                         })">
 
                         <form method="GET" action="{{ route('game.explore', $game->id) }}">
-                            {{-- Search bar + Advanced-filter toggle --}}
+                            {{-- Scope picker + Search bar + Advanced-filter toggle, on a single row from sm: upwards --}}
                             <div class="flex flex-col sm:flex-row gap-2 mb-3">
+                                {{-- Scope picker (dropdown). Replaces the previous
+                                     pill bar, which became too wide once foreign
+                                     leagues + EUR + INT were included. The selected
+                                     scope is summarised in a single trigger button;
+                                     the panel groups leagues, transfer pools, and
+                                     free agents so users can see every option at
+                                     once instead of scrolling. --}}
+                                <div class="relative w-full sm:w-72 shrink-0" @click.outside="scopePickerOpen = false" @keydown.escape.window="scopePickerOpen = false">
+                                    <button type="button"
+                                            @click="scopePickerOpen = !scopePickerOpen"
+                                            :class="{
+                                                'border-accent-blue/40': viewMode === 'competition' && scopePickerOpen,
+                                                'border-accent-gold/40': viewMode === 'pool' && scopePickerOpen,
+                                                'border-accent-green/40': viewMode === 'freeAgents' && scopePickerOpen,
+                                                'border-border-strong': scopePickerOpen,
+                                                'border-border-default hover:border-border-strong': !scopePickerOpen,
+                                            }"
+                                            class="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border bg-surface-800 text-left min-h-[44px] transition-colors">
+                                        {{-- Glyph priority: search (search mode) > emoji (INT pool) > flag (leagues + EUR) > free-agents icon --}}
+                                        <template x-if="activeScope.icon === 'search'">
+                                            <svg class="w-5 h-5 text-text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                            </svg>
+                                        </template>
+                                        <template x-if="!activeScope.icon && activeScope.emoji">
+                                            <span class="text-lg leading-none shrink-0" x-text="activeScope.emoji"></span>
+                                        </template>
+                                        <template x-if="!activeScope.icon && !activeScope.emoji && activeScope.flag">
+                                            <img :src="assetUrl + '/flags/' + activeScope.flag + '.svg'" class="w-6 h-4 rounded-xs shadow-xs shrink-0" :alt="activeScope.label">
+                                        </template>
+                                        <template x-if="!activeScope.icon && !activeScope.emoji && !activeScope.flag">
+                                            <svg class="w-5 h-5 text-accent-green shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </template>
+
+                                        <span class="flex-1 text-sm font-medium text-text-primary truncate" x-text="activeScope.label"></span>
+                                        <span x-show="activeScope.count !== null" class="text-xs px-1.5 py-0.5 rounded-full bg-surface-700 text-text-muted shrink-0" x-text="activeScope.count"></span>
+                                        <svg class="w-4 h-4 text-text-muted shrink-0 transition-transform" :class="scopePickerOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+
+                                    <div x-show="scopePickerOpen" x-cloak x-transition.opacity.duration.150ms
+                                         class="absolute z-30 mt-1 left-0 right-0 sm:right-auto sm:w-80 max-h-[70vh] overflow-y-auto rounded-lg border border-border-strong bg-surface-800 shadow-xl">
+
+                                        {{-- Leagues group --}}
+                                        <template x-if="competitions.length > 0">
+                                            <div class="py-1">
+                                                <div class="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">{{ __('transfers.league') }}</div>
+                                                <template x-for="comp in competitions" :key="comp.id">
+                                                    <button type="button"
+                                                            @click="selectCompetition(comp); scopePickerOpen = false"
+                                                            :class="viewMode === 'competition' && selectedCompetition?.id === comp.id
+                                                                ? 'bg-accent-blue/10 text-accent-blue'
+                                                                : 'text-text-primary hover:bg-surface-700/60'"
+                                                            class="w-full flex items-center gap-3 px-3 py-2 text-left transition-colors min-h-[44px]">
+                                                        <template x-if="comp.flag">
+                                                            <img :src="assetUrl + '/flags/' + comp.flag + '.svg'" class="w-5 h-3.5 rounded-xs shadow-xs shrink-0" :alt="comp.country">
+                                                        </template>
+                                                        <span class="flex-1 text-sm truncate" x-text="comp.name"></span>
+                                                        <span class="text-xs px-1.5 py-0.5 rounded-full bg-surface-700 text-text-muted shrink-0" x-text="comp.teamCount"></span>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        {{-- Transfer pools group (Europe / Resto del mundo) --}}
+                                        @if(count($pools) > 0)
+                                        <div class="border-t border-border-default py-1">
+                                            <div class="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">{{ __('transfers.explore_pool_picker_label') }}</div>
+                                            <template x-for="pool in pools" :key="pool.id">
+                                                <button type="button"
+                                                        @click="selectPool(pool); scopePickerOpen = false"
+                                                        :class="viewMode === 'pool' && activePoolId === pool.id
+                                                            ? 'bg-accent-gold/10 text-accent-gold'
+                                                            : 'text-text-primary hover:bg-surface-700/60'"
+                                                        class="w-full flex items-center gap-3 px-3 py-2 text-left transition-colors min-h-[44px]">
+                                                    <template x-if="pool.emoji">
+                                                        <span class="w-5 text-center text-base leading-none shrink-0" x-text="pool.emoji"></span>
+                                                    </template>
+                                                    <template x-if="!pool.emoji && pool.flag">
+                                                        <img :src="assetUrl + '/flags/' + pool.flag + '.svg'" class="w-5 h-3.5 rounded-xs shadow-xs shrink-0" :alt="pool.label">
+                                                    </template>
+                                                    <span class="flex-1 text-sm truncate" x-text="pool.label"></span>
+                                                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-surface-700 text-text-muted shrink-0" x-text="pool.count"></span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                        @endif
+
+                                        {{-- Free agents --}}
+                                        @if($freeAgentCount > 0)
+                                        <div class="border-t border-border-default py-1">
+                                            <div class="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">{{ __('transfers.explore_free_agents') }}</div>
+                                            <button type="button"
+                                                    @click="selectFreeAgents(); scopePickerOpen = false"
+                                                    :class="viewMode === 'freeAgents'
+                                                        ? 'bg-accent-green/10 text-accent-green'
+                                                        : 'text-text-primary hover:bg-surface-700/60'"
+                                                    class="w-full flex items-center gap-3 px-3 py-2 text-left transition-colors min-h-[44px]">
+                                                <svg class="w-5 h-5 shrink-0" :class="viewMode === 'freeAgents' ? 'text-accent-green' : 'text-text-muted'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                <span class="flex-1 text-sm truncate">{{ __('transfers.explore_free_agents') }}</span>
+                                                <span class="text-xs px-1.5 py-0.5 rounded-full bg-surface-700 text-text-muted shrink-0">{{ $freeAgentCount }}</span>
+                                            </button>
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+
                                 <div class="relative flex-1">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,71 +311,22 @@
                                        class="text-xs text-text-muted hover:text-text-body underline-offset-2 hover:underline text-center sm:text-left">
                                         {{ __('transfers.explore_clear_filters') }}
                                     </a>
-                                    <button type="submit"
-                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-accent-blue/15 border border-accent-blue/30 text-accent-blue font-semibold text-sm hover:bg-accent-blue/20 min-h-[44px] sm:ml-auto">
+                                    <x-primary-button class="gap-2 sm:ml-auto">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                         </svg>
                                         {{ __('transfers.explore_search_submit') }}
-                                    </button>
+                                    </x-primary-button>
                                 </div>
                             </div>
                         </form>
 
-                        {{-- Hint --}}
+
+                        {{-- Hint (rendered below the picker so the active scope is always anchored to the top) --}}
                         <p class="text-sm text-text-muted mb-5" x-show="viewMode === 'competition'">{!! __('transfers.explore_hint', [
                             'scouting' => '<a href="' . route('game.scouting', $game->id) . '" class="text-accent-blue hover:text-accent-blue/80 font-medium underline-offset-2 hover:underline">' . __('transfers.explore_link_to_scouting') . '</a>',
                         ]) !!}</p>
-                        <p class="text-sm text-text-muted mb-5" x-show="viewMode === 'europe'">{{ __('transfers.explore_europe_hint') }}</p>
-
-                        {{-- Competition Selector + Free Agents pill --}}
-                        <div x-show="viewMode !== 'search'" class="flex overflow-x-auto scrollbar-hide gap-2 pb-3 mb-5 border-b border-border-default">
-                            <template x-for="comp in competitions" :key="comp.id">
-                                <x-pill-button @click="selectCompetition(comp)"
-                                        x-bind:class="viewMode === 'competition' && selectedCompetition?.id === comp.id
-                                            ? 'bg-accent-blue/15 text-accent-blue border-accent-blue/30'
-                                            : 'bg-surface-800 text-text-body border-border-default hover:border-border-strong'"
-                                        class="shrink-0 gap-2 rounded-lg border min-h-[44px]">
-                                    <template x-if="comp.country">
-                                        <img :src="assetUrl + '/flags/' + comp.flag + '.svg'" class="w-5 h-3.5 rounded-xs shadow-xs" :alt="comp.country">
-                                    </template>
-                                    <span x-text="comp.name"></span>
-                                    <span class="text-xs px-1.5 py-0.5 rounded-full"
-                                          :class="viewMode === 'competition' && selectedCompetition?.id === comp.id ? 'bg-accent-blue/20 text-accent-blue' : 'bg-surface-700 text-text-muted'"
-                                          x-text="comp.teamCount"></span>
-                                </x-pill-button>
-                            </template>
-
-                            {{-- Europe pill --}}
-                            @if($europeTeamCount > 0)
-                            <x-pill-button @click="selectEurope()"
-                                    x-bind:class="viewMode === 'europe'
-                                        ? 'bg-accent-gold/15 text-accent-gold border-accent-gold/30'
-                                        : 'bg-surface-800 text-text-body border-border-default hover:border-border-strong'"
-                                    class="shrink-0 gap-2 rounded-lg border min-h-[44px]">
-                                <img :src="assetUrl + '/flags/eu.svg'" class="w-5 h-3.5 rounded-xs shadow-xs" alt="Europe">
-                                <span>{{ __('transfers.explore_europe') }}</span>
-                                <span class="text-xs px-1.5 py-0.5 rounded-full"
-                                      :class="viewMode === 'europe' ? 'bg-accent-gold/20 text-accent-gold' : 'bg-surface-700 text-text-muted'">{{ $europeTeamCount }}</span>
-                            </x-pill-button>
-                            @endif
-
-                            {{-- Free Agents pill --}}
-                            @if($freeAgentCount > 0)
-                            <x-pill-button @click="selectFreeAgents()"
-                                    x-bind:class="viewMode === 'freeAgents'
-                                        ? 'bg-accent-green/15 text-accent-green border-accent-green/30'
-                                        : 'bg-surface-800 text-text-body border-border-default hover:border-border-strong'"
-                                    class="shrink-0 gap-2 rounded-lg border min-h-[44px]">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span>{{ __('transfers.explore_free_agents') }}</span>
-                                <span class="text-xs px-1.5 py-0.5 rounded-full"
-                                      :class="viewMode === 'freeAgents' ? 'bg-accent-green/20 text-accent-green' : 'bg-surface-700 text-text-muted'">{{ $freeAgentCount }}</span>
-                            </x-pill-button>
-                            @endif
-                        </div>
+                        <p class="text-sm text-text-muted mb-5" x-show="viewMode === 'pool'" x-text="activePoolHint"></p>
 
                         {{-- Competition mode: Two-column layout (desktop) / Tab toggle (mobile) --}}
                         <div x-show="viewMode === 'competition'" class="flex flex-col md:flex-row gap-6">
@@ -328,8 +411,8 @@
                             </div>
                         </div>
 
-                        {{-- Europe mode: Two-column layout with teams grouped by country --}}
-                        <div x-show="viewMode === 'europe'" class="flex flex-col md:flex-row gap-6">
+                        {{-- Pool mode (Europe / International / future): two-column layout with teams grouped by country --}}
+                        <div x-show="viewMode === 'pool'" class="flex flex-col md:flex-row gap-6">
 
                             {{-- Mobile tab toggle --}}
                             <div class="flex md:hidden border-b border-border-strong mb-2">
@@ -350,7 +433,7 @@
                                  :class="{ 'hidden md:block': mobileView === 'squad' }">
 
                                 {{-- Loading state --}}
-                                <template x-if="loadingEurope">
+                                <template x-if="loadingPool">
                                     <div class="flex items-center justify-center py-12">
                                         <svg class="animate-spin h-6 w-6 text-text-secondary" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -360,9 +443,9 @@
                                 </template>
 
                                 {{-- Grouped teams --}}
-                                <template x-if="!loadingEurope && europeGroups.length > 0">
+                                <template x-if="!loadingPool && poolGroups.length > 0">
                                     <div class="space-y-4">
-                                        <template x-for="group in europeGroups" :key="group.code">
+                                        <template x-for="group in poolGroups" :key="group.code">
                                             <div>
                                                 {{-- Country header --}}
                                                 <div class="flex items-center gap-2 px-2 py-1.5 mb-1">
@@ -391,7 +474,7 @@
                                 </template>
 
                                 {{-- Empty state --}}
-                                <template x-if="!loadingEurope && europeGroups.length === 0">
+                                <template x-if="!loadingPool && poolGroups.length === 0">
                                     <p class="text-sm text-text-secondary text-center py-8">{{ __('transfers.explore_no_teams') }}</p>
                                 </template>
                             </div>
@@ -421,7 +504,7 @@
                                 </template>
 
                                 {{-- Squad content (server-rendered HTML) --}}
-                                <div x-show="!loadingSquad && squadHtml" x-ref="europeSquadPanel"></div>
+                                <div x-show="!loadingSquad && squadHtml" x-ref="poolSquadPanel"></div>
                             </div>
                         </div>
 
@@ -495,214 +578,4 @@
 
     <x-negotiation-chat-modal />
 
-    <script>
-        function exploreApp() {
-            const initialFilters = @js($initialFilters);
-            const searchMode = @js((bool) $searchMode);
-
-            return {
-                competitions: @json($competitions),
-                assetUrl: '{{ rtrim(Storage::disk('assets')->url(''), '/') }}',
-                viewMode: searchMode ? 'search' : 'competition',
-                selectedCompetition: null,
-                teams: [],
-                selectedTeam: null,
-                squadHtml: '',
-                loadingTeams: false,
-                loadingSquad: false,
-                loadingFreeAgents: false,
-                loadingEurope: false,
-                europeGroups: [],
-                searchQuery: initialFilters.name || '',
-                mobileView: 'teams',
-                gameId: '{{ $game->id }}',
-                selectedPositionFilter: 'all',
-                positionFilters: [
-                    { key: 'all', label: @js(__('transfers.explore_filter_all')) },
-                    { key: 'gk', label: @js(__('transfers.explore_goalkeepers')) },
-                    { key: 'def', label: @js(__('transfers.explore_defenders')) },
-                    { key: 'mid', label: @js(__('transfers.explore_midfielders')) },
-                    { key: 'fwd', label: @js(__('transfers.explore_forwards')) },
-                ],
-                filtersOpen: searchMode,
-                filters: {
-                    position: initialFilters.position || '',
-                    nationality: initialFilters.nationality || '',
-                    competition_id: initialFilters.competition_id || '',
-                    max_contract_year: initialFilters.max_contract_year || null,
-                },
-
-                // Dual-range bounds (mirrors scout-search-modal pattern)
-                AGE_MIN_BOUND: 16,
-                AGE_MAX_BOUND: 40,
-                OVERALL_MIN_BOUND: 50,
-                OVERALL_MAX_BOUND: 99,
-                valueSteps: [0, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 50000000, 100000000, 200000000],
-
-                ageMin: null,
-                ageMax: null,
-                overallMin: null,
-                overallMax: null,
-                valueStepMin: null,
-                valueStepMax: null,
-
-                enforceAgeMin() { if (this.ageMin > this.ageMax) this.ageMax = this.ageMin; },
-                enforceAgeMax() { if (this.ageMax < this.ageMin) this.ageMin = this.ageMax; },
-                enforceOverallMin() { if (this.overallMin > this.overallMax) this.overallMax = this.overallMin; },
-                enforceOverallMax() { if (this.overallMax < this.overallMin) this.overallMin = this.overallMax; },
-                enforceValueMin() { if (this.valueStepMin > this.valueStepMax) this.valueStepMax = this.valueStepMin; },
-                enforceValueMax() { if (this.valueStepMax < this.valueStepMin) this.valueStepMin = this.valueStepMax; },
-
-                ageTrackLeft() { return ((this.ageMin - this.AGE_MIN_BOUND) / (this.AGE_MAX_BOUND - this.AGE_MIN_BOUND)) * 100 + '%'; },
-                ageTrackWidth() { return ((this.ageMax - this.ageMin) / (this.AGE_MAX_BOUND - this.AGE_MIN_BOUND)) * 100 + '%'; },
-                overallTrackLeft() { return ((this.overallMin - this.OVERALL_MIN_BOUND) / (this.OVERALL_MAX_BOUND - this.OVERALL_MIN_BOUND)) * 100 + '%'; },
-                overallTrackWidth() { return ((this.overallMax - this.overallMin) / (this.OVERALL_MAX_BOUND - this.OVERALL_MIN_BOUND)) * 100 + '%'; },
-                valueTrackLeft() { return (this.valueStepMin / (this.valueSteps.length - 1)) * 100 + '%'; },
-                valueTrackWidth() { return ((this.valueStepMax - this.valueStepMin) / (this.valueSteps.length - 1)) * 100 + '%'; },
-
-                valueMin() { return this.valueSteps[this.valueStepMin]; },
-                valueMax() { return this.valueSteps[this.valueStepMax]; },
-                formatValue(val) {
-                    if (val === 0) return '€0';
-                    if (val >= 1000000) return '€' + (val / 1000000) + 'M';
-                    if (val >= 1000) return '€' + (val / 1000) + 'K';
-                    return '€' + val;
-                },
-
-                get ageActive() { return this.ageMin > this.AGE_MIN_BOUND || this.ageMax < this.AGE_MAX_BOUND; },
-                get overallActive() { return this.overallMin > this.OVERALL_MIN_BOUND || this.overallMax < this.OVERALL_MAX_BOUND; },
-                get valueActive() { return this.valueStepMin > 0 || this.valueStepMax < this.valueSteps.length - 1; },
-
-                get activeFilterCount() {
-                    let n = 0;
-                    if (this.filters.position) n++;
-                    if (this.filters.nationality) n++;
-                    if (this.filters.competition_id) n++;
-                    if (this.filters.max_contract_year) n++;
-                    if (this.ageActive) n++;
-                    if (this.overallActive) n++;
-                    if (this.valueActive) n++;
-                    return n;
-                },
-                get hasAnyCriteria() {
-                    return this.searchQuery.trim().length >= 2 || this.activeFilterCount > 0;
-                },
-
-                init() {
-                    this.initRangesFromFilters();
-                    if (!searchMode && this.competitions.length > 0) {
-                        this.selectCompetition(this.competitions[0]);
-                    }
-                },
-
-                initRangesFromFilters() {
-                    const f = initialFilters;
-                    this.ageMin = f.min_age ? Number(f.min_age) : this.AGE_MIN_BOUND;
-                    this.ageMax = f.max_age ? Number(f.max_age) : this.AGE_MAX_BOUND;
-                    this.overallMin = f.min_overall ? Number(f.min_overall) : this.OVERALL_MIN_BOUND;
-                    this.overallMax = f.max_overall ? Number(f.max_overall) : this.OVERALL_MAX_BOUND;
-                    this.valueStepMin = f.min_value ? this.stepForValue(Number(f.min_value), 0) : 0;
-                    this.valueStepMax = f.max_value ? this.stepForValue(Number(f.max_value), this.valueSteps.length - 1) : this.valueSteps.length - 1;
-                },
-
-                stepForValue(value, fallback) {
-                    const idx = this.valueSteps.indexOf(value);
-                    return idx >= 0 ? idx : fallback;
-                },
-
-                async selectCompetition(comp) {
-                    this.viewMode = 'competition';
-                    this.selectedCompetition = comp;
-                    this.selectedTeam = null;
-                    this.squadHtml = '';
-                    if (this.$refs.squadPanel) this.$refs.squadPanel.innerHTML = '';
-                    if (this.$refs.europeSquadPanel) this.$refs.europeSquadPanel.innerHTML = '';
-                    this.loadingTeams = true;
-
-                    try {
-                        const response = await fetch(`/game/${this.gameId}/explore/teams/${comp.id}`);
-                        this.teams = await response.json();
-                    } catch (e) {
-                        this.teams = [];
-                    } finally {
-                        this.loadingTeams = false;
-                    }
-                },
-
-                async selectTeam(team) {
-                    this.selectedTeam = team;
-                    this.loadingSquad = true;
-                    this.mobileView = 'squad';
-
-                    const panel = this.viewMode === 'europe' ? this.$refs.europeSquadPanel : this.$refs.squadPanel;
-
-                    try {
-                        const response = await fetch(`/game/${this.gameId}/explore/squad/${team.id}`);
-                        const html = await response.text();
-                        this.squadHtml = html;
-                        if (panel) {
-                            panel.innerHTML = html;
-                            this.$nextTick(() => Alpine.initTree(panel));
-                        }
-                    } catch (e) {
-                        this.squadHtml = '';
-                        if (panel) panel.innerHTML = '';
-                    } finally {
-                        this.loadingSquad = false;
-                    }
-                },
-
-                async selectEurope() {
-                    this.viewMode = 'europe';
-                    this.selectedCompetition = null;
-                    this.selectedTeam = null;
-                    this.squadHtml = '';
-                    if (this.$refs.europeSquadPanel) this.$refs.europeSquadPanel.innerHTML = '';
-                    this.mobileView = 'teams';
-
-                    if (this.europeGroups.length > 0) return;
-
-                    this.loadingEurope = true;
-                    try {
-                        const response = await fetch(`/game/${this.gameId}/explore/europe-teams`);
-                        this.europeGroups = await response.json();
-                    } catch (e) {
-                        this.europeGroups = [];
-                    } finally {
-                        this.loadingEurope = false;
-                    }
-                },
-
-                selectFreeAgents() {
-                    this.viewMode = 'freeAgents';
-                    this.selectedCompetition = null;
-                    this.selectedPositionFilter = 'all';
-                    this.mobileView = 'teams';
-                    this.loadFreeAgents('all');
-                },
-
-                selectPositionFilter(position) {
-                    this.selectedPositionFilter = position;
-                    this.mobileView = 'squad';
-                    this.loadFreeAgents(position);
-                },
-
-                async loadFreeAgents(position) {
-                    this.loadingFreeAgents = true;
-
-                    try {
-                        const response = await fetch(`/game/${this.gameId}/explore/free-agents?position=${position}`);
-                        const html = await response.text();
-                        this.$refs.freeAgentPanel.innerHTML = html;
-                        this.$nextTick(() => Alpine.initTree(this.$refs.freeAgentPanel));
-                    } catch (e) {
-                        if (this.$refs.freeAgentPanel) this.$refs.freeAgentPanel.innerHTML = '';
-                    } finally {
-                        this.loadingFreeAgents = false;
-                    }
-                },
-
-            };
-        }
-    </script>
 </x-app-layout>

@@ -80,14 +80,16 @@ class ExploreService
     }
 
     /**
-     * Get teams from the EUR team pool grouped by country.
+     * Get teams from a transfer-only team pool (e.g. EUR, INT) grouped by
+     * country. Used by the Explore dropdown to render "Europe" and
+     * "International" scopes with the same two-column UI.
      *
      * @return Collection<int, array{code: string, name: string, flag: string, teams: array}>
      */
-    public function getEuropeanTeamsGroupedByCountry(string $gameId): Collection
+    public function getTeamPoolGroupedByCountry(string $gameId, string $competitionId): Collection
     {
         $teamIds = CompetitionEntry::where('game_id', $gameId)
-            ->where('competition_id', 'EUR')
+            ->where('competition_id', $competitionId)
             ->pluck('team_id');
 
         $teams = Team::whereIn('id', $teamIds)
@@ -117,12 +119,12 @@ class ExploreService
     }
 
     /**
-     * Count teams in the EUR team pool for a game.
+     * Count teams in a transfer-only team pool for a game.
      */
-    public function getEuropeanTeamCount(string $gameId): int
+    public function getTeamPoolCount(string $gameId, string $competitionId): int
     {
         return CompetitionEntry::where('game_id', $gameId)
-            ->where('competition_id', 'EUR')
+            ->where('competition_id', $competitionId)
             ->count();
     }
 

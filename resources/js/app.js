@@ -10,6 +10,7 @@ import squadSelection from './squad-selection';
 import tournamentSummary from './tournament-summary';
 import seasonSummary from './season-summary';
 import squadRegistration from './squad-registration';
+import explore from './explore';
 
 Alpine.plugin(Collapse);
 Alpine.plugin(Tooltip);
@@ -21,6 +22,7 @@ Alpine.data('squadSelection', squadSelection);
 Alpine.data('squadRegistration', squadRegistration);
 Alpine.data('tournamentSummary', tournamentSummary);
 Alpine.data('seasonSummary', seasonSummary);
+Alpine.data('explore', explore);
 
 window.Alpine = Alpine;
 
