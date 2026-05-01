@@ -223,6 +223,9 @@ return [
                 'ITA1' => ['role' => 'league', 'handler' => 'league', 'country' => 'IT'],
                 // EUR club pool — individual team files, includes NLD/POR teams
                 'EUR'  => ['role' => 'team_pool', 'handler' => 'team_pool', 'country' => 'EU'],
+                // INT club pool — non-European clubs (South America, MLS, etc.)
+                // for transfer market only; never participates in fixtures
+                'INT'  => ['role' => 'team_pool', 'handler' => 'team_pool', 'country' => 'XX'],
             ],
             'continental' => [
                 // Teams needed for European competitions — rosters reused from
@@ -283,6 +286,7 @@ return [
                 'FRA1' => ['role' => 'league', 'handler' => 'league', 'country' => 'FR'],
                 'ITA1' => ['role' => 'league', 'handler' => 'league', 'country' => 'IT'],
                 'EUR'  => ['role' => 'team_pool', 'handler' => 'team_pool', 'country' => 'EU'],
+                'INT'  => ['role' => 'team_pool', 'handler' => 'team_pool', 'country' => 'XX'],
             ],
             'continental' => [
                 'UCL' => ['handler' => 'swiss_format', 'country' => 'EU'],
@@ -340,6 +344,7 @@ return [
                 'FRA1' => ['role' => 'league', 'handler' => 'league', 'country' => 'FR'],
                 'ITA1' => ['role' => 'league', 'handler' => 'league', 'country' => 'IT'],
                 'EUR'  => ['role' => 'team_pool', 'handler' => 'team_pool', 'country' => 'EU'],
+                'INT'  => ['role' => 'team_pool', 'handler' => 'team_pool', 'country' => 'XX'],
             ],
             'continental' => [
                 'UCL' => ['handler' => 'swiss_format', 'country' => 'EU'],
@@ -397,6 +402,7 @@ return [
                 'DEU1' => ['role' => 'league', 'handler' => 'league', 'country' => 'DE'],
                 'FRA1' => ['role' => 'league', 'handler' => 'league', 'country' => 'FR'],
                 'EUR'  => ['role' => 'team_pool', 'handler' => 'team_pool', 'country' => 'EU'],
+                'INT'  => ['role' => 'team_pool', 'handler' => 'team_pool', 'country' => 'XX'],
             ],
             'continental' => [
                 'UCL' => ['handler' => 'swiss_format', 'country' => 'EU'],
@@ -454,6 +460,7 @@ return [
                 'DEU1' => ['role' => 'league', 'handler' => 'league', 'country' => 'DE'],
                 'ITA1' => ['role' => 'league', 'handler' => 'league', 'country' => 'IT'],
                 'EUR'  => ['role' => 'team_pool', 'handler' => 'team_pool', 'country' => 'EU'],
+                'INT'  => ['role' => 'team_pool', 'handler' => 'team_pool', 'country' => 'XX'],
             ],
             'continental' => [
                 'UCL' => ['handler' => 'swiss_format', 'country' => 'EU'],

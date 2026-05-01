@@ -303,6 +303,27 @@ class ClubProfilesSeeder extends Seeder
         'Go Ahead Eagles' => ClubProfile::REPUTATION_MODEST,
         'Pafos FC' => ClubProfile::REPUTATION_MODEST,
         'Kairat Almaty' => ClubProfile::REPUTATION_MODEST,
+
+        // =============================================
+        // International transfer pool (INT)
+        // Non-European clubs available for transfers/loans only.
+        // =============================================
+
+        // Continental — South American giants with global reach
+        'CA Boca Juniors' => ClubProfile::REPUTATION_CONTINENTAL,
+        'CA River Plate' => ClubProfile::REPUTATION_CONTINENTAL,
+        'CR Flamengo' => ClubProfile::REPUTATION_CONTINENTAL,
+        'SE Palmeiras' => ClubProfile::REPUTATION_CONTINENTAL,
+
+        // Established — strong domestic clubs and high-profile MLS sides
+        'SC Corinthians Paulista' => ClubProfile::REPUTATION_ESTABLISHED,
+        'Botafogo FR' => ClubProfile::REPUTATION_ESTABLISHED,
+        'Cruzeiro EC' => ClubProfile::REPUTATION_ESTABLISHED,
+        'Racing Club' => ClubProfile::REPUTATION_ESTABLISHED,
+        'Club Estudiantes de La Plata' => ClubProfile::REPUTATION_ESTABLISHED,
+        'CA Rosario Central' => ClubProfile::REPUTATION_ESTABLISHED,
+        'Inter Miami CF' => ClubProfile::REPUTATION_ESTABLISHED,
+        'Los Angeles FC' => ClubProfile::REPUTATION_ESTABLISHED,
     ];
 
     /**
