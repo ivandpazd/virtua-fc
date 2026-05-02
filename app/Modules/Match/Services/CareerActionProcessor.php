@@ -286,18 +286,36 @@ class CareerActionProcessor
 
     private function processAITransferBatch(Game $game): void
     {
+        $profile = QueryProfiler::enabled();
+        $start = microtime(true);
+        $startQ = $profile ? count(DB::getQueryLog()) : 0;
+
         // The user-facing market is refreshed year-round so players can be
         // bought at any time. Bids accepted out-of-window are stored as
         // STATUS_AGREED and flushed when the next window opens.
         $this->transferMarketService->refreshListings($game);
 
+        $refreshMs = (int) round((microtime(true) - $start) * 1000);
+        $refreshQ = $profile ? count(DB::getQueryLog()) - $startQ : 0;
+        $batchStart = microtime(true);
+        $batchStartQ = $profile ? count(DB::getQueryLog()) : 0;
+
         // AI-to-AI transfer activity only runs while a window is open.
         $windowType = TransferWindowType::fromDate($game->current_date);
-        if (! $windowType) {
-            return;
+        if ($windowType) {
+            $this->aiTransferMarketService->processTransferBatch($game, $windowType->value);
         }
 
-        $this->aiTransferMarketService->processTransferBatch($game, $windowType->value);
+        if ($profile) {
+            Log::info("[CareerActionProcessor {$game->id}] ai_transfer_batch detail", [
+                'refresh_listings' => ['ms' => $refreshMs, 'q' => $refreshQ],
+                'ai_to_ai_batch' => [
+                    'ms' => (int) round((microtime(true) - $batchStart) * 1000),
+                    'q' => $profile ? count(DB::getQueryLog()) - $batchStartQ : 0,
+                    'window' => $windowType?->value ?? 'closed',
+                ],
+            ]);
+        }
     }
 
 }
