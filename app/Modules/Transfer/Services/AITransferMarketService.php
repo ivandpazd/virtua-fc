@@ -569,13 +569,20 @@ class AITransferMarketService
                 $teamSizeDeltas->put($sellerTeamId, ($teamSizeDeltas->get($sellerTeamId, 0)) - 1);
                 $teamSizeDeltas->put($buyerTeamId, ($teamSizeDeltas->get($buyerTeamId, 0)) + 1);
             } else {
-                // No domestic buyer — try foreign departure
+                // No domestic buyer — try foreign departure.
+                // Foreign clubs sit outside the playable world: their players
+                // never appear in lineups or UI, so we leave `number` null
+                // rather than allocating one. PostgreSQL's unique index on
+                // (game_id, team_id, number) treats nulls as distinct, so
+                // many players can coexist on the same foreign team without
+                // collision — important when only a handful of foreign teams
+                // pass `transferMarketEligible` and round-robin selection
+                // funnels every departure to the same destination.
                 if (mt_rand(1, 100) <= self::FOREIGN_FALLBACK_CHANCE && ! empty($foreignTeams)) {
                     $foreignTeam = $foreignTeams[$foreignIndex % count($foreignTeams)];
                     $foreignIndex++;
-                    $assignedNumber = $this->allocateSquadNumber($takenNumbers, $foreignTeam->id);
 
-                    $this->prepareTransfer($game, $player, $sellerTeamId, $foreignTeam->id, $window, $assignedNumber, $playerUpdates, $transferInserts, maxContractYears: 4, buyerReputationIndex: 1);
+                    $this->prepareTransfer($game, $player, $sellerTeamId, $foreignTeam->id, $window, null, $playerUpdates, $transferInserts, maxContractYears: 4, buyerReputationIndex: 1);
                     $count++;
                     $transferredPlayerIds[$player->id] = true;
                     $this->incrementBudget($teamBudgets, $sellerTeamId, 'sells');
@@ -1089,7 +1096,7 @@ class AITransferMarketService
         string $fromTeamId,
         string $toTeamId,
         string $window,
-        int $assignedNumber,
+        ?int $assignedNumber,
         array &$playerUpdates,
         array &$transferInserts,
         int $minContractYears = 2,
@@ -1444,6 +1451,13 @@ class AITransferMarketService
     /**
      * Allocate the next available squad number from the in-memory map.
      * Mutates the map to reserve the number — no DB query.
+     *
+     * Throws when every number 2–99 is already taken: callers (free-agent
+     * signings, domestic AI buyers) operate on rosters bounded by
+     * MAX_SQUAD_SIZE, so overflow is unreachable in practice and silently
+     * returning a colliding number would corrupt the upsert payload (see
+     * the original `(team_id, number)` 23505 incident driven by foreign
+     * departures, which now bypass allocation entirely).
      */
     private function allocateSquadNumber(Collection &$takenNumbers, string $teamId): int
     {
@@ -1459,7 +1473,7 @@ class AITransferMarketService
             }
         }
 
-        return 99;
+        throw new \RuntimeException("No squad number available for team {$teamId} (numbers 2-99 exhausted)");
     }
 
     /**
