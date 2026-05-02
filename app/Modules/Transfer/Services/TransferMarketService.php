@@ -6,6 +6,7 @@ use App\Models\ClubProfile;
 use App\Models\Game;
 use App\Models\GamePlayer;
 use App\Models\GameTransfer;
+use App\Models\Player;
 use App\Models\TeamReputation;
 use App\Models\TransferListing;
 use App\Models\TransferOffer;
@@ -379,6 +380,12 @@ class TransferMarketService
     /**
      * Load rosters for a fixed set of team_ids, grouped by team_id.
      *
+     * Uses a single JOIN against players (for date_of_birth) and teams (to
+     * exclude reserve squads where parent_team_id is set), eliminating both
+     * the eager-load round-trip and the per-row EXISTS subquery the previous
+     * whereHas() generated. Models are hydrated with a stub Player relation
+     * pre-attached so consumers calling ->age($date) keep working.
+     *
      * @param  array<string>  $teamIds
      */
     private function loadRostersFor(Game $game, array $teamIds): Collection
@@ -387,16 +394,47 @@ class TransferMarketService
             return collect();
         }
 
-        return GamePlayer::with(['player:id,date_of_birth'])
-            ->select([
-                'id', 'game_id', 'player_id', 'team_id', 'position',
-                'market_value_cents', 'tier',
-                'retiring_at_season', 'contract_until', 'annual_wage',
-            ])
-            ->where('game_id', $game->id)
-            ->whereIn('team_id', $teamIds)
-            ->whereHas('team', fn ($q) => $q->whereNull('parent_team_id'))
-            ->get()
-            ->groupBy('team_id');
+        $rows = DB::table('game_players')
+            ->join('players', 'players.id', '=', 'game_players.player_id')
+            ->join('teams', 'teams.id', '=', 'game_players.team_id')
+            ->where('game_players.game_id', $game->id)
+            ->whereIn('game_players.team_id', $teamIds)
+            ->whereNull('teams.parent_team_id')
+            ->get([
+                'game_players.id',
+                'game_players.game_id',
+                'game_players.player_id',
+                'game_players.team_id',
+                'game_players.position',
+                'game_players.market_value_cents',
+                'game_players.tier',
+                'game_players.retiring_at_season',
+                'game_players.contract_until',
+                'game_players.annual_wage',
+                'players.date_of_birth as _player_date_of_birth',
+            ]);
+
+        if ($rows->isEmpty()) {
+            return collect();
+        }
+
+        $gpAttrs = [];
+        $playerAttrs = [];
+        foreach ($rows as $row) {
+            $arr = (array) $row;
+            $dob = $arr['_player_date_of_birth'];
+            unset($arr['_player_date_of_birth']);
+            $gpAttrs[] = $arr;
+            $playerAttrs[] = ['id' => $arr['player_id'], 'date_of_birth' => $dob];
+        }
+
+        $gamePlayers = GamePlayer::hydrate($gpAttrs);
+        $players = Player::hydrate($playerAttrs);
+
+        foreach ($gamePlayers as $i => $gp) {
+            $gp->setRelation('player', $players[$i]);
+        }
+
+        return $gamePlayers->groupBy('team_id');
     }
 }
