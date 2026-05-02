@@ -25,6 +25,21 @@ class CareerActionProcessor
 
     private const LISTED_OFFER_CHANCE_OUTSIDE_WINDOW = 15;
 
+    /**
+     * Memoized buyer pool for the lifetime of one ProcessCareerActions job.
+     * loadBuyerPool() costs ~220ms (the SUM(market_value_cents) GROUP BY
+     * team_id query alone is ~140ms). Out-of-window ticks don't mutate any
+     * inputs to the pool, so a cached value stays valid for the entire job.
+     * In-window ticks invalidate at the end of process() because
+     * complete_transfers and processAITransferBatch move players between
+     * teams, changing per-team squad totals.
+     *
+     * @var array{leagueTeams: \Illuminate\Support\Collection, squadValues: \Illuminate\Support\Collection, reputationLevels: \Illuminate\Support\Collection}|null
+     */
+    private ?array $buyerPoolCache = null;
+
+    private ?string $buyerPoolGameId = null;
+
     public function __construct(
         private readonly TransferService $transferService,
         private readonly ScoutingService $scoutingService,
@@ -34,6 +49,27 @@ class CareerActionProcessor
         private readonly AITransferMarketService $aiTransferMarketService,
         private readonly TransferMarketService $transferMarketService,
     ) {}
+
+    /**
+     * @return array{leagueTeams: \Illuminate\Support\Collection, squadValues: \Illuminate\Support\Collection, reputationLevels: \Illuminate\Support\Collection}
+     */
+    private function getBuyerPool(Game $game): array
+    {
+        if ($this->buyerPoolCache !== null && $this->buyerPoolGameId === $game->id) {
+            return $this->buyerPoolCache;
+        }
+
+        $this->buyerPoolCache = $this->transferService->loadBuyerPool($game);
+        $this->buyerPoolGameId = $game->id;
+
+        return $this->buyerPoolCache;
+    }
+
+    private function invalidateBuyerPool(): void
+    {
+        $this->buyerPoolCache = null;
+        $this->buyerPoolGameId = null;
+    }
 
     public function process(Game $game): void
     {
@@ -53,8 +89,10 @@ class CareerActionProcessor
             $sectionQueryCount = $profile ? count(DB::getQueryLog()) : 0;
         };
 
-        // Pre-load buyer pool once for all offer generation (avoids repeated team/squad queries)
-        $buyerPool = $this->transferService->loadBuyerPool($game);
+        // Pre-load buyer pool once for all offer generation. Memoized across
+        // ticks within one job; invalidated below if the window is open and
+        // mutating sections may have run.
+        $buyerPool = $this->getBuyerPool($game);
         $mark('buyer_pool');
 
         // Process transfers when window is open
@@ -151,6 +189,13 @@ class CareerActionProcessor
         // AI transfer market: process batch during open window
         $this->processAITransferBatch($game);
         $mark('ai_transfer_batch');
+
+        // Within an open window, complete_transfers and processAITransferBatch
+        // may have moved players between teams, changing per-team squad totals.
+        // Drop the cached buyer pool so the next tick reloads with fresh data.
+        if ($game->isTransferWindowOpen()) {
+            $this->invalidateBuyerPool();
+        }
 
         if ($profile) {
             Log::info("[CareerActionProcessor {$game->id}] section breakdown", [
