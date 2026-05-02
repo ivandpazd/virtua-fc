@@ -33,6 +33,18 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
 
     public int $tries = 1;
 
+    /**
+     * Number of prep steps that run before the shared setup pipeline.
+     * Used as the pipeline step offset and by GameSetupStatus for progress totals.
+     */
+    public const PREP_STEPS = 3;
+
+    /**
+     * Steps run by non-career mode after the prep phase (fixtures + standings).
+     * Career mode delegates to SeasonSetupPipeline instead.
+     */
+    public const NON_CAREER_PIPELINE_STEPS = 2;
+
     public function uniqueId(): string
     {
         return $this->gameId;
@@ -63,16 +75,24 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
 
         $this->currentDate = $game->current_date ?? Carbon::parse("{$this->season}-08-15");
 
-        // Step 1: Copy competition team rosters into per-game table
-        $this->copyCompetitionTeamsToGame();
+        // Reset progress counter on (re-)entry so the polling UI starts at 0.
+        // Stale values can be left behind by a crashed prior run; the per-step
+        // idempotency checks below mean we always re-walk the prep phase.
+        $this->markStep(-1);
 
-        // Step 1b: Initialize per-game reputation records for all teams
+        // Step 0: Copy competition team rosters into per-game table
+        $this->copyCompetitionTeamsToGame();
+        $this->markStep(0);
+
+        // Step 1: Initialize per-game reputation records for all teams
         $this->initializeTeamReputations();
+        $this->markStep(1);
 
         // Step 2: Initialize game players from templates (required)
         $this->initializeGamePlayersFromTemplates();
+        $this->markStep(2);
 
-        // Step 3: Run shared setup processors
+        // Step 3+: Run shared setup processors
         if ($this->gameMode === Game::MODE_CAREER) {
             // Career mode: run all 4 shared processors (fixtures, standings, budget, cups/Swiss)
             $allTeams = $this->loadTeamLookup();
@@ -86,7 +106,9 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
                 metadata: $swissPotData ? [SeasonTransitionData::META_SWISS_POT_DATA => $swissPotData] : [],
             );
 
-            $setupPipeline->run($game->refresh(), $data);
+            // Pipeline writes season_transition_step using stepOffset + processor index,
+            // so its checkpoints continue the count after the prep phase.
+            $setupPipeline->run($game->refresh(), $data, stepOffset: self::PREP_STEPS);
         } else {
             // Non-career mode: only fixtures + standings (no budget/cups)
             $data = new SeasonTransitionData(
@@ -97,7 +119,9 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
             );
 
             $fixtureProcessor->process($game, $data);
+            $this->markStep(self::PREP_STEPS);
             $standingsProcessor->process($game, $data);
+            $this->markStep(self::PREP_STEPS + 1);
         }
 
         // Mark setup as complete
@@ -115,6 +139,17 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
         if ($this->gameMode === Game::MODE_CAREER) {
             app(NotificationService::class)->notifyTransferWindowOpen($game->refresh(), 'summer');
         }
+    }
+
+    /**
+     * Persist the current setup step so GameSetupStatus can report progress.
+     * Pass -1 to reset the counter on (re-)entry.
+     */
+    private function markStep(int $step): void
+    {
+        Game::where('id', $this->gameId)->update([
+            'season_transition_step' => $step < 0 ? null : $step,
+        ]);
     }
 
     private function copyCompetitionTeamsToGame(): void
