@@ -6,12 +6,14 @@ use App\Models\ClubProfile;
 use App\Models\Game;
 use App\Models\GamePlayer;
 use App\Models\GameTransfer;
+use App\Models\Player;
 use App\Models\Team;
 use App\Models\TeamReputation;
 use App\Modules\Notification\Services\NotificationService;
 use App\Modules\Player\PlayerAge;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -225,16 +227,10 @@ class AITransferMarketService
         $takenNumbers = $this->preloadSquadNumbers($game->id);
         $reputationLevels = TeamReputation::resolveLevels($game->id, $teamRosters->keys()->all());
 
-        $freeAgents = GamePlayer::with(['player:id,date_of_birth'])
-            ->select([
-                'id', 'game_id', 'player_id', 'team_id', 'position', 'tier',
-                'market_value_cents', 'game_technical_ability', 'game_physical_ability',
-                'retiring_at_season', 'number', 'contract_until', 'annual_wage',
-            ])
-            ->where('game_id', $game->id)
-            ->whereNull('team_id')
-            ->get()
-            ->keyBy('id');
+        $freeAgents = $this->loadGamePlayersWithPlayerDob(function ($query) use ($game): void {
+            $query->where('game_players.game_id', $game->id)
+                ->whereNull('game_players.team_id');
+        })->keyBy('id');
 
         if ($freeAgents->isEmpty()) {
             return ['count' => 0, 'signings' => []];
@@ -373,15 +369,10 @@ class AITransferMarketService
         array &$alreadyTransferredSet,
         Collection $reputationLevels,
     ): int {
-        $freeAgents = GamePlayer::with(['player:id,date_of_birth'])
-            ->select([
-                'id', 'game_id', 'player_id', 'team_id', 'position', 'tier',
-                'market_value_cents', 'game_technical_ability', 'game_physical_ability',
-                'retiring_at_season', 'number', 'contract_until', 'annual_wage',
-            ])
-            ->where('game_id', $game->id)
-            ->whereNull('team_id')
-            ->get();
+        $freeAgents = $this->loadGamePlayersWithPlayerDob(function ($query) use ($game): void {
+            $query->where('game_players.game_id', $game->id)
+                ->whereNull('game_players.team_id');
+        });
 
         if ($freeAgents->isEmpty()) {
             return 0;
@@ -1420,27 +1411,82 @@ class AITransferMarketService
      */
     private function loadAIRosters(Game $game): Collection
     {
-        return GamePlayer::with(['player:id,date_of_birth'])
-            ->select([
-                'id', 'game_id', 'player_id', 'team_id', 'position',
-                'market_value_cents', 'game_technical_ability', 'game_physical_ability',
-                'retiring_at_season', 'number', 'contract_until', 'annual_wage',
-            ])
-            ->where('game_id', $game->id)
-            ->whereNotNull('team_id')
-            ->where('team_id', '!=', $game->team_id)
-            ->get()
-            ->groupBy('team_id');
+        return $this->loadGamePlayersWithPlayerDob(function ($query) use ($game): void {
+            $query->where('game_players.game_id', $game->id)
+                ->whereNotNull('game_players.team_id')
+                ->where('game_players.team_id', '!=', $game->team_id);
+        })->groupBy('team_id');
     }
 
     /**
-     * Pre-load all squad numbers for the game in a single query.
+     * Load game players matching the given filter, with the player's
+     * date_of_birth fetched via a JOIN instead of a separate eager-load
+     * round-trip. Hydrates GamePlayer models and pre-attaches a stub Player
+     * relation so callers using ->age($date) and ->player work unchanged.
+     *
+     * Production profiling showed the eager-load query
+     * `SELECT id, date_of_birth FROM players WHERE id IN (3000)` taking
+     * ~155ms by itself; folding it into a JOIN eliminates that round-trip.
+     */
+    private function loadGamePlayersWithPlayerDob(\Closure $applyWhere): Collection
+    {
+        $query = DB::table('game_players')
+            ->join('players', 'players.id', '=', 'game_players.player_id');
+
+        $applyWhere($query);
+
+        $rows = $query->get([
+            'game_players.id',
+            'game_players.game_id',
+            'game_players.player_id',
+            'game_players.team_id',
+            'game_players.position',
+            'game_players.tier',
+            'game_players.market_value_cents',
+            'game_players.game_technical_ability',
+            'game_players.game_physical_ability',
+            'game_players.retiring_at_season',
+            'game_players.number',
+            'game_players.contract_until',
+            'game_players.annual_wage',
+            'players.date_of_birth as _player_date_of_birth',
+        ]);
+
+        if ($rows->isEmpty()) {
+            return new Collection();
+        }
+
+        $gpAttrs = [];
+        $playerAttrs = [];
+        foreach ($rows as $row) {
+            $arr = (array) $row;
+            $dob = $arr['_player_date_of_birth'];
+            unset($arr['_player_date_of_birth']);
+            $gpAttrs[] = $arr;
+            $playerAttrs[] = ['id' => $arr['player_id'], 'date_of_birth' => $dob];
+        }
+
+        $gamePlayers = GamePlayer::hydrate($gpAttrs);
+        $players = Player::hydrate($playerAttrs);
+
+        foreach ($gamePlayers as $i => $gp) {
+            $gp->setRelation('player', $players[$i]);
+        }
+
+        return $gamePlayers;
+    }
+
+    /**
+     * Pre-load all squad numbers for the game in a single query. Uses
+     * DB::table because callers only need the (team_id, number) pairs and
+     * gain nothing from Eloquent hydration on what can be 3000+ rows.
      *
      * @return Collection<string, int[]> teamId => array of taken numbers
      */
     private function preloadSquadNumbers(string $gameId): Collection
     {
-        return GamePlayer::where('game_id', $gameId)
+        return DB::table('game_players')
+            ->where('game_id', $gameId)
             ->whereNotNull('team_id')
             ->whereNotNull('number')
             ->get(['team_id', 'number'])
