@@ -5,7 +5,6 @@ namespace App\Modules\Season\Services;
 use App\Models\Competition;
 use App\Models\CompetitionEntry;
 use App\Models\Game;
-use App\Models\GameMatch;
 use App\Models\GamePlayer;
 use App\Models\Team;
 use Carbon\Carbon;
@@ -15,6 +14,7 @@ use App\Modules\Competition\Services\LeagueFixtureGenerator;
 use App\Modules\Competition\Services\StandingsCalculator;
 use App\Modules\Competition\Services\CountryConfig;
 use App\Modules\Competition\Services\SwissDrawService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -321,15 +321,18 @@ class SeasonInitializationService
                 'round_number' => $fixture['matchday'],
                 'home_team_id' => $fixture['homeTeamId'],
                 'away_team_id' => $fixture['awayTeamId'],
-                'scheduled_date' => Carbon::parse($fixture['date']),
+                // Postgres accepts 'YYYY-MM-DD' directly; skip Carbon::parse to
+                // avoid hundreds of object allocations on the hot path.
+                'scheduled_date' => $fixture['date'],
                 'home_score' => null,
                 'away_score' => null,
                 'played' => false,
             ];
         }
 
-        foreach (array_chunk($rows, 100) as $chunk) {
-            GameMatch::insert($chunk);
-        }
+        // Single bulk INSERT via the query builder — bypasses Eloquent's
+        // per-row mutator pipeline. 380 rows × 10 short columns is well
+        // under Postgres's parameter limit.
+        DB::table('game_matches')->insert($rows);
     }
 }
