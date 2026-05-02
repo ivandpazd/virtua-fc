@@ -11,6 +11,7 @@ use App\Modules\Competition\Playoffs\PlayoffGeneratorFactory;
 use App\Modules\Season\DTOs\SeasonTransitionData;
 use App\Modules\Season\Services\SeasonClosingPipeline;
 use App\Modules\Season\Services\SeasonSetupPipeline;
+use App\Support\QueryProfiler;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -45,6 +46,7 @@ class ProcessSeasonTransition implements ShouldQueue, ShouldBeUnique
         SeasonSetupPipeline $setupPipeline,
         PlayoffGeneratorFactory $playoffFactory,
     ): void {
+        $jobStart = microtime(true);
         $game = Game::find($this->gameId);
 
         if (!$game || !$game->isTransitioningSeason()) {
@@ -135,6 +137,15 @@ class ProcessSeasonTransition implements ShouldQueue, ShouldBeUnique
         ]);
 
         event(new SeasonStarted($game));
+
+        if (QueryProfiler::enabled()) {
+            Log::info("[SeasonTransition {$game->id}] job summary", [
+                'wall_ms' => (int) round((microtime(true) - $jobStart) * 1000),
+                'closing_processors' => count($closingPipeline->getProcessors()),
+                'setup_processors' => count($setupPipeline->getProcessors()),
+                'peak_mb' => round(memory_get_peak_usage(true) / 1048576, 1),
+            ]);
+        }
     }
 
     /**

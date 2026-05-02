@@ -30,6 +30,7 @@ use App\Modules\Season\Processors\UefaQualificationProcessor;
 use App\Modules\Season\Processors\YouthAcademyClosingProcessor;
 use App\Modules\Stadium\Processors\FanLoyaltyUpdateProcessor;
 use App\Models\Game;
+use App\Support\QueryProfiler;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -123,7 +124,7 @@ class SeasonClosingPipeline
             }
 
             $processorName = class_basename($processor);
-            $start = microtime(true);
+            $profile = QueryProfiler::start();
 
             try {
                 $data = DB::transaction(fn () => $processor->process($game, $data));
@@ -138,8 +139,11 @@ class SeasonClosingPipeline
                 throw $e;
             }
 
-            $elapsed = round((microtime(true) - $start) * 1000);
-            Log::info("[SeasonClosing {$game->id}] {$processorName} (priority {$processor->priority()}) completed in {$elapsed}ms");
+            $stats = $profile->snapshot();
+            Log::info(
+                "[SeasonClosing {$game->id}] {$processorName} (priority {$processor->priority()}) completed in {$stats['wall_ms']}ms",
+                $stats,
+            );
 
             // Checkpoint: persist completed step and DTO for crash recovery
             $game->updateQuietly([

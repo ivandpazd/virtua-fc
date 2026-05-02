@@ -30,6 +30,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Query Profiling for Queue Jobs
+    |--------------------------------------------------------------------------
+    |
+    | When true, ProcessCareerActions and ProcessSeasonTransition log per-scope
+    | query counts, total DB time, and top query patterns to help diagnose
+    | round-trip-bound slowness. Off by default — toggle in prod via env.
+    |
+    */
+
+    'query_profile_jobs' => (bool) env('APP_QUERY_PROFILE_JOBS', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

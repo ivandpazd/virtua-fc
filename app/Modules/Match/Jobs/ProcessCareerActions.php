@@ -4,6 +4,7 @@ namespace App\Modules\Match\Jobs;
 
 use App\Models\Game;
 use App\Modules\Match\Services\CareerActionProcessor;
+use App\Support\QueryProfiler;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -44,7 +45,12 @@ class ProcessCareerActions implements ShouldQueue, ShouldBeUnique
         // Per-tick (rather than whole-job) locking keeps the critical section
         // short so a user advancing to the next matchday is only ever blocked
         // by a single tick's work, not the full accumulated batch.
+        $jobStart = microtime(true);
+        $tickStats = [];
+
         for ($i = 0; $i < $this->ticks; $i++) {
+            $tick = QueryProfiler::start();
+
             $processed = DB::transaction(function () use ($processor) {
                 $game = Game::where('id', $this->gameId)->lockForUpdate()->first();
 
@@ -57,12 +63,29 @@ class ProcessCareerActions implements ShouldQueue, ShouldBeUnique
                 return true;
             });
 
+            if (QueryProfiler::enabled()) {
+                $stats = $tick->snapshot();
+                $tickStats[] = $stats;
+                Log::info("[CareerActions {$this->gameId}] tick ".($i + 1)."/{$this->ticks}", $stats);
+            }
+
             if (! $processed) {
-                return;
+                break;
             }
         }
 
         Game::where('id', $this->gameId)->update(['career_actions_processing_at' => null]);
+
+        if (QueryProfiler::enabled()) {
+            Log::info("[CareerActions {$this->gameId}] job summary", [
+                'wall_ms' => (int) round((microtime(true) - $jobStart) * 1000),
+                'db_ms' => array_sum(array_column($tickStats, 'db_ms')),
+                'queries' => array_sum(array_column($tickStats, 'queries')),
+                'ticks_run' => count($tickStats),
+                'ticks_requested' => $this->ticks,
+                'peak_mb' => round(memory_get_peak_usage(true) / 1048576, 1),
+            ]);
+        }
     }
 
     public function failed(?\Throwable $exception): void

@@ -15,6 +15,7 @@ use App\Modules\Season\Processors\TransferMarketSeedProcessor;
 use App\Modules\Season\Processors\UefaSuperCupQualificationProcessor;
 use App\Modules\Season\Processors\YouthAcademyPromotionProcessor;
 use App\Models\Game;
+use App\Support\QueryProfiler;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -71,7 +72,7 @@ class SeasonSetupPipeline
             }
 
             $processorName = class_basename($processor);
-            $start = microtime(true);
+            $profile = QueryProfiler::start();
 
             try {
                 $data = DB::transaction(fn () => $processor->process($game, $data));
@@ -86,8 +87,11 @@ class SeasonSetupPipeline
                 throw $e;
             }
 
-            $elapsed = round((microtime(true) - $start) * 1000);
-            Log::info("[SeasonSetup {$game->id}] {$processorName} (priority {$processor->priority()}) completed in {$elapsed}ms");
+            $stats = $profile->snapshot();
+            Log::info(
+                "[SeasonSetup {$game->id}] {$processorName} (priority {$processor->priority()}) completed in {$stats['wall_ms']}ms",
+                $stats,
+            );
 
             // Checkpoint: persist completed step and DTO for crash recovery
             $game->updateQuietly([
