@@ -15,7 +15,9 @@ class BetaInvite extends Mailable
 
     public function __construct(
         public InviteCode $inviteCode,
-    ) {}
+    ) {
+        $this->onQueue('mail');
+    }
 
     public function envelope(): Envelope
     {
