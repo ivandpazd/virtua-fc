@@ -13,7 +13,6 @@ return [
         'home_ground' => 'Campo',
         'stadium_name' => 'Estadio',
         'capacity' => 'Aforo',
-        'capacity_help' => 'El aforo se registra en cada partido para calcular la asistencia. La ampliación del estadio se convertirá en una decisión del entrenador en una fase posterior.',
 
         'fan_base' => 'Afición',
         'fan_base_help' => 'La lealtad sube con títulos y buenas campañas y baja tras temporadas flojas. Junto a la reputación, determina cuánto se llena el estadio los días de partido.',
@@ -24,9 +23,42 @@ return [
         'fill_rate' => 'Ocupación',
         'no_home_match_yet' => 'Aún no se ha jugado ningún partido en casa.',
 
-        'matchday_revenue' => 'Ingresos por taquilla',
-        'matchday_revenue_help' => 'La proyección usa la fórmula presupuestaria de la temporada; los ingresos reales se liquidan al cierre. Empezarán a divergir cuando la asistencia determine directamente la taquilla.',
         'no_finances_yet' => 'Las finanzas de la temporada aparecerán cuando se generen las proyecciones.',
+
+        'stadium_revenue' => [
+            'title' => 'Ingresos del estadio',
+            'season_tickets' => 'Abonos',
+            'matchday' => 'Taquilla',
+            'help' => 'Los abonos se cobran por adelantado; la taquilla se acumula en cada partido en casa.',
+        ],
+
+        'season_tickets' => [
+            'title' => 'Precios',
+            'subtitle' => 'Fija el precio de los abonos para cada zona del estadio. Los precios se bloquean en cuanto se juegue el primer partido de liga.',
+            'deadline_notice' => 'Plazo: los precios se bloquean al jugarse el primer partido de liga de la temporada.',
+            'locked_notice' => 'Los abonos están bloqueados esta temporada. Podrás fijar nuevos precios la próxima pretemporada.',
+            'tickets_sold' => 'Abonos vendidos',
+            'predicted_fill' => 'ocupación prevista',
+            'predicted_fill_tooltip' => 'Los precios y el apoyo de tu afición influyen en la venta de abonos.',
+            'baseline_price' => 'Base',
+            'capacity' => 'Aforo',
+            'save_button' => 'Guardar precios',
+            'reset_defaults' => 'Restaurar valores por defecto',
+
+            'area' => [
+                'general'       => 'General',
+                'lateral'       => 'Lateral',
+                'lateral_alta'  => 'Lateral alta',
+                'lateral_baja'  => 'Lateral baja',
+                'tribuna'       => 'Tribuna',
+                'tribuna_alta'  => 'Tribuna alta',
+                'tribuna_baja'  => 'Tribuna baja',
+                'fondo_norte'   => 'Fondo norte',
+                'fondo_sur'     => 'Fondo sur',
+                'vip'           => 'VIP',
+                'palco'         => 'Palco',
+            ],
+        ],
     ],
 
     'reputation' => [
