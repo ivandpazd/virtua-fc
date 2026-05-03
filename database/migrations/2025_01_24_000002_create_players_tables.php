@@ -28,7 +28,8 @@ return new class extends Migration
             $table->json('nationality')->nullable(); // Array of countries
             $table->string('height')->nullable(); // "1,88m"
             $table->enum('foot', ['left', 'right', 'both'])->nullable();
-            $table->unsignedTinyInteger('overall_score')->default(50); // 0-100, slow-changing baseline rating
+            $table->unsignedTinyInteger('technical_ability')->default(50); // 0-100, slow-changing
+            $table->unsignedTinyInteger('physical_ability')->default(50); // 0-100, slow-changing
 
             $table->index('name');
         });
