@@ -67,7 +67,10 @@ foreach ($ticketAreas as $i => $area) {
                     </div>
                 </x-section-card>
 
-                {{-- Season tickets — editable or locked --}}
+                {{-- Season tickets — editable or locked. Hidden for pre-feature in-flight
+                     saves where SeasonTicketDefaultsProcessor never ran, so no pricing row
+                     exists and the user has no way to set prices mid-season. --}}
+                @if($pricing)
                 <x-section-card :title="__('club.stadium.season_tickets.title')">
                     @if($canEditTickets)
                         <div class="px-5 py-4"
@@ -222,6 +225,7 @@ foreach ($ticketAreas as $i => $area) {
                         </div>
                     @endif
                 </x-section-card>
+                @endif
 
             </div>
 
