@@ -7,8 +7,10 @@ use App\Models\CompetitionEntry;
 use App\Models\Game;
 use App\Models\GamePlayer;
 use App\Models\Loan;
+use App\Models\Player;
 use App\Models\ShortlistedPlayer;
 use App\Models\Team;
+use App\Modules\Player\PlayerAge;
 use App\Support\CountryCodeMapper;
 use App\Support\PositionMapper;
 use Illuminate\Support\Collection;
@@ -222,11 +224,15 @@ class ExploreService
         $query = GamePlayer::where('game_id', $game->id)
             ->with(['player', 'team']);
 
+        // Filters that target the biographical Player table (control plane)
+        // are folded into a single Player query; the resulting player_id list
+        // is then applied to the GamePlayer query as a whereIn. This keeps
+        // the control/tenant plane boundary intact.
+        $playerConstraints = [];
+
         if (!empty($filters['name']) && mb_strlen($filters['name']) >= 2) {
             $needle = mb_strtolower($filters['name']);
-            $query->whereHas('player', function ($q) use ($needle) {
-                $q->whereRaw('LOWER(name) LIKE ?', ['%' . $needle . '%']);
-            });
+            $playerConstraints[] = fn ($q) => $q->whereRaw('LOWER(name) LIKE ?', ['%' . $needle . '%']);
         }
 
         if (!empty($filters['position'])) {
@@ -249,23 +255,32 @@ class ExploreService
             }
         }
 
-        if (!empty($filters['min_age']) || !empty($filters['max_age'])) {
-            $gameDate = $game->current_date->toDateString();
-            $ageExpr = 'EXTRACT(YEAR FROM AGE(?::date, (SELECT date_of_birth FROM players WHERE players.id = game_players.player_id)))';
-            if (!empty($filters['min_age'])) {
-                $query->whereRaw("($ageExpr) >= ?", [$gameDate, (int) $filters['min_age']]);
-            }
-            if (!empty($filters['max_age'])) {
-                $query->whereRaw("($ageExpr) <= ?", [$gameDate, (int) $filters['max_age']]);
-            }
+        if (!empty($filters['min_age'])) {
+            // age >= N → date_of_birth <= today − N years
+            $minAgeCutoff = PlayerAge::dateOfBirthCutoff((int) $filters['min_age'], $game->current_date);
+            $playerConstraints[] = fn ($q) => $q->where('date_of_birth', '<=', $minAgeCutoff);
+        }
+        if (!empty($filters['max_age'])) {
+            // age <= N → date_of_birth > today − (N+1) years
+            $maxAgeCutoff = PlayerAge::dateOfBirthCutoff((int) $filters['max_age'] + 1, $game->current_date);
+            $playerConstraints[] = fn ($q) => $q->where('date_of_birth', '>', $maxAgeCutoff);
         }
 
         if (!empty($filters['nationality'])) {
             // players.nationality is stored as a JSON array of country names
             // (["France", "Spain"]). ?::jsonb matches if the array contains the value.
-            $query->whereHas('player', function ($q) use ($filters) {
-                $q->whereRaw('nationality::jsonb @> ?::jsonb', [json_encode([$filters['nationality']])]);
-            });
+            $playerConstraints[] = fn ($q) => $q->whereRaw(
+                'nationality::jsonb @> ?::jsonb',
+                [json_encode([$filters['nationality']])],
+            );
+        }
+
+        if ($playerConstraints !== []) {
+            $playerQuery = Player::query();
+            foreach ($playerConstraints as $apply) {
+                $apply($playerQuery);
+            }
+            $query->whereIn('player_id', $playerQuery->pluck('id'));
         }
 
         if (!empty($filters['competition_id'])) {
@@ -298,16 +313,36 @@ class ExploreService
             });
         }
 
-        if (!empty($filters['min_overall']) || !empty($filters['max_overall'])) {
-            // Use the stable overall_score baseline so filter results stay
-            // consistent across matchdays instead of shifting with daily form.
-            $overallExpr = 'COALESCE(game_players.overall_score, (SELECT overall_score FROM players WHERE players.id = game_players.player_id))';
-            if (!empty($filters['min_overall'])) {
-                $query->whereRaw("$overallExpr >= ?", [(int) $filters['min_overall']]);
+        $minOverall = !empty($filters['min_overall']) ? (int) $filters['min_overall'] : null;
+        $maxOverall = !empty($filters['max_overall']) ? (int) $filters['max_overall'] : null;
+        if ($minOverall !== null || $maxOverall !== null) {
+            // Effective ability is COALESCE(game_players.overall_score,
+            // players.overall_score). The biographical fallback lives on the
+            // control plane, so the second half of the OR resolves qualifying
+            // player ids up front and intersects via whereIn.
+            $overallPlayerQuery = Player::query();
+            if ($minOverall !== null) {
+                $overallPlayerQuery->where('overall_score', '>=', $minOverall);
             }
-            if (!empty($filters['max_overall'])) {
-                $query->whereRaw("$overallExpr <= ?", [(int) $filters['max_overall']]);
+            if ($maxOverall !== null) {
+                $overallPlayerQuery->where('overall_score', '<=', $maxOverall);
             }
+            $qualifyingOverallPlayerIds = $overallPlayerQuery->pluck('id');
+
+            $query->where(function ($outer) use ($minOverall, $maxOverall, $qualifyingOverallPlayerIds) {
+                $outer->where(function ($gpQ) use ($minOverall, $maxOverall) {
+                    $gpQ->whereNotNull('game_players.overall_score');
+                    if ($minOverall !== null) {
+                        $gpQ->where('game_players.overall_score', '>=', $minOverall);
+                    }
+                    if ($maxOverall !== null) {
+                        $gpQ->where('game_players.overall_score', '<=', $maxOverall);
+                    }
+                })->orWhere(function ($pQ) use ($qualifyingOverallPlayerIds) {
+                    $pQ->whereNull('game_players.overall_score')
+                        ->whereIn('game_players.player_id', $qualifyingOverallPlayerIds);
+                });
+            });
         }
 
         $total = (clone $query)->count();
@@ -360,11 +395,20 @@ class ExploreService
      */
     public function getDistinctNationalities(string $gameId): array
     {
-        $rows = DB::table('game_players')
-            ->join('players', 'players.id', '=', 'game_players.player_id')
-            ->where('game_players.game_id', $gameId)
-            ->whereRaw("jsonb_typeof(players.nationality::jsonb) = 'array'")
-            ->selectRaw("DISTINCT players.nationality::jsonb->>0 AS nat")
+        $playerIds = DB::table('game_players')
+            ->where('game_id', $gameId)
+            ->distinct()
+            ->pluck('player_id')
+            ->all();
+
+        if ($playerIds === []) {
+            return [];
+        }
+
+        $rows = DB::connection('pgsql_control')->table('players')
+            ->whereIn('id', $playerIds)
+            ->whereRaw("jsonb_typeof(nationality::jsonb) = 'array'")
+            ->selectRaw("DISTINCT nationality::jsonb->>0 AS nat")
             ->pluck('nat')
             ->filter()
             ->unique()

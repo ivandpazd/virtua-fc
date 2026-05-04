@@ -14,6 +14,7 @@ use App\Models\CompetitionEntry;
 use App\Models\CompetitionTeam;
 use App\Models\Game;
 use App\Models\GamePlayer;
+use App\Models\Team;
 use App\Models\TeamReputation;
 use App\Modules\Stadium\Services\FanLoyaltyService;
 use Carbon\Carbon;
@@ -218,9 +219,13 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
         $game = Game::find($this->gameId);
         $countryCode = $game->country ?? 'ES';
 
-        // Load competition entries with their competition tier
+        // Resolve in-country competition ids on the control plane first, then
+        // filter game-side entries by competition_id. Avoids a cross-plane
+        // whereHas('competition', …) subquery.
+        $countryCompetitionIds = Competition::where('country', $countryCode)->pluck('id');
+
         $entries = CompetitionEntry::where('game_id', $this->gameId)
-            ->whereHas('competition', fn ($q) => $q->where('country', $countryCode))
+            ->whereIn('competition_id', $countryCompetitionIds)
             ->get();
 
         $teamIds = $entries->pluck('team_id')->unique();
@@ -284,10 +289,8 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
 
     private function loadTeamLookup(): Collection
     {
-        return DB::table('teams')
-            ->select('id', 'transfermarkt_id')
-            ->whereNotNull('transfermarkt_id')
-            ->get()
+        return Team::whereNotNull('transfermarkt_id')
+            ->get(['id', 'transfermarkt_id'])
             ->keyBy('transfermarkt_id');
     }
 
@@ -370,7 +373,21 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
         // in practice, but the invariant "every game_player has a matchState
         // row" lets simulation code assume presence without a lazy-ensure
         // fallback at matchday time).
-        DB::insert(<<<'SQL'
+        //
+        // National team ids are resolved on the control plane up front so the
+        // raw INSERT below stays single-plane (tenant) — replaces an inline
+        // `NOT IN (SELECT id FROM teams WHERE type = 'national')` that would
+        // cross the plane boundary post-split.
+        $nationalTeamIds = Team::where('type', 'national')->pluck('id')->all();
+        $excludeNationalClause = '';
+        $bindings = [$this->gameId, $this->season];
+        if ($nationalTeamIds !== []) {
+            $placeholders = implode(',', array_fill(0, count($nationalTeamIds), '?'));
+            $excludeNationalClause = "AND t.team_id NOT IN ($placeholders)";
+            array_push($bindings, ...$nationalTeamIds);
+        }
+
+        DB::insert(<<<SQL
             INSERT INTO game_players (
                 id, game_id, player_id, team_id, number, position, secondary_positions,
                 market_value, market_value_cents, contract_until, annual_wage, durability,
@@ -384,9 +401,9 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
                 t.potential, t.potential_low, t.potential_high, t.tier
             FROM game_player_templates t
             WHERE t.season = ?
-              AND t.team_id NOT IN (SELECT id FROM teams WHERE type = 'national')
+              {$excludeNationalClause}
             ON CONFLICT (game_id, player_id) DO NOTHING
-        SQL, [$this->gameId, $this->season]);
+        SQL, $bindings);
 
         // Join on team_id too: the same player_id can appear in templates
         // for multiple teams in the same season (e.g. league + national),

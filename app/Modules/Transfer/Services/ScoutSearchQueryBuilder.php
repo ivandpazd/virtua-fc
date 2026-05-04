@@ -6,8 +6,10 @@ use App\Models\Competition;
 use App\Models\Game;
 use App\Models\GamePlayer;
 use App\Models\Loan;
+use App\Models\Player;
 use App\Models\Team;
 use App\Models\TransferOffer;
+use App\Modules\Player\PlayerAge;
 use App\Support\PositionMapper;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -90,33 +92,67 @@ class ScoutSearchQueryBuilder
             return;
         }
 
-        $dobSubquery = '(SELECT date_of_birth FROM players WHERE players.id = game_players.player_id)';
-        $gameDate = $game->current_date->toDateString();
-
-        $ageExpr = "EXTRACT(YEAR FROM AGE(?::date, $dobSubquery))";
+        // Resolve qualifying biographical player ids on the control plane and
+        // intersect with the GamePlayer query via whereIn. Replaces a
+        // correlated subquery against the players table that would cross the
+        // control/tenant boundary.
+        $playerQuery = Player::query();
 
         if (! empty($filters['age_min'])) {
-            $query->whereRaw("($ageExpr) >= ?", [$gameDate, (int) $filters['age_min']]);
+            // age >= N → date_of_birth <= today − N years
+            $playerQuery->where(
+                'date_of_birth',
+                '<=',
+                PlayerAge::dateOfBirthCutoff((int) $filters['age_min'], $game->current_date),
+            );
         }
         if (! empty($filters['age_max'])) {
-            $query->whereRaw("($ageExpr) <= ?", [$gameDate, (int) $filters['age_max']]);
+            // age <= N → date_of_birth > today − (N+1) years
+            $playerQuery->where(
+                'date_of_birth',
+                '>',
+                PlayerAge::dateOfBirthCutoff((int) $filters['age_max'] + 1, $game->current_date),
+            );
         }
+
+        $query->whereIn('player_id', $playerQuery->pluck('id'));
     }
 
     private function applyAbilityFilter(Builder $query, array $filters): void
     {
-        if (empty($filters['ability_min']) && empty($filters['ability_max'])) {
+        $min = ! empty($filters['ability_min']) ? (int) $filters['ability_min'] : null;
+        $max = ! empty($filters['ability_max']) ? (int) $filters['ability_max'] : null;
+        if ($min === null && $max === null) {
             return;
         }
 
-        $query->where(function ($q) use ($filters) {
-            $abilityExpr = 'COALESCE(game_players.overall_score, (SELECT overall_score FROM players WHERE players.id = game_players.player_id))';
-            if (! empty($filters['ability_min'])) {
-                $q->whereRaw("$abilityExpr >= ?", [(int) $filters['ability_min']]);
-            }
-            if (! empty($filters['ability_max'])) {
-                $q->whereRaw("$abilityExpr <= ?", [(int) $filters['ability_max']]);
-            }
+        // The effective ability is COALESCE(game_players.overall_score,
+        // players.overall_score) — game-specific value if set, biographical
+        // baseline otherwise. Players sits on the control plane, so the
+        // fallback half can't be a correlated subquery; resolve qualifying
+        // biographical ids up front and intersect via whereIn.
+        $playerQuery = Player::query();
+        if ($min !== null) {
+            $playerQuery->where('overall_score', '>=', $min);
+        }
+        if ($max !== null) {
+            $playerQuery->where('overall_score', '<=', $max);
+        }
+        $qualifyingPlayerIds = $playerQuery->pluck('id');
+
+        $query->where(function ($outer) use ($min, $max, $qualifyingPlayerIds) {
+            $outer->where(function ($gpQ) use ($min, $max) {
+                $gpQ->whereNotNull('game_players.overall_score');
+                if ($min !== null) {
+                    $gpQ->where('game_players.overall_score', '>=', $min);
+                }
+                if ($max !== null) {
+                    $gpQ->where('game_players.overall_score', '<=', $max);
+                }
+            })->orWhere(function ($pQ) use ($qualifyingPlayerIds) {
+                $pQ->whereNull('game_players.overall_score')
+                    ->whereIn('game_players.player_id', $qualifyingPlayerIds);
+            });
         });
     }
 
