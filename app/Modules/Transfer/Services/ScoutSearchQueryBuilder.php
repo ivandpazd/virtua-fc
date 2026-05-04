@@ -12,6 +12,7 @@ use App\Models\TransferOffer;
 use App\Modules\Player\PlayerAge;
 use App\Support\PositionMapper;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Builds queries for scouting search candidates.
@@ -35,7 +36,7 @@ class ScoutSearchQueryBuilder
 
         $this->applyScopeFilter($query, $game, $filters);
         $this->applyAgeFilter($query, $game, $filters);
-        $this->applyAbilityFilter($query, $filters);
+        $this->applyAbilityFilter($query, $game, $filters);
         $this->applyValueFilter($query, $filters);
         $this->applyContractFilter($query, $game, $filters);
         $this->excludeLoaned($query, $game);
@@ -118,7 +119,7 @@ class ScoutSearchQueryBuilder
         $query->whereIn('player_id', $playerQuery->pluck('id'));
     }
 
-    private function applyAbilityFilter(Builder $query, array $filters): void
+    private function applyAbilityFilter(Builder $query, Game $game, array $filters): void
     {
         $min = ! empty($filters['ability_min']) ? (int) $filters['ability_min'] : null;
         $max = ! empty($filters['ability_max']) ? (int) $filters['ability_max'] : null;
@@ -128,19 +129,46 @@ class ScoutSearchQueryBuilder
 
         // The effective ability is COALESCE(game_players.overall_score,
         // players.overall_score) — game-specific value if set, biographical
-        // baseline otherwise. Players sits on the control plane, so the
-        // fallback half can't be a correlated subquery; resolve qualifying
-        // biographical ids up front and intersect via whereIn.
-        $playerQuery = Player::query();
+        // baseline otherwise. The fallback half lives on the control plane
+        // and can't be a correlated subquery, so we'd otherwise have to
+        // pluck every globally-qualifying player_id (tens of thousands) and
+        // ship them as bindings — which OOMs.
+        //
+        // Instead, scope the fallback set to this game's roster: only
+        // game_players in the current game whose overall_score is NULL
+        // actually need the biographical lookup. That bounds the binding
+        // list to squad size × team count regardless of the global player
+        // pool. Once the deferred backfill on game_players.overall_score
+        // completes for this game, the fallback set is empty and we emit a
+        // pure tenant filter.
+        $fallbackPlayerIds = DB::table('game_players')
+            ->where('game_id', $game->id)
+            ->whereNull('overall_score')
+            ->distinct()
+            ->pluck('player_id')
+            ->all();
+
+        if ($fallbackPlayerIds === []) {
+            $query->whereNotNull('game_players.overall_score');
+            if ($min !== null) {
+                $query->where('game_players.overall_score', '>=', $min);
+            }
+            if ($max !== null) {
+                $query->where('game_players.overall_score', '<=', $max);
+            }
+            return;
+        }
+
+        $playerQuery = Player::whereIn('id', $fallbackPlayerIds);
         if ($min !== null) {
             $playerQuery->where('overall_score', '>=', $min);
         }
         if ($max !== null) {
             $playerQuery->where('overall_score', '<=', $max);
         }
-        $qualifyingPlayerIds = $playerQuery->pluck('id');
+        $qualifyingFallbackIds = $playerQuery->pluck('id');
 
-        $query->where(function ($outer) use ($min, $max, $qualifyingPlayerIds) {
+        $query->where(function ($outer) use ($min, $max, $qualifyingFallbackIds) {
             $outer->where(function ($gpQ) use ($min, $max) {
                 $gpQ->whereNotNull('game_players.overall_score');
                 if ($min !== null) {
@@ -149,9 +177,9 @@ class ScoutSearchQueryBuilder
                 if ($max !== null) {
                     $gpQ->where('game_players.overall_score', '<=', $max);
                 }
-            })->orWhere(function ($pQ) use ($qualifyingPlayerIds) {
+            })->orWhere(function ($pQ) use ($qualifyingFallbackIds) {
                 $pQ->whereNull('game_players.overall_score')
-                    ->whereIn('game_players.player_id', $qualifyingPlayerIds);
+                    ->whereIn('game_players.player_id', $qualifyingFallbackIds);
             });
         });
     }

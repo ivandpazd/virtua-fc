@@ -317,32 +317,52 @@ class ExploreService
         $maxOverall = !empty($filters['max_overall']) ? (int) $filters['max_overall'] : null;
         if ($minOverall !== null || $maxOverall !== null) {
             // Effective ability is COALESCE(game_players.overall_score,
-            // players.overall_score). The biographical fallback lives on the
-            // control plane, so the second half of the OR resolves qualifying
-            // player ids up front and intersects via whereIn.
-            $overallPlayerQuery = Player::query();
-            if ($minOverall !== null) {
-                $overallPlayerQuery->where('overall_score', '>=', $minOverall);
-            }
-            if ($maxOverall !== null) {
-                $overallPlayerQuery->where('overall_score', '<=', $maxOverall);
-            }
-            $qualifyingOverallPlayerIds = $overallPlayerQuery->pluck('id');
+            // players.overall_score). Scope the biographical-fallback set
+            // to this game's NULL-overall_score rows so the cross-plane
+            // pluck stays bounded by squad size × team count instead of
+            // returning the entire global player pool. With the deferred
+            // backfill complete for this game, fallbackPlayerIds is [] and
+            // this collapses to a pure tenant filter.
+            $fallbackPlayerIds = DB::table('game_players')
+                ->where('game_id', $game->id)
+                ->whereNull('overall_score')
+                ->distinct()
+                ->pluck('player_id')
+                ->all();
 
-            $query->where(function ($outer) use ($minOverall, $maxOverall, $qualifyingOverallPlayerIds) {
-                $outer->where(function ($gpQ) use ($minOverall, $maxOverall) {
-                    $gpQ->whereNotNull('game_players.overall_score');
-                    if ($minOverall !== null) {
-                        $gpQ->where('game_players.overall_score', '>=', $minOverall);
-                    }
-                    if ($maxOverall !== null) {
-                        $gpQ->where('game_players.overall_score', '<=', $maxOverall);
-                    }
-                })->orWhere(function ($pQ) use ($qualifyingOverallPlayerIds) {
-                    $pQ->whereNull('game_players.overall_score')
-                        ->whereIn('game_players.player_id', $qualifyingOverallPlayerIds);
+            if ($fallbackPlayerIds === []) {
+                $query->whereNotNull('game_players.overall_score');
+                if ($minOverall !== null) {
+                    $query->where('game_players.overall_score', '>=', $minOverall);
+                }
+                if ($maxOverall !== null) {
+                    $query->where('game_players.overall_score', '<=', $maxOverall);
+                }
+            } else {
+                $overallPlayerQuery = Player::whereIn('id', $fallbackPlayerIds);
+                if ($minOverall !== null) {
+                    $overallPlayerQuery->where('overall_score', '>=', $minOverall);
+                }
+                if ($maxOverall !== null) {
+                    $overallPlayerQuery->where('overall_score', '<=', $maxOverall);
+                }
+                $qualifyingFallbackIds = $overallPlayerQuery->pluck('id');
+
+                $query->where(function ($outer) use ($minOverall, $maxOverall, $qualifyingFallbackIds) {
+                    $outer->where(function ($gpQ) use ($minOverall, $maxOverall) {
+                        $gpQ->whereNotNull('game_players.overall_score');
+                        if ($minOverall !== null) {
+                            $gpQ->where('game_players.overall_score', '>=', $minOverall);
+                        }
+                        if ($maxOverall !== null) {
+                            $gpQ->where('game_players.overall_score', '<=', $maxOverall);
+                        }
+                    })->orWhere(function ($pQ) use ($qualifyingFallbackIds) {
+                        $pQ->whereNull('game_players.overall_score')
+                            ->whereIn('game_players.player_id', $qualifyingFallbackIds);
+                    });
                 });
-            });
+            }
         }
 
         $total = (clone $query)->count();
