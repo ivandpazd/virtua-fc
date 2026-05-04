@@ -49,7 +49,7 @@
                              },
                          })">
 
-                        <form method="GET" action="{{ route('game.explore', $game->id) }}">
+                        <form method="GET" action="{{ route('game.explore', $game->id) }}" @submit="searching = true">
                             {{-- Scope picker + Search bar + Advanced-filter toggle, on a single row from sm: upwards --}}
                             <div class="flex flex-col sm:flex-row gap-2 mb-3">
                                 {{-- Scope picker (dropdown). Replaces the previous
@@ -311,12 +311,12 @@
                                        class="text-xs text-text-muted hover:text-text-body underline-offset-2 hover:underline text-center sm:text-left">
                                         {{ __('transfers.explore_clear_filters') }}
                                     </a>
-                                    <x-primary-button class="gap-2 sm:ml-auto">
+                                    <x-primary-button-spin loading="searching" class="gap-2 sm:ml-auto">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                         </svg>
                                         {{ __('transfers.explore_search_submit') }}
-                                    </x-primary-button>
+                                    </x-primary-button-spin>
                                 </div>
                             </div>
                         </form>

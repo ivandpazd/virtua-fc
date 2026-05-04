@@ -28,6 +28,7 @@ export default function explore(config) {
         loadingPool: false,
         poolGroups: [],
         searchQuery: initialFilters.name || '',
+        searching: false,
         mobileView: 'teams',
         selectedPositionFilter: 'all',
         positionFilters: [
