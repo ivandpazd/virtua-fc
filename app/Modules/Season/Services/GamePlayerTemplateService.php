@@ -26,47 +26,51 @@ class GamePlayerTemplateService
 
     /**
      * Delete all templates for a season (call once before generating for multiple countries).
+     *
+     * PLANES-SEAM: cross-plane subquery. game_player_templates=tenant,
+     * teams=control. Restored while both planes share one physical Postgres.
+     * Re-split before the planes are physically separated. See CLAUDE.md →
+     * "Control plane / tenant plane".
      */
     public function clearTemplates(string $season): void
     {
-        $nationalTeamIds = Team::where('type', 'national')->pluck('id')->all();
-
-        $query = DB::table('game_player_templates')->where('season', $season);
-        if ($nationalTeamIds !== []) {
-            $query->whereNotIn('team_id', $nationalTeamIds);
-        }
-        $query->delete();
+        DB::table('game_player_templates')
+            ->where('season', $season)
+            ->whereNotIn('team_id', function ($query) {
+                $query->select('id')->from('teams')->where('type', 'national');
+            })
+            ->delete();
     }
 
     /**
      * Delete templates for a specific country's teams only.
+     *
+     * PLANES-SEAM: cross-plane subquery. game_player_templates=tenant,
+     * teams=control. See sibling method.
      */
     public function clearTemplatesForCountry(string $season, string $countryCode): void
     {
-        $teamIds = Team::where('country', $countryCode)->pluck('id')->all();
-        if ($teamIds === []) {
-            return;
-        }
-
         DB::table('game_player_templates')
             ->where('season', $season)
-            ->whereIn('team_id', $teamIds)
+            ->whereIn('team_id', function ($query) use ($countryCode) {
+                $query->select('id')->from('teams')->where('country', $countryCode);
+            })
             ->delete();
     }
 
     /**
      * Delete templates for national teams (World Cup rosters).
+     *
+     * PLANES-SEAM: cross-plane subquery. game_player_templates=tenant,
+     * teams=control. See sibling method.
      */
     public function clearTemplatesForNationalTeams(string $season): void
     {
-        $nationalTeamIds = Team::where('type', 'national')->pluck('id')->all();
-        if ($nationalTeamIds === []) {
-            return;
-        }
-
         DB::table('game_player_templates')
             ->where('season', $season)
-            ->whereIn('team_id', $nationalTeamIds)
+            ->whereIn('team_id', function ($query) {
+                $query->select('id')->from('teams')->where('type', 'national');
+            })
             ->delete();
     }
 

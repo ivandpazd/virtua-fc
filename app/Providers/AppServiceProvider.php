@@ -90,13 +90,16 @@ class AppServiceProvider extends ServiceProvider
             return $user->is_admin;
         });
 
-        // Runtime guard: fail loudly in dev/staging when a query crosses the
-        // control/tenant plane boundary, so violations surface before the
-        // planes are physically split. Skipped in production (overhead) and
-        // in testing (the alias below collapses both connection names onto
-        // the same Connection, so the guard can't distinguish them). See
-        // CLAUDE.md → "Control plane / tenant plane".
-        if (! $this->app->environment(['production', 'testing'])) {
+        // Runtime guard: fail loudly in dev/staging when a query crosses
+        // the control/tenant plane boundary. Currently opt-in via
+        // `database_planes.guard_enabled` (default false) because several
+        // cross-plane sites are temporarily un-refactored — see the
+        // PLANES-SEAM comments. Flip it on locally when working on a seam.
+        // Skipped in production (overhead) and in testing (the alias below
+        // collapses both connection names onto the same Connection, so the
+        // guard can't distinguish them). See CLAUDE.md → "Control plane /
+        // tenant plane".
+        if (! $this->app->environment(['production', 'testing']) && config('database_planes.guard_enabled', false)) {
             $crossPlaneGuard = new CrossPlaneQueryGuard(config('database_planes.control', []));
             DB::listen(fn ($event) => $crossPlaneGuard($event));
         }

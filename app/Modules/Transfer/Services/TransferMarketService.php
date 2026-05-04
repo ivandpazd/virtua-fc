@@ -7,7 +7,6 @@ use App\Models\Game;
 use App\Models\GamePlayer;
 use App\Models\GameTransfer;
 use App\Models\Player;
-use App\Models\Team;
 use App\Models\TeamReputation;
 use App\Models\TransferListing;
 use App\Models\TransferOffer;
@@ -395,20 +394,18 @@ class TransferMarketService
             return collect();
         }
 
-        // Filter to first teams (parent_team_id IS NULL) on the control plane
-        // up front so the game_players query stays single-plane.
-        $eligibleTeamIds = Team::whereIn('id', $teamIds)
-            ->whereNull('parent_team_id')
-            ->pluck('id')
-            ->all();
-
-        if ($eligibleTeamIds === []) {
-            return collect();
-        }
-
+        // PLANES-SEAM: cross-plane JOIN. game_players=tenant, players & teams=control.
+        // The two-step split (Team::pluck → DB::table('game_players') → Player::pluck)
+        // caused timeouts/OOM in production because this is on the AI-transfer hot
+        // path and the JOIN is materially faster while both planes share one
+        // physical Postgres. Re-split before the planes are physically separated.
+        // See CLAUDE.md → "Control plane / tenant plane".
         $rows = DB::table('game_players')
+            ->join('players', 'players.id', '=', 'game_players.player_id')
+            ->join('teams', 'teams.id', '=', 'game_players.team_id')
             ->where('game_players.game_id', $game->id)
-            ->whereIn('game_players.team_id', $eligibleTeamIds)
+            ->whereIn('game_players.team_id', $teamIds)
+            ->whereNull('teams.parent_team_id')
             ->get([
                 'game_players.id',
                 'game_players.game_id',
@@ -420,28 +417,21 @@ class TransferMarketService
                 'game_players.retiring_at_season',
                 'game_players.contract_until',
                 'game_players.annual_wage',
+                'players.date_of_birth as _player_date_of_birth',
             ]);
 
         if ($rows->isEmpty()) {
             return collect();
         }
 
-        // date_of_birth lives on the control plane; resolve in a second
-        // query and attach as a stub Player relation so callers using
-        // ->age($date) keep working without a lazy load.
-        $playerIds = $rows->pluck('player_id')->unique()->all();
-        $dobByPlayerId = Player::whereIn('id', $playerIds)
-            ->pluck('date_of_birth', 'id');
-
         $gpAttrs = [];
         $playerAttrs = [];
         foreach ($rows as $row) {
             $arr = (array) $row;
+            $dob = $arr['_player_date_of_birth'];
+            unset($arr['_player_date_of_birth']);
             $gpAttrs[] = $arr;
-            $playerAttrs[] = [
-                'id' => $arr['player_id'],
-                'date_of_birth' => $dobByPlayerId[$arr['player_id']] ?? null,
-            ];
+            $playerAttrs[] = ['id' => $arr['player_id'], 'date_of_birth' => $dob];
         }
 
         $gamePlayers = GamePlayer::hydrate($gpAttrs);

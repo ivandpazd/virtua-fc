@@ -563,14 +563,14 @@ class YouthAcademyService
      */
     private function getExistingPlayerNames(Game $game): array
     {
-        $playerIds = GamePlayer::where('game_id', $game->id)
-            ->pluck('player_id')
-            ->unique()
-            ->all();
-
-        $playerNames = $playerIds === []
-            ? []
-            : Player::whereIn('id', $playerIds)->pluck('name')->all();
+        // PLANES-SEAM: cross-plane JOIN. game_players=tenant, players=control.
+        // Restored while both planes share one physical Postgres. Re-split
+        // before the planes are physically separated. See CLAUDE.md →
+        // "Control plane / tenant plane".
+        $playerNames = GamePlayer::where('game_players.game_id', $game->id)
+            ->join('players', 'game_players.player_id', '=', 'players.id')
+            ->pluck('players.name')
+            ->toArray();
 
         $academyNames = AcademyPlayer::where('game_id', $game->id)
             ->pluck('name')

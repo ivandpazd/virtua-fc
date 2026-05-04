@@ -7,10 +7,8 @@ use App\Models\CompetitionEntry;
 use App\Models\Game;
 use App\Models\GamePlayer;
 use App\Models\Loan;
-use App\Models\Player;
 use App\Models\ShortlistedPlayer;
 use App\Models\Team;
-use App\Modules\Player\PlayerAge;
 use App\Support\CountryCodeMapper;
 use App\Support\PositionMapper;
 use Illuminate\Support\Collection;
@@ -224,15 +222,19 @@ class ExploreService
         $query = GamePlayer::where('game_id', $game->id)
             ->with(['player', 'team']);
 
-        // Filters that target the biographical Player table (control plane)
-        // are folded into a single Player query; the resulting player_id list
-        // is then applied to the GamePlayer query as a whereIn. This keeps
-        // the control/tenant plane boundary intact.
-        $playerConstraints = [];
-
+        // PLANES-SEAM: name/age/nationality cross-plane filters.
+        // game_players=tenant, players=control. These were folded into a
+        // single Player::pluck → whereIn split, but for wide ranges that
+        // shipped a list bounded only by the global player pool — the same
+        // OOM trap the ability filter hit. Restored to the pre-split
+        // whereHas / correlated subquery form while both planes share one
+        // physical Postgres. Re-split before the planes are physically
+        // separated. See CLAUDE.md → "Control plane / tenant plane".
         if (!empty($filters['name']) && mb_strlen($filters['name']) >= 2) {
             $needle = mb_strtolower($filters['name']);
-            $playerConstraints[] = fn ($q) => $q->whereRaw('LOWER(name) LIKE ?', ['%' . $needle . '%']);
+            $query->whereHas('player', function ($q) use ($needle) {
+                $q->whereRaw('LOWER(name) LIKE ?', ['%' . $needle . '%']);
+            });
         }
 
         if (!empty($filters['position'])) {
@@ -255,32 +257,23 @@ class ExploreService
             }
         }
 
-        if (!empty($filters['min_age'])) {
-            // age >= N → date_of_birth <= today − N years
-            $minAgeCutoff = PlayerAge::dateOfBirthCutoff((int) $filters['min_age'], $game->current_date);
-            $playerConstraints[] = fn ($q) => $q->where('date_of_birth', '<=', $minAgeCutoff);
-        }
-        if (!empty($filters['max_age'])) {
-            // age <= N → date_of_birth > today − (N+1) years
-            $maxAgeCutoff = PlayerAge::dateOfBirthCutoff((int) $filters['max_age'] + 1, $game->current_date);
-            $playerConstraints[] = fn ($q) => $q->where('date_of_birth', '>', $maxAgeCutoff);
+        if (!empty($filters['min_age']) || !empty($filters['max_age'])) {
+            $gameDate = $game->current_date->toDateString();
+            $ageExpr = 'EXTRACT(YEAR FROM AGE(?::date, (SELECT date_of_birth FROM players WHERE players.id = game_players.player_id)))';
+            if (!empty($filters['min_age'])) {
+                $query->whereRaw("($ageExpr) >= ?", [$gameDate, (int) $filters['min_age']]);
+            }
+            if (!empty($filters['max_age'])) {
+                $query->whereRaw("($ageExpr) <= ?", [$gameDate, (int) $filters['max_age']]);
+            }
         }
 
         if (!empty($filters['nationality'])) {
             // players.nationality is stored as a JSON array of country names
             // (["France", "Spain"]). ?::jsonb matches if the array contains the value.
-            $playerConstraints[] = fn ($q) => $q->whereRaw(
-                'nationality::jsonb @> ?::jsonb',
-                [json_encode([$filters['nationality']])],
-            );
-        }
-
-        if ($playerConstraints !== []) {
-            $playerQuery = Player::query();
-            foreach ($playerConstraints as $apply) {
-                $apply($playerQuery);
-            }
-            $query->whereIn('player_id', $playerQuery->pluck('id'));
+            $query->whereHas('player', function ($q) use ($filters) {
+                $q->whereRaw('nationality::jsonb @> ?::jsonb', [json_encode([$filters['nationality']])]);
+            });
         }
 
         if (!empty($filters['competition_id'])) {
@@ -313,55 +306,22 @@ class ExploreService
             });
         }
 
-        $minOverall = !empty($filters['min_overall']) ? (int) $filters['min_overall'] : null;
-        $maxOverall = !empty($filters['max_overall']) ? (int) $filters['max_overall'] : null;
-        if ($minOverall !== null || $maxOverall !== null) {
-            // Effective ability is COALESCE(game_players.overall_score,
-            // players.overall_score). Scope the biographical-fallback set
-            // to this game's NULL-overall_score rows so the cross-plane
-            // pluck stays bounded by squad size × team count instead of
-            // returning the entire global player pool. With the deferred
-            // backfill complete for this game, fallbackPlayerIds is [] and
-            // this collapses to a pure tenant filter.
-            $fallbackPlayerIds = DB::table('game_players')
-                ->where('game_id', $game->id)
-                ->whereNull('overall_score')
-                ->distinct()
-                ->pluck('player_id')
-                ->all();
-
-            if ($fallbackPlayerIds === []) {
-                $query->whereNotNull('game_players.overall_score');
-                if ($minOverall !== null) {
-                    $query->where('game_players.overall_score', '>=', $minOverall);
-                }
-                if ($maxOverall !== null) {
-                    $query->where('game_players.overall_score', '<=', $maxOverall);
-                }
-            } else {
-                $overallPlayerQuery = Player::whereIn('id', $fallbackPlayerIds);
-                if ($minOverall !== null) {
-                    $overallPlayerQuery->where('overall_score', '>=', $minOverall);
-                }
-                if ($maxOverall !== null) {
-                    $overallPlayerQuery->where('overall_score', '<=', $maxOverall);
-                }
-                $qualifyingFallbackIds = $overallPlayerQuery->pluck('id');
-
-                $query->where(function ($outer) use ($minOverall, $maxOverall, $qualifyingFallbackIds) {
-                    $outer->where(function ($gpQ) use ($minOverall, $maxOverall) {
-                        $gpQ->whereNotNull('game_players.overall_score');
-                        if ($minOverall !== null) {
-                            $gpQ->where('game_players.overall_score', '>=', $minOverall);
-                        }
-                        if ($maxOverall !== null) {
-                            $gpQ->where('game_players.overall_score', '<=', $maxOverall);
-                        }
-                    })->orWhere(function ($pQ) use ($qualifyingFallbackIds) {
-                        $pQ->whereNull('game_players.overall_score')
-                            ->whereIn('game_players.player_id', $qualifyingFallbackIds);
-                    });
-                });
+        if (!empty($filters['min_overall']) || !empty($filters['max_overall'])) {
+            // Use the stable overall_score baseline so filter results stay
+            // consistent across matchdays instead of shifting with daily form.
+            //
+            // PLANES-SEAM: cross-plane correlated subquery. game_players=tenant,
+            // players=control. The two-step split version (pluck globally
+            // qualifying player_ids, then OR + whereIn) OOMed PHP when the
+            // ability range was wide. Restored while both planes share one
+            // physical Postgres. Re-split before the planes are physically
+            // separated. See CLAUDE.md → "Control plane / tenant plane".
+            $overallExpr = 'COALESCE(game_players.overall_score, (SELECT overall_score FROM players WHERE players.id = game_players.player_id))';
+            if (!empty($filters['min_overall'])) {
+                $query->whereRaw("$overallExpr >= ?", [(int) $filters['min_overall']]);
+            }
+            if (!empty($filters['max_overall'])) {
+                $query->whereRaw("$overallExpr <= ?", [(int) $filters['max_overall']]);
             }
         }
 
@@ -415,20 +375,16 @@ class ExploreService
      */
     public function getDistinctNationalities(string $gameId): array
     {
-        $playerIds = DB::table('game_players')
-            ->where('game_id', $gameId)
-            ->distinct()
-            ->pluck('player_id')
-            ->all();
-
-        if ($playerIds === []) {
-            return [];
-        }
-
-        $rows = DB::connection('pgsql_control')->table('players')
-            ->whereIn('id', $playerIds)
-            ->whereRaw("jsonb_typeof(nationality::jsonb) = 'array'")
-            ->selectRaw("DISTINCT nationality::jsonb->>0 AS nat")
+        // PLANES-SEAM: cross-plane JOIN. game_players=tenant, players=control.
+        // The two-step split (pluck player_ids on tenant → query control)
+        // shipped a large IN list per call. Restored while both planes share
+        // one physical Postgres. Re-split before the planes are physically
+        // separated. See CLAUDE.md → "Control plane / tenant plane".
+        $rows = DB::table('game_players')
+            ->join('players', 'players.id', '=', 'game_players.player_id')
+            ->where('game_players.game_id', $gameId)
+            ->whereRaw("jsonb_typeof(players.nationality::jsonb) = 'array'")
+            ->selectRaw("DISTINCT players.nationality::jsonb->>0 AS nat")
             ->pluck('nat')
             ->filter()
             ->unique()

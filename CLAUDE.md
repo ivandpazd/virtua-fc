@@ -101,9 +101,11 @@ Two logical database planes share one physical Postgres today, with separate con
 **Rules:**
 - New cross-tenant models declare `protected $connection = 'pgsql_control'`.
 - New per-game models stay on the default connection.
-- **Never JOIN across planes.** Even though both connections currently resolve to the same physical DB, JOINs that cross the boundary will break the moment they're split. Use a service-layer call that issues separate queries on each connection.
+- **Goal: never JOIN across planes** in new code. Even though both connections currently resolve to the same physical DB, JOINs that cross the boundary will break the moment they're split. Use a service-layer call that issues separate queries on each connection.
 - **No Eloquent relationships across planes** (`belongsTo`/`hasMany` between models on different connections). Eloquent's eager loading does not work reliably across connections. Replace with explicit service calls.
 - Migrations target a specific plane; control-plane schema goes in `database/migrations/control/`, tenant in `database/migrations/tenant/` (paths are introduced in a later phase — until then, all migrations are on the default connection).
+
+**Existing seams:** several pre-existing cross-plane sites (search `PLANES-SEAM`) still use JOINs / correlated subqueries because the two-step rewrites caused OOM/timeout regressions. They work today because both planes share one physical Postgres. Each seam needs to be re-split — without the perf regression — before the planes are physically separated. The runtime guard (`config/database_planes.php` → `guard_enabled`, env `DATABASE_PLANES_GUARD_ENABLED`) is opt-in for this reason; flip it on when working on a seam to verify your fix is single-plane.
 
 ### Player Age Boundaries
 

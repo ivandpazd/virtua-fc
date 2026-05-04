@@ -6,13 +6,10 @@ use App\Models\Competition;
 use App\Models\Game;
 use App\Models\GamePlayer;
 use App\Models\Loan;
-use App\Models\Player;
 use App\Models\Team;
 use App\Models\TransferOffer;
-use App\Modules\Player\PlayerAge;
 use App\Support\PositionMapper;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Builds queries for scouting search candidates.
@@ -36,7 +33,7 @@ class ScoutSearchQueryBuilder
 
         $this->applyScopeFilter($query, $game, $filters);
         $this->applyAgeFilter($query, $game, $filters);
-        $this->applyAbilityFilter($query, $game, $filters);
+        $this->applyAbilityFilter($query, $filters);
         $this->applyValueFilter($query, $filters);
         $this->applyContractFilter($query, $game, $filters);
         $this->excludeLoaned($query, $game);
@@ -93,94 +90,45 @@ class ScoutSearchQueryBuilder
             return;
         }
 
-        // Resolve qualifying biographical player ids on the control plane and
-        // intersect with the GamePlayer query via whereIn. Replaces a
-        // correlated subquery against the players table that would cross the
-        // control/tenant boundary.
-        $playerQuery = Player::query();
+        // PLANES-SEAM: cross-plane correlated subquery. game_players=tenant,
+        // players=control. The two-step split (Player::pluck → whereIn)
+        // shipped a list bounded only by the global player pool — the same
+        // OOM trap the ability filter hit. Restored while both planes share
+        // one physical Postgres. Re-split before the planes are physically
+        // separated. See CLAUDE.md → "Control plane / tenant plane".
+        $dobSubquery = '(SELECT date_of_birth FROM players WHERE players.id = game_players.player_id)';
+        $gameDate = $game->current_date->toDateString();
+
+        $ageExpr = "EXTRACT(YEAR FROM AGE(?::date, $dobSubquery))";
 
         if (! empty($filters['age_min'])) {
-            // age >= N → date_of_birth <= today − N years
-            $playerQuery->where(
-                'date_of_birth',
-                '<=',
-                PlayerAge::dateOfBirthCutoff((int) $filters['age_min'], $game->current_date),
-            );
+            $query->whereRaw("($ageExpr) >= ?", [$gameDate, (int) $filters['age_min']]);
         }
         if (! empty($filters['age_max'])) {
-            // age <= N → date_of_birth > today − (N+1) years
-            $playerQuery->where(
-                'date_of_birth',
-                '>',
-                PlayerAge::dateOfBirthCutoff((int) $filters['age_max'] + 1, $game->current_date),
-            );
+            $query->whereRaw("($ageExpr) <= ?", [$gameDate, (int) $filters['age_max']]);
         }
-
-        $query->whereIn('player_id', $playerQuery->pluck('id'));
     }
 
-    private function applyAbilityFilter(Builder $query, Game $game, array $filters): void
+    private function applyAbilityFilter(Builder $query, array $filters): void
     {
-        $min = ! empty($filters['ability_min']) ? (int) $filters['ability_min'] : null;
-        $max = ! empty($filters['ability_max']) ? (int) $filters['ability_max'] : null;
-        if ($min === null && $max === null) {
+        if (empty($filters['ability_min']) && empty($filters['ability_max'])) {
             return;
         }
 
-        // The effective ability is COALESCE(game_players.overall_score,
-        // players.overall_score) — game-specific value if set, biographical
-        // baseline otherwise. The fallback half lives on the control plane
-        // and can't be a correlated subquery, so we'd otherwise have to
-        // pluck every globally-qualifying player_id (tens of thousands) and
-        // ship them as bindings — which OOMs.
-        //
-        // Instead, scope the fallback set to this game's roster: only
-        // game_players in the current game whose overall_score is NULL
-        // actually need the biographical lookup. That bounds the binding
-        // list to squad size × team count regardless of the global player
-        // pool. Once the deferred backfill on game_players.overall_score
-        // completes for this game, the fallback set is empty and we emit a
-        // pure tenant filter.
-        $fallbackPlayerIds = DB::table('game_players')
-            ->where('game_id', $game->id)
-            ->whereNull('overall_score')
-            ->distinct()
-            ->pluck('player_id')
-            ->all();
-
-        if ($fallbackPlayerIds === []) {
-            $query->whereNotNull('game_players.overall_score');
-            if ($min !== null) {
-                $query->where('game_players.overall_score', '>=', $min);
+        // PLANES-SEAM: cross-plane correlated subquery. game_players=tenant,
+        // players=control. The two-step split version OOMed when the
+        // bindings list grew with the global player pool. Restore the
+        // correlated subquery while both planes share one physical Postgres.
+        // Re-split before the planes are physically separated. See CLAUDE.md
+        // → "Control plane / tenant plane".
+        $query->where(function ($q) use ($filters) {
+            $abilityExpr = 'COALESCE(game_players.overall_score, (SELECT overall_score FROM players WHERE players.id = game_players.player_id))';
+            if (! empty($filters['ability_min'])) {
+                $q->whereRaw("$abilityExpr >= ?", [(int) $filters['ability_min']]);
             }
-            if ($max !== null) {
-                $query->where('game_players.overall_score', '<=', $max);
+            if (! empty($filters['ability_max'])) {
+                $q->whereRaw("$abilityExpr <= ?", [(int) $filters['ability_max']]);
             }
-            return;
-        }
-
-        $playerQuery = Player::whereIn('id', $fallbackPlayerIds);
-        if ($min !== null) {
-            $playerQuery->where('overall_score', '>=', $min);
-        }
-        if ($max !== null) {
-            $playerQuery->where('overall_score', '<=', $max);
-        }
-        $qualifyingFallbackIds = $playerQuery->pluck('id');
-
-        $query->where(function ($outer) use ($min, $max, $qualifyingFallbackIds) {
-            $outer->where(function ($gpQ) use ($min, $max) {
-                $gpQ->whereNotNull('game_players.overall_score');
-                if ($min !== null) {
-                    $gpQ->where('game_players.overall_score', '>=', $min);
-                }
-                if ($max !== null) {
-                    $gpQ->where('game_players.overall_score', '<=', $max);
-                }
-            })->orWhere(function ($pQ) use ($qualifyingFallbackIds) {
-                $pQ->whereNull('game_players.overall_score')
-                    ->whereIn('game_players.player_id', $qualifyingFallbackIds);
-            });
         });
     }
 

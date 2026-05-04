@@ -349,14 +349,15 @@ class UefaQualificationProcessor implements SeasonProcessor
             ->filter(fn (string $code) => !empty($this->countryConfig->continentalSlots($code)))
             ->all();
 
-        // Filter teams by country on the control plane up front, then
-        // intersect on the tenant CompetitionEntry side.
-        $eligibleTeamIds = Team::whereNotIn('country', $configuredCountries)
-            ->pluck('id');
-
-        $replaceable = CompetitionEntry::where('game_id', $game->id)
-            ->where('competition_id', 'UCL')
-            ->whereIn('team_id', $eligibleTeamIds)
+        // PLANES-SEAM: cross-plane JOIN. competition_entries=tenant, teams=control.
+        // Restored while both planes share one physical Postgres. Re-split
+        // before the planes are physically separated. See CLAUDE.md →
+        // "Control plane / tenant plane".
+        $replaceable = CompetitionEntry::where('competition_entries.game_id', $game->id)
+            ->where('competition_entries.competition_id', 'UCL')
+            ->join('teams', 'competition_entries.team_id', '=', 'teams.id')
+            ->whereNotIn('teams.country', $configuredCountries)
+            ->select('competition_entries.*')
             ->get();
 
         if ($replaceable->isNotEmpty()) {
