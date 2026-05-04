@@ -220,21 +220,11 @@ class ExploreService
     public function advancedSearch(Game $game, array $filters): array
     {
         $query = GamePlayer::where('game_id', $game->id)
-            ->with(['player', 'team']);
+            ->with(['team']);
 
-        // PLANES-SEAM: name/age/nationality cross-plane filters.
-        // game_players=tenant, players=control. These were folded into a
-        // single Player::pluck → whereIn split, but for wide ranges that
-        // shipped a list bounded only by the global player pool — the same
-        // OOM trap the ability filter hit. Restored to the pre-split
-        // whereHas / correlated subquery form while both planes share one
-        // physical Postgres. Re-split before the planes are physically
-        // separated. See CLAUDE.md → "Control plane / tenant plane".
         if (!empty($filters['name']) && mb_strlen($filters['name']) >= 2) {
             $needle = mb_strtolower($filters['name']);
-            $query->whereHas('player', function ($q) use ($needle) {
-                $q->whereRaw('LOWER(name) LIKE ?', ['%' . $needle . '%']);
-            });
+            $query->whereRaw('LOWER(game_players.name) LIKE ?', ['%' . $needle . '%']);
         }
 
         if (!empty($filters['position'])) {
@@ -259,7 +249,7 @@ class ExploreService
 
         if (!empty($filters['min_age']) || !empty($filters['max_age'])) {
             $gameDate = $game->current_date->toDateString();
-            $ageExpr = 'EXTRACT(YEAR FROM AGE(?::date, (SELECT date_of_birth FROM players WHERE players.id = game_players.player_id)))';
+            $ageExpr = 'EXTRACT(YEAR FROM AGE(?::date, game_players.date_of_birth))';
             if (!empty($filters['min_age'])) {
                 $query->whereRaw("($ageExpr) >= ?", [$gameDate, (int) $filters['min_age']]);
             }
@@ -269,11 +259,9 @@ class ExploreService
         }
 
         if (!empty($filters['nationality'])) {
-            // players.nationality is stored as a JSON array of country names
-            // (["France", "Spain"]). ?::jsonb matches if the array contains the value.
-            $query->whereHas('player', function ($q) use ($filters) {
-                $q->whereRaw('nationality::jsonb @> ?::jsonb', [json_encode([$filters['nationality']])]);
-            });
+            // nationality is a JSON array of country names (["France", "Spain"]).
+            // ?::jsonb matches if the array contains the value.
+            $query->whereRaw('game_players.nationality::jsonb @> ?::jsonb', [json_encode([$filters['nationality']])]);
         }
 
         if (!empty($filters['competition_id'])) {
@@ -307,21 +295,11 @@ class ExploreService
         }
 
         if (!empty($filters['min_overall']) || !empty($filters['max_overall'])) {
-            // Use the stable overall_score baseline so filter results stay
-            // consistent across matchdays instead of shifting with daily form.
-            //
-            // PLANES-SEAM: cross-plane correlated subquery. game_players=tenant,
-            // players=control. The two-step split version (pluck globally
-            // qualifying player_ids, then OR + whereIn) OOMed PHP when the
-            // ability range was wide. Restored while both planes share one
-            // physical Postgres. Re-split before the planes are physically
-            // separated. See CLAUDE.md → "Control plane / tenant plane".
-            $overallExpr = 'COALESCE(game_players.overall_score, (SELECT overall_score FROM players WHERE players.id = game_players.player_id))';
             if (!empty($filters['min_overall'])) {
-                $query->whereRaw("$overallExpr >= ?", [(int) $filters['min_overall']]);
+                $query->where('overall_score', '>=', (int) $filters['min_overall']);
             }
             if (!empty($filters['max_overall'])) {
-                $query->whereRaw("$overallExpr <= ?", [(int) $filters['max_overall']]);
+                $query->where('overall_score', '<=', (int) $filters['max_overall']);
             }
         }
 
@@ -366,25 +344,14 @@ class ExploreService
      * sorted alphabetically. Used to populate the nationality dropdown so the
      * list never contains options that would return zero results.
      *
-     * Uses the DB facade rather than Eloquent because selecting a column
-     * aliased `nationality` through GamePlayer::... triggers the model's
-     * magic getNationalityAttribute() accessor on pluck, which then fails
-     * when the unloaded player relation is null.
-     *
      * @return array<int, string>
      */
     public function getDistinctNationalities(string $gameId): array
     {
-        // PLANES-SEAM: cross-plane JOIN. game_players=tenant, players=control.
-        // The two-step split (pluck player_ids on tenant → query control)
-        // shipped a large IN list per call. Restored while both planes share
-        // one physical Postgres. Re-split before the planes are physically
-        // separated. See CLAUDE.md → "Control plane / tenant plane".
         $rows = DB::table('game_players')
-            ->join('players', 'players.id', '=', 'game_players.player_id')
-            ->where('game_players.game_id', $gameId)
-            ->whereRaw("jsonb_typeof(players.nationality::jsonb) = 'array'")
-            ->selectRaw("DISTINCT players.nationality::jsonb->>0 AS nat")
+            ->where('game_id', $gameId)
+            ->whereRaw("jsonb_typeof(nationality::jsonb) = 'array'")
+            ->selectRaw("DISTINCT nationality::jsonb->>0 AS nat")
             ->pluck('nat')
             ->filter()
             ->unique()
