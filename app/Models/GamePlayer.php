@@ -791,28 +791,9 @@ class GamePlayer extends Model
         };
     }
 
-    /**
-     * Read `overall_score`, falling back to the legacy dual-ability columns
-     * when the row hasn't been backfilled yet. Production rolled out the
-     * flatten with the dual columns still present on `game_players`, so this
-     * accessor is the bridge until the eventual background backfill +
-     * column drop completes. New writes populate `overall_score` directly,
-     * so the NULL pool only shrinks over time.
-     */
     public function getOverallScoreAttribute(?int $value): int
     {
-        if ($value !== null) {
-            return $value;
-        }
-
-        $tech = $this->attributes['game_technical_ability'] ?? null;
-        $phys = $this->attributes['game_physical_ability'] ?? null;
-
-        if ($tech !== null && $phys !== null) {
-            return (int) round(((int) $tech + (int) $phys) / 2);
-        }
-
-        return 50;
+        return $value ?? 50;
     }
 
     /**

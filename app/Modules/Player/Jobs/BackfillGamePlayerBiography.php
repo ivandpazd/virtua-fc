@@ -17,8 +17,9 @@ use Illuminate\Support\Facades\DB;
  *
  * Per-game scope: rows for a single game are heap-clustered (inserted
  * together during game creation), so each UPDATE touches a small,
- * contiguous slice of the table — same shape that made
- * BackfillGameOverallScores tractable on Neon's network-storage model.
+ * contiguous slice of the table — a handful of page-fetch round trips
+ * per game on Neon's network-storage model instead of the random scatter
+ * of a UUID-PK-batched bulk update.
  *
  * Plane-safe: reads Players from `pgsql_control` and writes to the default
  * tenant connection in separate queries — no cross-plane JOIN. The bulk
