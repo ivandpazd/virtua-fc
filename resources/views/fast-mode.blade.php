@@ -48,7 +48,7 @@
         // order so the list reads chronologically.
         $formatScorers = function ($events) {
             return $events
-                ->groupBy(fn ($e) => optional($e->gamePlayer?->player)->name ?? '—')
+                ->groupBy(fn ($e) => $e->gamePlayer?->name ?? '—')
                 ->map(function ($playerEvents, $name) {
                     $minutes = $playerEvents->map(function ($e) {
                         $label = $e->minute . "'";
