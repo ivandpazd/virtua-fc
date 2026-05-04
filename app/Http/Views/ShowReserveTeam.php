@@ -21,12 +21,12 @@ class ShowReserveTeam
         $squad = $this->reserveTeamService->getReserveSquad($game);
 
         $grouped = $squad
-            ->sortByDesc('overall_score')
+            ->sortByDesc(fn ($p) => $p->effective_rating)
             ->groupBy(fn ($player) => PositionMapper::getPositionGroup($player->position));
 
         $count = $squad->count();
         $avgAge = $count > 0 ? round($squad->avg(fn ($p) => $p->age($game->current_date)), 1) : 0;
-        $avgOverall = $count > 0 ? (int) round($squad->avg('overall_score')) : 0;
+        $avgOverall = $count > 0 ? (int) round($squad->avg(fn ($p) => $p->effective_rating)) : 0;
 
         return view('squad-reserve', [
             'game' => $game,

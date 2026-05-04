@@ -67,7 +67,7 @@ $showAskingPrice = $showAskingPrice ?? ($askingPrice !== null);
             <span>{{ \App\Support\Money::format($player->market_value_cents) }}</span>
             @if($showOvr)
                 <span>&middot;</span>
-                <span>OVR {{ $player->overall_score }}</span>
+                <span>OVR {{ $player->effective_rating }}</span>
             @endif
             @if($showAskingPrice)
                 <span>&middot;</span>
@@ -102,7 +102,7 @@ $showAskingPrice = $showAskingPrice ?? ($askingPrice !== null);
     {{-- OVR --}}
     <td class="py-2 pr-3 hidden md:table-cell text-center">
         <div class="flex justify-center">
-            <x-rating-badge :value="$player->overall_score" size="sm" />
+            <x-rating-badge :value="$player->effective_rating" size="sm" />
         </div>
     </td>
     @endif

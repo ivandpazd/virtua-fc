@@ -159,7 +159,7 @@ class ShowScoutReportResults
     private function orderByAbility(Collection $players): Collection
     {
         return $players
-            ->sortByDesc(fn (GamePlayer $p) => $p->overall_score)
+            ->sortByDesc(fn (GamePlayer $p) => $p->effective_rating)
             ->values();
     }
 }

@@ -36,7 +36,7 @@ class ShowSquadRegistration
                 'position' => $gp->position,
                 'position_group' => $gp->position_group,
                 'position_abbreviation' => PositionMapper::toAbbreviation($gp->position),
-                'overall' => $gp->overall_score,
+                'overall' => $gp->effective_rating,
                 'age' => $gp->age($game->current_date),
             ];
 

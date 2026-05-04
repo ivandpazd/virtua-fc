@@ -27,9 +27,9 @@
     ];
 
     $overallColor = match(true) {
-        $gamePlayer->overall_score >= 80 => 'bg-accent-green',
-        $gamePlayer->overall_score >= 70 => 'bg-lime-500',
-        $gamePlayer->overall_score >= 60 => 'bg-accent-gold',
+        $gamePlayer->effective_rating >= 80 => 'bg-accent-green',
+        $gamePlayer->effective_rating >= 70 => 'bg-lime-500',
+        $gamePlayer->effective_rating >= 60 => 'bg-accent-gold',
         default => 'bg-surface-600',
     };
 @endphp
@@ -99,7 +99,7 @@
 
         {{-- Overall score --}}
         <div class="w-14 h-14 md:w-16 md:h-16 rounded-xl {{ $overallColor }} flex items-center justify-center shrink-0">
-            <span class="text-xl md:text-2xl font-bold text-white">{{ $gamePlayer->overall_score }}</span>
+            <span class="text-xl md:text-2xl font-bold text-white">{{ $gamePlayer->effective_rating }}</span>
         </div>
     </div>
 </div>
@@ -111,7 +111,7 @@
     <div class="p-5">
         <h4 class="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-secondary mb-4">{{ __('squad.abilities') }}</h4>
         <div class="space-y-3">
-            <x-stat-bar :label="__('squad.overall_full')" :value="$gamePlayer->overall_score" />
+            <x-stat-bar :label="__('squad.overall_full')" :value="$gamePlayer->effective_rating" />
             <x-stat-bar :label="__('squad.fitness_full')" :value="$gamePlayer->fitness" :max="100" />
             <x-stat-bar :label="__('squad.morale_full')" :value="$gamePlayer->morale" :max="100" />
 
@@ -385,7 +385,7 @@
                     'playerInfo' => [
                         'age' => $gamePlayer->age($game->current_date),
                         'wage' => $gamePlayer->formatted_wage,
-                        'overall' => $gamePlayer->overall_score,
+                        'overall' => $gamePlayer->effective_rating,
                         'position' => $posDisp['abbreviation'],
                         'positionBg' => $posDisp['bg'],
                         'positionText' => $posDisp['text'],

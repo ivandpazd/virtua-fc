@@ -799,6 +799,17 @@ class GamePlayer extends Model
     }
 
     /**
+     * Blade-friendly accessor for the form-modulated rating. UI surfaces
+     * ("media") show this value so squad averages reflect day-to-day fitness
+     * and morale, matching the pre-flatten behaviour of the old computed
+     * `overall_score` accessor.
+     */
+    public function getEffectiveRatingAttribute(): int
+    {
+        return $this->getEffectiveRating();
+    }
+
+    /**
      * Get potential display range for UI.
      */
     public function getPotentialRangeAttribute(): string

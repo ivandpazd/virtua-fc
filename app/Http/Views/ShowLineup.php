@@ -347,7 +347,7 @@ class ShowLineup
         $grouped = $players->groupBy(fn ($p) => $p->position_group);
 
         $avgOverall = fn (string $group) => (int) round(
-            ($grouped->get($group) ?? collect())->avg('overall_score') ?? 0
+            ($grouped->get($group) ?? collect())->avg(fn ($p) => $p->effective_rating) ?? 0
         );
 
         return [
@@ -357,7 +357,7 @@ class ShowLineup
             'attack' => $avgOverall('Forward'),
             'fitness' => (int) round($players->avg('fitness')),
             'morale' => (int) round($players->avg('morale')),
-            'overall' => (int) round($players->avg('overall_score')),
+            'overall' => (int) round($players->avg(fn ($p) => $p->effective_rating)),
         ];
     }
 }

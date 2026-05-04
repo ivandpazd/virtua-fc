@@ -117,7 +117,7 @@
                                                 @endif
                                             </div>
                                         </div>
-                                        <x-rating-badge :value="$player->overall_score" class="shrink-0" />
+                                        <x-rating-badge :value="$player->effective_rating" class="shrink-0" />
                                     </div>
                                     @if($isCalledUp)
                                         <form method="POST" action="{{ route('game.reserve.send-back', [$game->id, $player->id]) }}" onsubmit="return confirm('{{ __('squad.send_back_to_reserve') }}?')">
@@ -155,7 +155,7 @@
                                 </span>
                                 <span class="text-xs text-center tabular-nums text-text-muted">{{ $player->potential_range }}</span>
                                 <div class="flex justify-center">
-                                    <x-rating-badge :value="$player->overall_score" size="sm" />
+                                    <x-rating-badge :value="$player->effective_rating" size="sm" />
                                 </div>
                             </div>
                         @endforeach

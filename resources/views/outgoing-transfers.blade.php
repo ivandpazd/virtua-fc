@@ -137,7 +137,7 @@
                                                             'playerInfo' => [
                                                                 'age' => $gp->age($game->current_date),
                                                                 'wage' => $gp->formatted_wage,
-                                                                'overall' => $gp->overall_score,
+                                                                'overall' => $gp->effective_rating,
                                                                 'position' => $posDisp['abbreviation'],
                                                                 'positionBg' => $posDisp['bg'],
                                                                 'positionText' => $posDisp['text'],
@@ -194,7 +194,7 @@
                                                                 'playerInfo' => [
                                                                     'age' => $offeredPlayer->age($game->current_date),
                                                                     'wage' => $offeredPlayer->formatted_wage,
-                                                                    'overall' => $offeredPlayer->overall_score,
+                                                                    'overall' => $offeredPlayer->effective_rating,
                                                                     'position' => $posDisp['abbreviation'],
                                                                     'positionBg' => $posDisp['bg'],
                                                                     'positionText' => $posDisp['text'],
@@ -259,7 +259,7 @@
                                                             'playerInfo' => [
                                                                 'age' => $gp->age($game->current_date),
                                                                 'wage' => $gp->formatted_wage,
-                                                                'overall' => $gp->overall_score,
+                                                                'overall' => $gp->effective_rating,
                                                                 'position' => $posDisp['abbreviation'],
                                                                 'positionBg' => $posDisp['bg'],
                                                                 'positionText' => $posDisp['text'],
@@ -521,7 +521,7 @@
                                                 'playerInfo' => [
                                                     'age' => $player->age($game->current_date),
                                                     'wage' => $player->formatted_wage,
-                                                    'overall' => $player->overall_score,
+                                                    'overall' => $player->effective_rating,
                                                     'position' => $posDisp['abbreviation'],
                                                     'positionBg' => $posDisp['bg'],
                                                     'positionText' => $posDisp['text'],

@@ -312,7 +312,7 @@
                                                             <x-morale-indicator :value="$player->morale" class="shrink-0" />
                                                         </div>
                                                     </div>
-                                                    <x-rating-badge :value="$player->overall_score" size="sm" class="shrink-0" />
+                                                    <x-rating-badge :value="$player->effective_rating" size="sm" class="shrink-0" />
                                                     <div class="w-5 h-5 rounded-sm border flex items-center justify-center transition-colors shrink-0"
                                                         :class="isSelected('{{ $player->id }}') ? 'border-accent-blue bg-accent-blue' : 'border-border-strong'">
                                                         <svg x-show="isSelected('{{ $player->id }}')" x-cloak class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">

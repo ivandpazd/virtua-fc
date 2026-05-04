@@ -36,7 +36,7 @@ class ShowTransferMarket
                 'gamePlayer' => $gp,
                 'askingPrice' => null,
             ]))
-            ->sortByDesc(fn ($row) => $row['gamePlayer']->overall_score)
+            ->sortByDesc(fn ($row) => $row['gamePlayer']->effective_rating)
             ->values();
 
         $headerData = $this->headerService->getHeaderData($game);

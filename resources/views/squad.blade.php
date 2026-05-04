@@ -236,7 +236,7 @@
                                 <div class="px-4 py-2 bg-surface-700/30 border-b border-border-default">
                                     <div class="flex items-center justify-between">
                                         <span class="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-muted">{{ $group['label'] }}</span>
-                                        <span class="text-[10px] text-text-faint">{{ $group['players']->count() }} · {{ __('squad.avg_ovr') }} {{ round($group['players']->avg('overall_score')) }}</span>
+                                        <span class="text-[10px] text-text-faint">{{ $group['players']->count() }} · {{ __('squad.avg_ovr') }} {{ round($group['players']->avg(fn ($p) => $p->effective_rating)) }}</span>
                                     </div>
                                 </div>
 
@@ -316,7 +316,7 @@
                                             </div>
 
                                             {{-- Rating badge --}}
-                                            <x-rating-badge :value="$gp->overall_score" size="sm" class="shrink-0" />
+                                            <x-rating-badge :value="$gp->effective_rating" size="sm" class="shrink-0" />
                                         </div>
 
                                     </div>
@@ -363,7 +363,7 @@
 
                                         {{-- Rating badge --}}
                                         <div class="flex justify-center">
-                                            <x-rating-badge :value="$gp->overall_score" size="sm" />
+                                            <x-rating-badge :value="$gp->effective_rating" size="sm" />
                                         </div>
 
                                         {{-- === Tactical columns === --}}

@@ -140,7 +140,7 @@
                                     <span class="text-xs text-center tabular-nums text-text-muted">{{ $prospect->potential_range }}</span>
                                     {{-- Overall --}}
                                     <div class="flex justify-center">
-                                        <x-rating-badge :value="$prospect->overall_score_score" size="sm" />
+                                        <x-rating-badge :value="$prospect->overall_score" size="sm" />
                                     </div>
                                 </div>
                             @endforeach

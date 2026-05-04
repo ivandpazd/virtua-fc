@@ -88,7 +88,7 @@ class ShowNewSeason
         foreach (PositionMapper::getAllGroups() as $group) {
             $players = $positionGroups->get($group, collect());
             $count = $players->count();
-            $avgAbility = $count > 0 ? (int) round($players->avg('overall_score')) : 0;
+            $avgAbility = $count > 0 ? (int) round($players->avg(fn ($p) => $p->effective_rating)) : 0;
 
             // Determine coverage status
             $status = match ($group) {
@@ -107,7 +107,7 @@ class ShowNewSeason
         }
 
         $totalPlayers = $squad->count();
-        $avgOverall = $totalPlayers > 0 ? (int) round($squad->avg('overall_score')) : 0;
+        $avgOverall = $totalPlayers > 0 ? (int) round($squad->avg(fn ($p) => $p->effective_rating)) : 0;
         $avgAge = $totalPlayers > 0 ? round($squad->avg(fn ($p) => $p->age($currentDate)), 1) : 0;
         $totalWages = $squad->sum('annual_wage');
 

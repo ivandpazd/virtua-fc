@@ -134,7 +134,7 @@ class LiveMatchLineupPresenter
             'positionSort' => LineupService::positionSortOrder($p->position),
             'positions' => $p->positions,
             'age' => $p->age($currentDate),
-            'overallScore' => $p->overall_score,
+            'overallScore' => $p->effective_rating,
             'fitness' => $p->fitness,
             'morale' => $p->morale,
             'minuteEntered' => $minuteEntered,
