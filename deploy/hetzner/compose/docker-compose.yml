@@ -63,8 +63,14 @@ x-app-env: &app-env
 
 services:
   traefik:
-    image: traefik:v3.2
+    image: traefik:v3.6
     restart: unless-stopped
+    # traefik:v3.2 ships a Docker SDK that pins API version 1.24, which
+    # modern Docker Engines (>= 25) reject ("client version 1.24 is too
+    # old"). 3.3+ updated the embedded SDK; DOCKER_API_VERSION is set as
+    # a belt-and-suspenders override in case of future engine bumps.
+    environment:
+      DOCKER_API_VERSION: "1.44"
     command:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
@@ -129,6 +135,13 @@ services:
     environment:
       <<: *app-env
       RUN_MIGRATIONS: "false"
+    # No HTTP server in this container, and 'php artisan horizon:status'
+    # is unreliable as a docker healthcheck (it talks to Redis-backed
+    # state and exits non-zero in the supervisor's own context). Disable
+    # it here — smoketest.sh already validates Horizon by calling
+    # horizon:status from inside the app container.
+    healthcheck:
+      disable: true
     volumes:
       - storage:/app/storage
     depends_on:
@@ -138,12 +151,6 @@ services:
         condition: service_healthy
       app:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "php", "artisan", "horizon:status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     networks:
       - internal
 
@@ -154,6 +161,11 @@ services:
     environment:
       <<: *app-env
       RUN_MIGRATIONS: "false"
+    # No HTTP server in this container — disable the image's default
+    # HEALTHCHECK (which probes /up) so the scheduler isn't reported
+    # as unhealthy forever.
+    healthcheck:
+      disable: true
     volumes:
       - storage:/app/storage
     depends_on:
@@ -173,8 +185,19 @@ services:
       POSTGRES_DB: ${DB_DATABASE:-virtua_fc}
       POSTGRES_USER: ${DB_USERNAME:-virtua_fc}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD required}
+    # postgres:18+ stores data at /var/lib/postgresql/<major>/docker (a
+    # major-version-nested layout that supports pg_upgrade --link). Mount
+    # the parent dir so the image manages the version subdirectory itself.
+    # See docker-library/postgres#1259. Servers bootstrapped under the old
+    # ":/var/lib/postgresql/data" layout are migrated by the
+    # "Migrate postgres data layout" step in .github/workflows/deploy.yml.
     volumes:
-      - /var/lib/virtua-fc/postgres:/var/lib/postgresql/data
+      - /var/lib/virtua-fc/postgres:/var/lib/postgresql
+    # Bind to loopback only so a GUI client (TablePlus, pgAdmin, …) can
+    # reach it via SSH local-forward without ever exposing 5432 publicly:
+    #   ssh -L 5432:127.0.0.1:5432 deploy@<host>
+    ports:
+      - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-virtua_fc} -d ${DB_DATABASE:-virtua_fc}"]
       interval: 10s
