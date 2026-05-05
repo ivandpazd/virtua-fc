@@ -2,7 +2,7 @@ name: Build and deploy
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
   workflow_dispatch:
     inputs:
       tag:
@@ -32,12 +32,13 @@ permissions:
   packages: write
 
 jobs:
-  # Always builds and pushes to GHCR. Tagging:
+  # Builds and pushes to GHCR on push-to-main and on manual dispatch.
+  # Feature-branch pushes don't build by default (wasteful) — use
+  # workflow_dispatch from the Actions tab to build/deploy any branch
+  # for staging or first-time bootstrap. Tagging:
   #   - <12-char-sha>           always
   #   - <branch-name slugified> always
   #   - latest                  only on main
-  # This means every branch push produces a pullable image, so the very
-  # first server bootstrap can happen from any branch.
   build:
     runs-on: ubuntu-latest
     outputs:

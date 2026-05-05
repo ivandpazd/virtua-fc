@@ -847,15 +847,19 @@ GitHub repo's slug is, that's the image path.
 The image is published by `.github/workflows/deploy.yml`. There are two
 jobs:
 
-- **`build`** — runs on **every branch push** plus `workflow_dispatch`.
-  It runs `docker buildx build --target production` against the repo root
+- **`build`** — runs on **push to `main`** and on `workflow_dispatch`.
+  Feature-branch pushes don't trigger it (CI cost). To build any branch
+  on demand — for staging or first-time bootstrap — use Actions → "Run
+  workflow" and pick the branch. It runs
+  `docker buildx build --target production` against the repo root
   `Dockerfile` and pushes to GHCR with these tags:
   - `:<12-char-sha>` — always, immutable, what `deploy.sh` actually pins to.
   - `:<branch-name>` — always, e.g. `:claude-hetzner-deployment-monitoring-5lyhl`.
   - `:latest` — **only when the build is on `main`** (so feature branches
     can't accidentally move the prod-facing pointer).
-- **`deploy`** — runs **only on push to `main`** (or `workflow_dispatch`
-  with `deploy=true`). SSHes to the Hetzner box and runs
+- **`deploy`** — runs **on push to `main`** (deploys to production) or on
+  `workflow_dispatch` with `deploy=true` (deploys to whichever environment
+  you pick — `staging` or `production`). SSHes to the box and runs
   `IMAGE_TAG=<sha> /srv/virtua-fc/scripts/deploy.sh`.
 
 The push step uses the workflow's built-in `GITHUB_TOKEN` with
@@ -869,20 +873,19 @@ A fresh repo's `ghcr.io/<owner>/<repo>:latest` URL returns 404 until then —
 which is the order-of-operations problem you'll hit if you try to bootstrap
 the server before any CI build has happened.
 
-Because `build` runs on **every** branch push (not just `main`), the fix
-is simple: just push the branch you're working on. The build will succeed,
-the package will be created, and you'll have a pullable
-`ghcr.io/<owner>/<repo>:<branch-name>` tag — even though `:latest` doesn't
-exist yet (it'll appear when this lands on `main`).
+Because `build` only runs on push-to-`main` (deliberately, to avoid
+wasting CI on every feature-branch push), bootstrapping from a feature
+branch needs a manual nudge.
 
 Three paths to get the first image, in order of preference:
 
-1. **Push your branch.** Easiest. Just `git push`. The `build` job runs;
-   the `deploy` job is automatically skipped because you're not on main.
-   Watch it complete in the Actions tab; the package now exists.
-2. **Manually run the workflow** via Actions → "Build and deploy" → Run
-   workflow → pick your branch → leave `deploy` unchecked. Same end state
-   as #1.
+1. **Manually run the workflow** via Actions → "Build and deploy" → Run
+   workflow → pick your branch → leave `deploy` unchecked. The `build`
+   job runs and pushes the image with `:<branch-name>` and `:<sha>` tags;
+   `deploy` is skipped. This is the easiest path.
+2. **Merge to `main`.** Once your branch is reviewed and merged, the
+   push-to-main triggers a full build + deploy. Use this only when the
+   branch is actually ready to ship — not as a bootstrap shortcut.
 3. **Build and push from your laptop** as a last resort:
    ```bash
    echo "$GITHUB_TOKEN" | docker login ghcr.io -u <github-username> --password-stdin
@@ -907,8 +910,9 @@ After any of these:
 
 For a brand-new server + brand-new GHCR package, the order is:
 
-1. Push your bootstrap branch → CI build runs → image lands in GHCR
-   (tagged `:<branch>` and `:<sha>`, but **not** `:latest` yet).
+1. Trigger a build for your bootstrap branch via Actions → "Run
+   workflow" (leave `deploy` unchecked). Image lands in GHCR tagged
+   `:<branch>` and `:<sha>` — but **not** `:latest` yet.
 2. Make the package public *or* set up a PAT for the server (§11.4).
 3. Provision the Hetzner server with `cloud-init.yaml` (§3 Path A).
 4. SSH in, set `IMAGE_TAG=<branch-name>` in `/srv/virtua-fc/env/.env`,
