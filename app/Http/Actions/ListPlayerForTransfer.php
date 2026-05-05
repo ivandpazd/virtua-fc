@@ -20,10 +20,10 @@ class ListPlayerForTransfer
         $game = Game::findOrFail($gameId);
         $player = GamePlayer::where('id', $playerId)
             ->where('game_id', $gameId)
-            ->where('team_id', $game->team_id)
+            ->whereIn('team_id', $game->userTeamIds())
             ->firstOrFail();
 
-        if ($player->isLoanedIn($game->team_id)) {
+        if (! $player->isUserOwned($game)) {
             abort(403, 'Cannot list a loaned player for transfer.');
         }
 

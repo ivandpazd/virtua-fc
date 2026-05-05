@@ -39,8 +39,8 @@ class NegotiateCounterOffer
             ->where('status', TransferOffer::STATUS_PENDING)
             ->firstOrFail();
 
-        // Verify the player belongs to the user's team
-        if ($offer->gamePlayer->team_id !== $game->team_id) {
+        // Verify the player belongs to the user's organization (first team or reserve team)
+        if (! $game->ownsTeam($offer->gamePlayer->team_id) || ! $offer->gamePlayer->isUserOwned($game)) {
             abort(403);
         }
 

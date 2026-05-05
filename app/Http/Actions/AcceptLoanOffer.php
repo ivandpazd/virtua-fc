@@ -27,12 +27,12 @@ class AcceptLoanOffer
             ->where('status', TransferOffer::STATUS_PENDING)
             ->firstOrFail();
 
-        // Verify the player belongs to the user's team
-        if ($offer->gamePlayer->team_id !== $game->team_id) {
+        // Verify the player belongs to the user's organization (first team or reserve team)
+        if (! $game->ownsTeam($offer->gamePlayer->team_id)) {
             abort(403, 'You can only accept loan offers for your own players.');
         }
 
-        if ($offer->gamePlayer->isLoanedIn($game->team_id)) {
+        if (! $offer->gamePlayer->isUserOwned($game)) {
             abort(403, 'Cannot accept loan offers for loaned players.');
         }
 
