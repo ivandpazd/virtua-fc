@@ -106,13 +106,39 @@ jobs:
           chmod 0600 ~/.ssh/id_ed25519
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
 
+      - name: Debug SSH credentials
+        env:
+          HOST: ${{ secrets.HETZNER_HOST }}
+          USER: ${{ secrets.HETZNER_USER }}
+        run: |
+          echo "::group::Key file"
+          ls -l ~/.ssh/id_ed25519
+          wc -c ~/.ssh/id_ed25519
+          head -1 ~/.ssh/id_ed25519
+          tail -1 ~/.ssh/id_ed25519
+          echo "::endgroup::"
+
+          echo "::group::Key fingerprint (compare against server's authorized_keys)"
+          ssh-keygen -lf ~/.ssh/id_ed25519 || echo "ssh-keygen could not parse the private key — secret is malformed"
+          ssh-keygen -yf ~/.ssh/id_ed25519 | ssh-keygen -lf - || true
+          echo "::endgroup::"
+
+          echo "::group::Target"
+          echo "user length: ${#USER}"
+          echo "host length: ${#HOST}"
+          echo "::endgroup::"
+
+          echo "::group::Verbose SSH probe (will fail loudly with the server's reason)"
+          ssh -vvv -o BatchMode=yes -o ConnectTimeout=10 "$USER@$HOST" true || true
+          echo "::endgroup::"
+
       - name: Deploy
         env:
           TAG: ${{ needs.build.outputs.tag }}
           HOST: ${{ secrets.HETZNER_HOST }}
           USER: ${{ secrets.HETZNER_USER }}
         run: |
-          ssh "$USER@$HOST" "IMAGE_TAG=$TAG /srv/virtua-fc/scripts/deploy.sh"
+          ssh -v "$USER@$HOST" "IMAGE_TAG=$TAG /srv/virtua-fc/scripts/deploy.sh"
 
       - name: Smoke test
         env:
