@@ -106,39 +106,143 @@ jobs:
           chmod 0600 ~/.ssh/id_ed25519
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
 
-      - name: Debug SSH credentials
+      # Render the production .env from GitHub Secrets (sensitive) and Variables
+      # (config). This is the single source of truth — the file on the server is
+      # overwritten on every deploy. Any hand-edits there will be lost.
+      #
+      # Secrets must exist in the environment ('${{ inputs.environment || 'production' }}'):
+      #   HETZNER_HOST, HETZNER_USER, HETZNER_SSH_KEY (SSH access)
+      #   APP_KEY, DB_PASSWORD, REDIS_PASSWORD, RESEND_API_KEY,
+      #   NIGHTWATCH_TOKEN, GRAFANA_ADMIN_PASSWORD,
+      #   LOG_SLACK_WEBHOOK_URL (optional), STORAGEBOX_USER, STORAGEBOX_HOST
+      # Variables (non-sensitive):
+      #   APP_DOMAIN, ACME_EMAIL, MAIL_FROM_ADDRESS
+      #   Optional with defaults: GHCR_REPO, APP_LOCALE, APP_TIMEZONE, LOG_LEVEL,
+      #   BETA_MODE, DB_DATABASE, DB_USERNAME, MAIL_MAILER, MAIL_FROM_NAME,
+      #   TRUSTED_PROXIES, NIGHTWATCH_ENABLED, PULSE_ENABLED, GRAFANA_ADMIN_USER,
+      #   BACKUP_RETENTION_DAYS, STORAGEBOX_PATH
+      - name: Render production .env
+        env:
+          IMAGE_TAG: ${{ needs.build.outputs.tag }}
+          GHCR_REPO: ${{ vars.GHCR_REPO || github.repository }}
+          APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+          ACME_EMAIL: ${{ vars.ACME_EMAIL }}
+          APP_LOCALE: ${{ vars.APP_LOCALE || 'es' }}
+          APP_TIMEZONE: ${{ vars.APP_TIMEZONE || 'UTC' }}
+          LOG_LEVEL: ${{ vars.LOG_LEVEL || 'info' }}
+          BETA_MODE: ${{ vars.BETA_MODE || 'false' }}
+          DB_DATABASE: ${{ vars.DB_DATABASE || 'virtua_fc' }}
+          DB_USERNAME: ${{ vars.DB_USERNAME || 'virtua_fc' }}
+          MAIL_MAILER: ${{ vars.MAIL_MAILER || 'resend' }}
+          MAIL_FROM_ADDRESS: ${{ vars.MAIL_FROM_ADDRESS }}
+          MAIL_FROM_NAME: ${{ vars.MAIL_FROM_NAME || 'VirtuaFC' }}
+          TRUSTED_PROXIES: ${{ vars.TRUSTED_PROXIES || '*' }}
+          NIGHTWATCH_ENABLED: ${{ vars.NIGHTWATCH_ENABLED || 'true' }}
+          PULSE_ENABLED: ${{ vars.PULSE_ENABLED || 'true' }}
+          GRAFANA_ADMIN_USER: ${{ vars.GRAFANA_ADMIN_USER || 'admin' }}
+          BACKUP_RETENTION_DAYS: ${{ vars.BACKUP_RETENTION_DAYS || '14' }}
+          STORAGEBOX_PATH: ${{ vars.STORAGEBOX_PATH || '/home/virtua-fc/backups' }}
+          APP_KEY: ${{ secrets.APP_KEY }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD || 'null' }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NIGHTWATCH_TOKEN: ${{ secrets.NIGHTWATCH_TOKEN }}
+          GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+          LOG_SLACK_WEBHOOK_URL: ${{ secrets.LOG_SLACK_WEBHOOK_URL }}
+          STORAGEBOX_USER: ${{ secrets.STORAGEBOX_USER }}
+          STORAGEBOX_HOST: ${{ secrets.STORAGEBOX_HOST }}
+        run: |
+          # Fail fast if a required value is missing (compose would die later anyway).
+          for v in APP_DOMAIN ACME_EMAIL MAIL_FROM_ADDRESS APP_KEY DB_PASSWORD GRAFANA_ADMIN_PASSWORD; do
+            if [ -z "${!v}" ]; then
+              echo "::error::Required env value '$v' is empty in environment '${{ inputs.environment || 'production' }}'"
+              exit 1
+            fi
+          done
+
+          umask 077
+          {
+            echo "# Rendered by .github/workflows/deploy.yml — do not edit on the server."
+            echo "# Source of truth: GitHub environment '${{ inputs.environment || 'production' }}' (Secrets + Variables)."
+            echo "# Last render: $(date -u +%Y-%m-%dT%H:%M:%SZ) (commit ${GITHUB_SHA:0:12})"
+            echo
+            echo "GHCR_REPO=${GHCR_REPO}"
+            echo "IMAGE_TAG=${IMAGE_TAG}"
+            echo
+            echo "APP_DOMAIN=${APP_DOMAIN}"
+            echo "APP_URL=https://${APP_DOMAIN}"
+            echo "ACME_EMAIL=${ACME_EMAIL}"
+            echo
+            echo "APP_ENV=production"
+            echo "APP_KEY=${APP_KEY}"
+            echo "APP_LOCALE=${APP_LOCALE}"
+            echo "APP_TIMEZONE=${APP_TIMEZONE}"
+            echo "LOG_LEVEL=${LOG_LEVEL}"
+            echo "BETA_MODE=${BETA_MODE}"
+            echo
+            echo "DB_DATABASE=${DB_DATABASE}"
+            echo "DB_USERNAME=${DB_USERNAME}"
+            echo "DB_PASSWORD=${DB_PASSWORD}"
+            echo
+            echo "REDIS_PASSWORD=${REDIS_PASSWORD}"
+            echo
+            echo "MAIL_MAILER=${MAIL_MAILER}"
+            echo "MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}"
+            echo "MAIL_FROM_NAME=${MAIL_FROM_NAME}"
+            echo "RESEND_API_KEY=${RESEND_API_KEY}"
+            echo
+            echo "TRUSTED_PROXIES=${TRUSTED_PROXIES}"
+            echo
+            echo "NIGHTWATCH_ENABLED=${NIGHTWATCH_ENABLED}"
+            echo "NIGHTWATCH_TOKEN=${NIGHTWATCH_TOKEN}"
+            echo "PULSE_ENABLED=${PULSE_ENABLED}"
+            echo "LOG_SLACK_WEBHOOK_URL=${LOG_SLACK_WEBHOOK_URL}"
+            echo
+            echo "GRAFANA_ADMIN_USER=${GRAFANA_ADMIN_USER}"
+            echo "GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}"
+            echo
+            echo "BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS}"
+            echo "STORAGEBOX_USER=${STORAGEBOX_USER}"
+            echo "STORAGEBOX_HOST=${STORAGEBOX_HOST}"
+            echo "STORAGEBOX_PATH=${STORAGEBOX_PATH}"
+          } > production.env
+
+      # Capture the currently-running app image tag BEFORE we overwrite .env, so
+      # rollback.sh has a target. We read it from the running container (ground
+      # truth) rather than the old .env, so a manual `docker compose up` between
+      # deploys is still rollback-safe.
+      - name: Record rollback target
         env:
           HOST: ${{ secrets.HETZNER_HOST }}
           USER: ${{ secrets.HETZNER_USER }}
         run: |
-          echo "::group::Key file"
-          ls -l ~/.ssh/id_ed25519
-          wc -c ~/.ssh/id_ed25519
-          head -1 ~/.ssh/id_ed25519
-          tail -1 ~/.ssh/id_ed25519
-          echo "::endgroup::"
+          ssh "$USER@$HOST" '
+            set -e
+            CID=$(/srv/virtua-fc/scripts/compose.sh ps -q app 2>/dev/null || true)
+            if [ -n "$CID" ]; then
+              IMG=$(docker inspect --format="{{.Config.Image}}" "$CID")
+              echo "${IMG##*:}" > /srv/virtua-fc/env/.previous
+              echo "Recorded rollback target: $(cat /srv/virtua-fc/env/.previous)"
+            else
+              echo "No running app container — skipping rollback record (first deploy?)"
+            fi
+          '
 
-          echo "::group::Key fingerprint (compare against server's authorized_keys)"
-          ssh-keygen -lf ~/.ssh/id_ed25519 || echo "ssh-keygen could not parse the private key — secret is malformed"
-          ssh-keygen -yf ~/.ssh/id_ed25519 | ssh-keygen -lf - || true
-          echo "::endgroup::"
-
-          echo "::group::Target"
-          echo "user length: ${#USER}"
-          echo "host length: ${#HOST}"
-          echo "::endgroup::"
-
-          echo "::group::Verbose SSH probe (will fail loudly with the server's reason)"
-          ssh -vvv -o BatchMode=yes -o ConnectTimeout=10 "$USER@$HOST" true || true
-          echo "::endgroup::"
+      - name: Sync .env to server
+        env:
+          HOST: ${{ secrets.HETZNER_HOST }}
+          USER: ${{ secrets.HETZNER_USER }}
+        run: |
+          scp -p production.env "$USER@$HOST:/srv/virtua-fc/env/.env"
+          ssh "$USER@$HOST" "chmod 600 /srv/virtua-fc/env/.env"
+          rm -f production.env
 
       - name: Deploy
         env:
-          TAG: ${{ needs.build.outputs.tag }}
           HOST: ${{ secrets.HETZNER_HOST }}
           USER: ${{ secrets.HETZNER_USER }}
         run: |
-          ssh -v "$USER@$HOST" "IMAGE_TAG=$TAG /srv/virtua-fc/scripts/deploy.sh"
+          ssh "$USER@$HOST" "/srv/virtua-fc/scripts/deploy.sh"
 
       - name: Smoke test
         env:

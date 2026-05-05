@@ -1,34 +1,32 @@
 #!/usr/bin/env bash
-# Pull a new image tag and roll the app/horizon/scheduler services.
+# Pull the IMAGE_TAG declared in $ENV_FILE and roll app/horizon/scheduler.
 #
 # Usage:
-#   IMAGE_TAG=<sha> ./deploy.sh
+#   ./deploy.sh
 #
-# Called both interactively and from .github/workflows/deploy.yml. Records the
-# previous IMAGE_TAG to /srv/virtua-fc/env/.previous so rollback.sh can revert.
+# .env is the source of truth for IMAGE_TAG (and everything else) — it is
+# rendered by .github/workflows/deploy.yml on every deploy from GitHub Secrets
+# and Variables. CI also records the rollback target in $ROOT/env/.previous
+# before invoking this script. rollback.sh writes IMAGE_TAG into .env before
+# re-invoking this script.
 
 set -euo pipefail
 
 ROOT="${VFC_ROOT:-/srv/virtua-fc}"
 ENV_FILE="${VFC_ENV_FILE:-$ROOT/env/.env}"
-PREV_FILE="$ROOT/env/.previous"
 COMPOSE="$(dirname "$0")/compose.sh"
 
-if [ -z "${IMAGE_TAG:-}" ]; then
-    echo "IMAGE_TAG required" >&2
+if [ ! -f "$ENV_FILE" ]; then
+    echo "Missing env file: $ENV_FILE" >&2
     exit 1
 fi
 
-CURRENT_TAG=$(grep -E '^IMAGE_TAG=' "$ENV_FILE" | cut -d= -f2- || echo "latest")
-echo "==> Current tag: $CURRENT_TAG"
+IMAGE_TAG=$(grep -E '^IMAGE_TAG=' "$ENV_FILE" | cut -d= -f2- || true)
+if [ -z "$IMAGE_TAG" ]; then
+    echo "IMAGE_TAG missing from $ENV_FILE" >&2
+    exit 1
+fi
 echo "==> Deploying tag: $IMAGE_TAG"
-
-# Save the rollback target.
-echo "$CURRENT_TAG" > "$PREV_FILE"
-
-# Update the tag in .env atomically.
-sed -i.bak "s|^IMAGE_TAG=.*|IMAGE_TAG=$IMAGE_TAG|" "$ENV_FILE"
-rm -f "$ENV_FILE.bak"
 
 echo "==> Pulling images"
 "$COMPOSE" pull app horizon scheduler

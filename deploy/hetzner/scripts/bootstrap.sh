@@ -129,21 +129,25 @@ cat <<EOF
 ====================================================
 Bootstrap complete.
 
-Next steps (as the deploy user, NOT root):
+Next steps:
 
-  1. Copy the deploy/hetzner/ tree into /srv/virtua-fc/
-       rsync -a deploy/hetzner/ deploy@<host>:/srv/virtua-fc/
+  1. Copy the deploy/hetzner/ compose + scripts into /srv/virtua-fc/
+     (run from your laptop, as the deploy user):
+       rsync -a deploy/hetzner/compose/ deploy@<host>:/srv/virtua-fc/compose/
+       rsync -a deploy/hetzner/scripts/ deploy@<host>:/srv/virtua-fc/scripts/
 
-  2. Copy compose/.env.example to /srv/virtua-fc/env/.env (mode 0600)
-     and fill in secrets (APP_KEY, DB_PASSWORD, NIGHTWATCH_TOKEN, …).
-
-  3. Test SSH lockdown: 'ssh root@<host>' must fail.
+  2. Test SSH lockdown: 'ssh root@<host>' must fail.
      'ssh deploy@<host>' must succeed (key-only).
 
-  4. First-boot the stack:
-       cd /srv/virtua-fc/compose
-       docker compose --env-file /srv/virtua-fc/env/.env \\
-         -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+  3. Configure the production environment in GitHub:
+     Settings → Environments → production → Secrets and Variables.
+     See deploy/hetzner/compose/.env.example for the full list of keys
+     and which go in Secrets vs Variables.
+
+  4. Trigger the first deploy from the Actions tab (workflow_dispatch
+     with deploy=true). CI will render /srv/virtua-fc/env/.env from
+     your Secrets/Variables and bring the stack up. Do NOT hand-edit
+     .env on the server — it is overwritten on every deploy.
 
 See deploy/hetzner/README.md for the full playbook.
 ====================================================
