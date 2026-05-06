@@ -86,4 +86,21 @@ return [
 
     'destination_url' => env('MIGRATION_DESTINATION_URL'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Test user allow-list
+    |--------------------------------------------------------------------------
+    |
+    | Comma-separated list of user IDs. When set, the migration banner and
+    | the start action only fire for these users — everyone else sees beta
+    | as usual. Use this for a production smoke test before flipping
+    | MIGRATION_MODE on for real. Empty/unset → no restriction.
+    |
+    */
+
+    'test_user_ids' => array_values(array_filter(array_map(
+        'intval',
+        explode(',', (string) env('MIGRATION_TEST_USER_IDS', ''))
+    ))),
+
 ];

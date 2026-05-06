@@ -2,6 +2,7 @@
 
 namespace App\Http\Actions\Migration;
 
+use App\Modules\Migration\MigrationGate;
 use App\Modules\Migration\MigrationStatus;
 use App\Modules\Migration\Services\SignedHandoff;
 use App\Modules\Migration\TokenPurpose;
@@ -28,6 +29,11 @@ class StartMigration
     {
         $user = $request->user();
         abort_unless($user, 401);
+
+        // During a smoke test, only allow-listed users may proceed. Match the
+        // banner: if the gate hides the CTA, the route shouldn't be reachable
+        // by guessing the URL.
+        abort_unless(MigrationGate::isUserAllowed($user->id), 404);
 
         // Already migrated → no point re-handoff. Send them to the destination
         // anyway so they end up where the data actually lives.

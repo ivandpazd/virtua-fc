@@ -1,10 +1,12 @@
 @php
+    $user = auth()->user();
     $shouldShow = config('migration.mode') === 'export'
-        && auth()->check()
-        && auth()->user()->migration_status?->value === \App\Modules\Migration\MigrationStatus::PENDING->value;
+        && $user
+        && $user->migration_status?->value === \App\Modules\Migration\MigrationStatus::PENDING->value
+        && \App\Modules\Migration\MigrationGate::isUserAllowed($user->id);
 @endphp
 
-@if($shouldShow || auth()->user()?->is_admin)
+@if($shouldShow || $user?->is_admin)
     <div class="bg-emerald-500 text-emerald-950 text-center text-xs py-1.5 px-4">
         <span class="font-semibold">{{ __('migration.banner_label') }}</span>
         —
