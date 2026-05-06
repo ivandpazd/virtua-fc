@@ -9,16 +9,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * On the import-side deployment, redirect authenticated users whose
- * migration_status is `pending` (or `in_progress`) to /migration/import.
+ * migration_status is `pending`, `in_progress`, or `failed` to
+ * /migration/import.
  *
  * Pre-imported users — those whose control-plane row was bulk-copied from
  * beta before the cutover — carry that status. The first thing they see
  * after logging in is the "Copy my data" page; they can't accidentally
- * play on an empty account.
+ * play on an empty account. Users whose first attempt failed are also
+ * redirected so they actually see the retry button.
  *
  * No-op outside import mode, for unauthenticated requests, for users with
- * status `completed`/`failed`, and for migration / logout paths
- * themselves.
+ * status `completed`, and for migration / logout paths themselves.
  */
 class RequireMigrationOnImport
 {
@@ -41,7 +42,7 @@ class RequireMigrationOnImport
 
         if (! in_array(
             $user->migration_status,
-            [MigrationStatus::PENDING, MigrationStatus::IN_PROGRESS],
+            [MigrationStatus::PENDING, MigrationStatus::IN_PROGRESS, MigrationStatus::FAILED],
             true,
         )) {
             return $next($request);

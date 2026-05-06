@@ -6,58 +6,26 @@ use App\Modules\Migration\TableManifest;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Inverse of UserExporter. Takes the JSON envelope produced on the export
+ * Inverse of UserExporter. Takes the JSON envelopes produced on the export
  * side and inserts every row into this deployment's database.
  *
  * Per-game work runs inside a transaction on the tenant connection so a
  * partial failure on one game doesn't leave dangling orphans. Control-plane
  * writes use a separate transaction on `pgsql_control` for the same reason.
  *
- * Progress is reported via MigrationProgress so the import page can drive a
- * progress bar without the job knowing anything about HTTP.
+ * Retries are idempotent: every per-game import wipes existing rows for that
+ * game id (in reverse manifest order so FKs are satisfied) before inserting.
+ * This means a job that crashed half-way through can be re-run from scratch
+ * without hitting duplicate-key errors on the games already imported.
+ *
+ * Progress is reported by the caller (MigrationImportJob) via
+ * MigrationProgress.
  */
 class UserImporter
 {
-    public function __construct(
-        private readonly MigrationProgress $progress,
-    ) {
-    }
-
-    public function import(int $userId, array $envelope): void
+    public function importControlPlane(int $userId, array $controlPlane): void
     {
-        $this->progress::set($userId, 0, 'starting');
-
-        $this->importControlPlane($userId, $envelope['control_plane'] ?? []);
-
-        $games = $envelope['games'] ?? [];
-        $total = count($games);
-
-        if ($total === 0) {
-            $this->progress::set($userId, 100, 'finalizing');
-
-            return;
-        }
-
-        foreach ($games as $i => $game) {
-            $current = $i + 1;
-            // Reserve 10–95% for game imports; 0–10% was control plane,
-            // 95–100% is the finalising step the caller writes on success.
-            $percent = 10 + (int) round((($current - 1) / $total) * 85);
-            $this->progress::set($userId, $percent, 'games', [
-                'current' => $current,
-                'total' => $total,
-            ]);
-
-            $this->importGame($game);
-        }
-
-        $this->progress::set($userId, 95, 'finalizing');
-    }
-
-    private function importControlPlane(int $userId, array $controlPlane): void
-    {
-        DB::connection('pgsql_control')->transaction(function () use ($userId, $controlPlane) {
-            $this->progress::set($userId, 2, 'user');
+        DB::connection('pgsql_control')->transaction(function () use ($controlPlane) {
             foreach (TableManifest::CONTROL_PLANE_TABLES as $table => $meta) {
                 $rows = $controlPlane[$table] ?? [];
                 if (empty($rows)) {
@@ -66,14 +34,17 @@ class UserImporter
 
                 $this->upsertOnControl($table, $meta['key'], $rows);
             }
-            $this->progress::set($userId, 10, 'stats');
         });
     }
 
     /** @param array{game_id: string, tables: array<string, list<array>>} $game */
-    private function importGame(array $game): void
+    public function importGame(array $game): void
     {
-        DB::transaction(function () use ($game) {
+        $gameId = $game['game_id'];
+
+        DB::transaction(function () use ($game, $gameId) {
+            $this->wipeGame($gameId);
+
             foreach (TableManifest::TENANT_TABLES_IN_INSERT_ORDER as $table) {
                 $rows = $game['tables'][$table] ?? [];
                 if (empty($rows)) {
@@ -87,6 +58,23 @@ class UserImporter
                 }
             }
         });
+    }
+
+    /**
+     * Delete every row tied to this game id, in reverse manifest order.
+     *
+     * We don't lean on FK ON DELETE CASCADE because not every per-game table
+     * was created with a cascading FK (e.g. `competition_entries.game_id`
+     * uses the default RESTRICT). Reverse-order deletes work for every table
+     * regardless of FK action and don't depend on schema details staying put.
+     */
+    private function wipeGame(string $gameId): void
+    {
+        $tables = array_reverse(TableManifest::TENANT_TABLES_IN_INSERT_ORDER);
+        foreach ($tables as $table) {
+            $column = $table === 'games' ? 'id' : 'game_id';
+            DB::table($table)->where($column, $gameId)->delete();
+        }
     }
 
     private function upsertOnControl(string $table, string $keyColumn, array $rows): void
