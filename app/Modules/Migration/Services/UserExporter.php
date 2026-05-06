@@ -120,7 +120,11 @@ class UserExporter
     private function tenantTableExists(string $table): bool
     {
         if ($this->tenantTables === null) {
-            $this->tenantTables = array_fill_keys(Schema::getTableListing(), true);
+            // schemaQualified=false — getTableListing() defaults to true,
+            // which returns names like "public.games". The manifest stores
+            // bare names ("games"), so without this every lookup misses and
+            // we silently ship empty tables.
+            $this->tenantTables = array_fill_keys(Schema::getTableListing(schemaQualified: false), true);
         }
 
         return isset($this->tenantTables[$table]);
