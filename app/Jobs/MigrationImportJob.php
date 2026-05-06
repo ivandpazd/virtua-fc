@@ -43,7 +43,7 @@ class MigrationImportJob implements ShouldQueue
     public function __construct(
         public readonly int $userId,
     ) {
-        $this->onQueue('migration');
+        $this->onQueue('cleanup');
     }
 
     public function handle(SignedHandoff $handoff, UserImporter $importer): void
