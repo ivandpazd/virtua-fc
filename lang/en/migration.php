@@ -11,8 +11,8 @@ return [
     'handoff_user_missing' => 'We could not find your account on the new server. Please contact support.',
 
     // Import page (import side)
-    'import_title' => 'Welcome to your new home',
-    'import_intro' => 'Your account is here. One last step: copy your manager career data from the old server.',
+    'import_title' => 'Complete your migration',
+    'import_intro' => 'Click the button to copy your manager career and all your games to the new server.',
     'import_cta' => 'Copy my data',
     'import_in_progress' => 'Copying your data…',
     'import_progress_label' => ':percent% — :step',

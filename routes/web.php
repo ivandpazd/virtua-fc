@@ -346,4 +346,19 @@ Route::middleware(['auth', 'migration.mode:export'])->group(function () {
         ->name('migration.start');
 });
 
+Route::middleware('migration.mode:import')->group(function () {
+    // Public landing page that consumes a handoff token and logs the user in.
+    Route::get('/migration/land', \App\Http\Actions\Migration\LandMigration::class)
+        ->name('migration.land');
+
+    Route::middleware('auth')->group(function () {
+        Route::get('/migration/import', \App\Http\Views\Migration\ShowImport::class)
+            ->name('migration.import.show');
+        Route::post('/migration/import', \App\Http\Actions\Migration\StartImport::class)
+            ->name('migration.import.start');
+        Route::get('/migration/status', \App\Http\Actions\Migration\MigrationStatusEndpoint::class)
+            ->name('migration.import.status');
+    });
+});
+
 require __DIR__.'/auth.php';

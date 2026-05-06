@@ -11,8 +11,8 @@ return [
     'handoff_user_missing' => 'No hemos podido encontrar tu cuenta en el nuevo servidor. Contacta con soporte.',
 
     // Import page (import side)
-    'import_title' => 'Bienvenido a tu nuevo hogar',
-    'import_intro' => 'Tu cuenta ya está aquí. Solo queda un paso: copiar tu carrera de mánager desde el servidor anterior.',
+    'import_title' => 'Completa tu migración',
+    'import_intro' => 'Pulsa el botón para copiar tu carrera de mánager y todas tus partidas al nuevo servidor.',
     'import_cta' => 'Copiar mis datos',
     'import_in_progress' => 'Copiando tus datos…',
     'import_progress_label' => ':percent% — :step',
