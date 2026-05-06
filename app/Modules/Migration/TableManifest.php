@@ -41,8 +41,10 @@ final class TableManifest
         'games',
 
         // Direct children of games (depend only on game_id).
-        'game_matches',
+        // game_players must come before game_matches because
+        // game_matches.mvp_player_id is an FK to game_players.id.
         'game_players',
+        'game_matches',
         'game_standings',
         'game_tactics',
         'game_tactical_presets',

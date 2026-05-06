@@ -146,6 +146,33 @@ class ExportImportRoundtripTest extends TestCase
         $this->assertSame('2025', $reloadedGame->season);
     }
 
+    public function test_roundtrip_handles_cross_table_fk_within_a_game(): void
+    {
+        // Regression: game_matches.mvp_player_id is an FK to game_players.id.
+        // If the manifest insert order puts game_matches before game_players,
+        // the importer trips a foreign-key violation on insert.
+        $user = User::factory()->create();
+        $team = Team::factory()->create();
+        $game = Game::factory()->create(['user_id' => $user->id, 'team_id' => $team->id]);
+
+        $player = GamePlayer::factory()->forGame($game)->forTeam($team)->create();
+        $match = GameMatch::factory()->forGame($game)->create([
+            'mvp_player_id' => $player->id,
+        ]);
+
+        $payload = (new UserExporter())->exportGame($user->id, $game->id);
+
+        $this->wipeGame($game->id);
+
+        // Must not throw — the importer must insert game_players before
+        // game_matches so the mvp_player_id FK resolves.
+        (new UserImporter())->importGame($payload);
+
+        $reloaded = DB::table('game_matches')->where('id', $match->id)->first();
+        $this->assertNotNull($reloaded);
+        $this->assertSame($player->id, $reloaded->mvp_player_id);
+    }
+
     public function test_import_game_is_idempotent_on_retry(): void
     {
         $user = User::factory()->create();
