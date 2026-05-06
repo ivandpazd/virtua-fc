@@ -35,6 +35,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'beta.invite' => \App\Http\Middleware\RequireInviteForRegistration::class,
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'database.editor' => \App\Http\Middleware\EnsureDatabaseEditor::class,
+            'migration.mode' => \App\Http\Middleware\RequireMigrationMode::class,
+            'migration.s2s' => \App\Http\Middleware\VerifyMigrationBearer::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

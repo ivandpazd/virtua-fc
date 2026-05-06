@@ -2,10 +2,9 @@
 
 return [
     // Banner (export side)
-    'banner_headline' => 'VirtuaFC has moved to a new home',
-    'banner_body' => 'We are migrating to faster servers. Click below to move your account and games. It only takes a minute.',
-    'banner_cta' => 'Move me to the new home',
-    'banner_dismiss' => 'Later',
+    'banner_label' => 'New server',
+    'banner_body' => 'VirtuaFC has a new server. Your data and games will be copied automatically and you can keep playing as always.',
+    'banner_cta' => 'Move me to the new server',
 
     // Handoff errors
     'handoff_invalid' => 'This migration link is invalid or has expired. Please go back and try again.',

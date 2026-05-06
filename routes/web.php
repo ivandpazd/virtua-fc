@@ -338,4 +338,12 @@ Route::middleware(['auth', 'database.editor'])->prefix('editor')->name('editor.'
     Route::post('/player-templates/{id}/restore/{auditId}', RestorePlayerTemplate::class)->name('player-templates.restore');
 });
 
+// Beta→prod migration. The same routes file is shipped on both deployments;
+// the `migration.mode:<role>` middleware 404s if the deployment isn't acting
+// in that role. See config/migration.php.
+Route::middleware(['auth', 'migration.mode:export'])->group(function () {
+    Route::post('/migration/start', \App\Http\Actions\Migration\StartMigration::class)
+        ->name('migration.start');
+});
+
 require __DIR__.'/auth.php';

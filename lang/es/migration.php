@@ -2,10 +2,9 @@
 
 return [
     // Banner (export side)
-    'banner_headline' => 'VirtuaFC se ha mudado a un nuevo hogar',
-    'banner_body' => 'Estamos migrando a servidores más rápidos. Pulsa el botón para llevar tu cuenta y partidas. Solo lleva un minuto.',
-    'banner_cta' => 'Llévame al nuevo hogar',
-    'banner_dismiss' => 'Más tarde',
+    'banner_label' => 'Nuevo servidor',
+    'banner_body' => 'VirtuaFC tiene un nuevo servidor. Tus datos y partidas se copiarán automáticamente y podrás seguir jugando como siempre.',
+    'banner_cta' => 'Llévame al nuevo servidor',
 
     // Handoff errors
     'handoff_invalid' => 'Este enlace de migración no es válido o ha caducado. Vuelve atrás e inténtalo de nuevo.',
