@@ -28,6 +28,12 @@ return [
     'import_already_completed' => 'You have already migrated. Continue to your dashboard.',
     'import_already_in_progress' => 'A migration is already running for your account.',
     'import_no_data_found' => 'We could not find any data to migrate for your account.',
+    'import_skip_link' => 'Or start fresh without copying',
+    'import_skip_modal_title' => 'Start fresh?',
+    'import_skip_modal_body' => 'Your old career and games will stay on the legacy server but you won\'t be able to access them anymore. You will start with a clean slate here. This cannot be undone.',
+    'import_skip_modal_confirm' => 'Yes, start fresh',
+    'import_skip_modal_cancel' => 'Cancel',
+    'import_skip_not_allowed' => 'This account can\'t skip the migration in its current state.',
 
     // Export side — user has migrated and tries to use beta
     'completed_title' => 'Migration completed',

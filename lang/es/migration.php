@@ -28,6 +28,12 @@ return [
     'import_already_completed' => 'Ya has migrado. Continúa a tu panel.',
     'import_already_in_progress' => 'Ya hay una migración en curso para tu cuenta.',
     'import_no_data_found' => 'No hemos encontrado datos que migrar para tu cuenta.',
+    'import_skip_link' => 'O empieza desde cero sin copiar nada',
+    'import_skip_modal_title' => '¿Empezar desde cero?',
+    'import_skip_modal_body' => 'Tu carrera y partidas anteriores se quedarán en el servidor antiguo, pero ya no podrás acceder a ellas. Empezarás con una cuenta limpia aquí. Esto no se puede deshacer.',
+    'import_skip_modal_confirm' => 'Sí, empezar desde cero',
+    'import_skip_modal_cancel' => 'Cancelar',
+    'import_skip_not_allowed' => 'Esta cuenta no puede saltarse la migración en su estado actual.',
 
     // Export side — user has migrated and tries to use beta
     'completed_title' => 'Migración completada',

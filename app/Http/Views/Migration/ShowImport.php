@@ -35,6 +35,7 @@ class ShowImport
                 'failed' => MigrationStatus::FAILED->value,
             ],
             'startUrl' => route('migration.import.start'),
+            'skipUrl' => route('migration.import.skip'),
             'statusUrl' => route('migration.import.status'),
             'dashboardUrl' => route('dashboard'),
         ]);

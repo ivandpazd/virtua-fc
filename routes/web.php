@@ -363,6 +363,8 @@ Route::middleware('migration.mode:import')->group(function () {
             ->name('migration.import.show');
         Route::post('/migration/import', \App\Http\Actions\Migration\StartImport::class)
             ->name('migration.import.start');
+        Route::post('/migration/skip', \App\Http\Actions\Migration\SkipImport::class)
+            ->name('migration.import.skip');
         Route::get('/migration/status', \App\Http\Actions\Migration\MigrationStatusEndpoint::class)
             ->name('migration.import.status');
     });

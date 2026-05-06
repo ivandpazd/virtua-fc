@@ -4,6 +4,7 @@
             initialStatus: @js($status->value),
             statusValues: @js($statusValues),
             startUrl: @js($startUrl),
+            skipUrl: @js($skipUrl),
             statusUrl: @js($statusUrl),
             dashboardUrl: @js($dashboardUrl),
             steps: @js([
@@ -39,6 +40,13 @@
                             class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent-blue hover:bg-blue-600 text-white font-semibold rounded-lg transition shadow-lg shadow-accent-blue/20">
                         <span>{{ __('migration.import_cta') }}</span>
                     </button>
+                    <div class="mt-6">
+                        <button type="button"
+                                @click="$dispatch('open-modal', 'migration-skip')"
+                                class="text-sm text-text-tertiary hover:text-text-secondary underline underline-offset-2 transition">
+                            {{ __('migration.import_skip_link') }}
+                        </button>
+                    </div>
                 </div>
             </template>
 
@@ -99,10 +107,44 @@
                             class="inline-flex items-center justify-center px-6 py-3 bg-accent-red hover:bg-red-500 text-white font-semibold rounded-lg transition shadow-lg shadow-accent-red/20">
                         {{ __('migration.import_retry') }}
                     </button>
+                    <div class="mt-6">
+                        <button type="button"
+                                @click="$dispatch('open-modal', 'migration-skip')"
+                                class="text-sm text-text-tertiary hover:text-text-secondary underline underline-offset-2 transition">
+                            {{ __('migration.import_skip_link') }}
+                        </button>
+                    </div>
                 </div>
             </template>
 
         </div>
+
+        {{-- Skip confirmation modal --}}
+        <x-modal name="migration-skip" maxWidth="md">
+            <div class="p-6">
+                <h2 class="font-heading text-xl font-bold uppercase tracking-wide text-text-primary mb-3">
+                    {{ __('migration.import_skip_modal_title') }}
+                </h2>
+                <p class="text-sm text-text-secondary mb-6">
+                    {{ __('migration.import_skip_modal_body') }}
+                </p>
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+                    <button type="button"
+                            @click="$dispatch('close-modal', 'migration-skip')"
+                            :disabled="skipping"
+                            class="inline-flex justify-center items-center px-4 py-2 bg-surface-700 hover:bg-surface-600 text-text-primary font-semibold rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed">
+                        {{ __('migration.import_skip_modal_cancel') }}
+                    </button>
+                    <button type="button"
+                            @click="skip()"
+                            :disabled="skipping"
+                            class="inline-flex justify-center items-center px-4 py-2 bg-accent-red hover:bg-red-500 text-white font-semibold rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed">
+                        <span x-show="!skipping">{{ __('migration.import_skip_modal_confirm') }}</span>
+                        <span x-show="skipping" x-cloak>…</span>
+                    </button>
+                </div>
+            </div>
+        </x-modal>
     </div>
 
     <script>
@@ -111,6 +153,7 @@
                 status: config.initialStatus,
                 statusValues: config.statusValues,
                 startUrl: config.startUrl,
+                skipUrl: config.skipUrl,
                 statusUrl: config.statusUrl,
                 dashboardUrl: config.dashboardUrl,
                 steps: config.steps,
@@ -118,6 +161,7 @@
                 step: 'starting',
                 stepExtra: {},
                 errorMessage: '',
+                skipping: false,
                 pollHandle: null,
 
                 init() {
@@ -150,6 +194,35 @@
                     } catch (e) {
                         this.status = this.statusValues.failed;
                         this.errorMessage = e.message;
+                    }
+                },
+
+                async skip() {
+                    if (this.skipping) {
+                        return;
+                    }
+                    this.skipping = true;
+                    this.errorMessage = '';
+                    try {
+                        const response = await fetch(this.skipUrl, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                            },
+                        });
+                        if (response.ok) {
+                            window.location.href = this.dashboardUrl;
+                            return;
+                        }
+                        const body = await response.json().catch(() => ({}));
+                        this.errorMessage = body.message || '';
+                        this.$dispatch('close-modal', 'migration-skip');
+                    } catch (e) {
+                        this.errorMessage = e.message;
+                        this.$dispatch('close-modal', 'migration-skip');
+                    } finally {
+                        this.skipping = false;
                     }
                 },
 
