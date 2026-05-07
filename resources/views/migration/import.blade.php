@@ -94,26 +94,14 @@
             <template x-if="status === statusValues.failed">
                 <div x-cloak>
                     <div class="flex justify-center mb-6">
-                        <div class="w-16 h-16 rounded-full bg-accent-red/15 flex items-center justify-center">
-                            <svg class="w-9 h-9 text-accent-red" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <div class="w-16 h-16 rounded-full bg-accent-orange/15 flex items-center justify-center">
+                            <svg class="w-9 h-9 text-accent-orange" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                             </svg>
                         </div>
                     </div>
-                    <p class="text-accent-red font-semibold mb-2">{{ __('migration.import_failed') }}</p>
-                    <p class="text-xs text-text-muted mb-8" x-text="errorMessage" x-show="errorMessage"></p>
-                    <button type="button"
-                            @click="start()"
-                            class="inline-flex items-center justify-center px-6 py-3 bg-accent-red hover:bg-red-500 text-white font-semibold rounded-lg transition shadow-lg shadow-accent-red/20">
-                        {{ __('migration.import_retry') }}
-                    </button>
-                    <div class="mt-6">
-                        <button type="button"
-                                @click="$dispatch('open-modal', 'migration-skip')"
-                                class="text-sm text-text-tertiary hover:text-text-secondary underline underline-offset-2 transition">
-                            {{ __('migration.import_skip_link') }}
-                        </button>
-                    </div>
+                    <p class="text-text-primary font-semibold mb-3">{{ __('migration.import_failed') }}</p>
+                    <p class="text-sm text-text-secondary">{{ __('migration.import_failed_body') }}</p>
                 </div>
             </template>
 
@@ -160,7 +148,6 @@
                 percent: 0,
                 step: 'starting',
                 stepExtra: {},
-                errorMessage: '',
                 skipping: false,
                 pollHandle: null,
 
@@ -171,7 +158,6 @@
                 },
 
                 async start() {
-                    this.errorMessage = '';
                     try {
                         const response = await fetch(this.startUrl, {
                             method: 'POST',
@@ -189,11 +175,9 @@
                             window.location.href = this.dashboardUrl;
                         } else {
                             this.status = body.status || this.statusValues.failed;
-                            this.errorMessage = body.message || '';
                         }
                     } catch (e) {
                         this.status = this.statusValues.failed;
-                        this.errorMessage = e.message;
                     }
                 },
 
@@ -202,7 +186,6 @@
                         return;
                     }
                     this.skipping = true;
-                    this.errorMessage = '';
                     try {
                         const response = await fetch(this.skipUrl, {
                             method: 'POST',
@@ -215,11 +198,8 @@
                             window.location.href = this.dashboardUrl;
                             return;
                         }
-                        const body = await response.json().catch(() => ({}));
-                        this.errorMessage = body.message || '';
                         this.$dispatch('close-modal', 'migration-skip');
                     } catch (e) {
-                        this.errorMessage = e.message;
                         this.$dispatch('close-modal', 'migration-skip');
                     } finally {
                         this.skipping = false;
@@ -249,9 +229,6 @@
                             this.percent = body.progress.percent ?? this.percent;
                             this.step = body.progress.step ?? this.step;
                             this.stepExtra = body.progress.extra ?? {};
-                            if (body.progress.extra && body.progress.extra.error) {
-                                this.errorMessage = body.progress.extra.error;
-                            }
                         }
                         if (
                             this.status === this.statusValues.completed
