@@ -75,19 +75,20 @@ class MigrationImportJob implements ShouldQueue
                 'control_plane_counts' => $controlPlaneCounts,
             ]);
 
-            MigrationProgress::set($this->userId, 5, 'control_plane');
-            $importer->importControlPlane($this->userId, $manifest['control_plane'] ?? []);
-
+            // Per-game (tenant) data must be imported BEFORE the control
+            // plane: manager_stats.game_id is a cross-plane FK to games.id,
+            // so the games rows have to exist before manager_stats can
+            // reference them.
             $gameIds = $manifest['game_ids'] ?? [];
             $total = count($gameIds);
 
             foreach ($gameIds as $i => $gameId) {
                 $current = $i + 1;
-                // Reserve 10–95% for game imports; 0–10% was control plane,
-                // 95–100% is the finalising step at the end.
+                // Reserve 5–90% for game imports. 0–5% is "starting",
+                // 90–95% is control plane, 95–100% is finalising.
                 $percent = $total === 0
-                    ? 95
-                    : 10 + (int) round((($current - 1) / $total) * 85);
+                    ? 90
+                    : 5 + (int) round((($current - 1) / $total) * 85);
                 MigrationProgress::set($this->userId, $percent, 'games', [
                     'current' => $current,
                     'total' => $total,
@@ -117,6 +118,9 @@ class MigrationImportJob implements ShouldQueue
                     'inserted_counts' => $importer->lastInsertCounts(),
                 ]);
             }
+
+            MigrationProgress::set($this->userId, 90, 'control_plane');
+            $importer->importControlPlane($this->userId, $manifest['control_plane'] ?? []);
 
             MigrationProgress::set($this->userId, 95, 'finalizing');
             $this->seal($handoff);
