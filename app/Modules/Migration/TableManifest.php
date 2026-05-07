@@ -25,6 +25,7 @@ final class TableManifest
         'users' => ['key' => 'id'],
         // Single row per user, keyed by user_id.
         'manager_stats' => ['key' => 'user_id'],
+        'tournament_summaries' => ['key' => 'user_id'],
     ];
 
     /**
@@ -69,6 +70,7 @@ final class TableManifest
         'season_ticket_pricings',
         'simulated_seasons',
         'manager_trophies',
+        'activation_events',
 
         // Match-scoped (FK: game_match_id → game_matches.id).
         'match_events',
