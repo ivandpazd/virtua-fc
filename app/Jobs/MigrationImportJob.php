@@ -11,7 +11,9 @@ use App\Modules\Migration\TokenPurpose;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
@@ -149,7 +151,9 @@ class MigrationImportJob implements ShouldQueue
 
     private function fetchManifest(SignedHandoff $handoff): array
     {
-        $response = $this->exportClient($handoff)->get($this->peerBase().'/api/migration/export');
+        $response = $this->sendWithRetries(
+            fn () => $this->exportClient($handoff)->get($this->peerBase().'/api/migration/export')
+        );
 
         if (! $response->successful()) {
             throw new \RuntimeException(
@@ -167,8 +171,10 @@ class MigrationImportJob implements ShouldQueue
 
     private function fetchGame(SignedHandoff $handoff, string $gameId): array
     {
-        $response = $this->exportClient($handoff)
-            ->get($this->peerBase().'/api/migration/export', ['game_id' => $gameId]);
+        $response = $this->sendWithRetries(
+            fn () => $this->exportClient($handoff)
+                ->get($this->peerBase().'/api/migration/export', ['game_id' => $gameId])
+        );
 
         if (! $response->successful()) {
             throw new \RuntimeException(
@@ -184,6 +190,39 @@ class MigrationImportJob implements ShouldQueue
         return $envelope;
     }
 
+    /**
+     * Wraps a request closure to retry on 5xx responses. Connection-level
+     * errors (TCP/DNS/cURL) are already retried at the HTTP client layer in
+     * exportClient(); if a ConnectionException still bubbles up here it means
+     * those native retries were exhausted, and we let it propagate as a
+     * terminal failure. 4xx responses also pass straight through — those
+     * indicate an auth or contract issue that won't recover by retrying.
+     */
+    private function sendWithRetries(\Closure $send): Response
+    {
+        $maxAttempts = 3;
+        $sleepMs = 2000;
+        $attempt = 0;
+
+        while (true) {
+            $attempt++;
+            $response = $send();
+
+            if ($response->serverError() && $attempt < $maxAttempts) {
+                Log::info('MigrationImport: 5xx response, retrying', [
+                    'user_id' => $this->userId,
+                    'status' => $response->status(),
+                    'attempt' => $attempt,
+                ]);
+                usleep($sleepMs * 1000);
+
+                continue;
+            }
+
+            return $response;
+        }
+    }
+
     private function exportClient(SignedHandoff $handoff): PendingRequest
     {
         $token = $handoff->mint(
@@ -195,7 +234,12 @@ class MigrationImportJob implements ShouldQueue
         return Http::withToken($token)
             ->acceptJson()
             ->withHeaders(['Accept-Encoding' => 'gzip'])
-            ->timeout(600);
+            ->timeout(600)
+            // Network-level retries: cURL drops, TCP resets, DNS blips. 5xx
+            // responses are handled separately in sendWithRetries() because
+            // making them throw here would also throw on 4xx (which we don't
+            // want to retry).
+            ->retry(2, 500, fn (\Throwable $e) => $e instanceof ConnectionException);
     }
 
     private function seal(SignedHandoff $handoff): void
