@@ -218,9 +218,9 @@
             <div class="text-xs sm:text-[0.65rem] text-slate-500">
                 © 2026 Pablo Román
                 <br>
-                <a href="https://beta.virtuafc.com/legal" class="text-accent-blue border-b border-accent-blue">Aviso Legal</a> ·
+                <a href="https://play.virtuafc.com/legal" class="text-accent-blue border-b border-accent-blue">Aviso Legal</a> ·
                 <a href="https://github.com/pabloroman/virtua-fc" target="_blank" class="text-accent-blue border-b border-accent-blue">GitHub</a> ·
-                <a href="https://beta.virtuafc.com/login" class="text-accent-blue border-b border-accent-blue">Iniciar sesión</a>
+                <a href="https://play.virtuafc.com/login" class="text-accent-blue border-b border-accent-blue">Iniciar sesión</a>
             </div>
 
         </div>
@@ -244,7 +244,7 @@
             formMessage.classList.add('hidden');
 
             try {
-                const res = await fetch('https://beta.virtuafc.com/api/waitlist', {
+                const res = await fetch('https://play.virtuafc.com/api/waitlist', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, wants_career: false, wants_tournament: true }),
