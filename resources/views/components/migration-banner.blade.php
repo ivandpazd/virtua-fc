@@ -6,7 +6,7 @@
         && \App\Modules\Migration\MigrationGate::isUserAllowed($user->id);
 @endphp
 
-@if($shouldShow || $user?->is_admin)
+@if($shouldShow)
     <div class="bg-emerald-500 text-emerald-950 text-center text-xs py-1.5 px-4">
         <span class="font-semibold">{{ __('migration.banner_label') }}</span>
         —
