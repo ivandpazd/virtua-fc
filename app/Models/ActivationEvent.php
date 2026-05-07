@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ActivationEvent extends Model
 {
+    use HasUuids;
+
     /**
      * Onboarding/activation analytics live on the control plane. See
      * CLAUDE.md → "Control plane / tenant plane".
