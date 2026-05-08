@@ -9,6 +9,7 @@ use App\Models\GamePlayer;
 use App\Models\Loan;
 use App\Models\ShortlistedPlayer;
 use App\Models\Team;
+use App\Models\TransferOffer;
 use App\Support\CountryCodeMapper;
 use App\Support\PositionMapper;
 use Illuminate\Support\Collection;
@@ -148,9 +149,12 @@ class ExploreService
             ->keyBy('game_player_id');
 
         $shortlistedIds = $this->getShortlistedIds($game->id, $playerIds);
+        $preContractStatuses = TransferOffer::getUserPreContractStatuses(
+            $game->id, $game->team_id, $playerIds
+        );
         $userTeamIds = $game->userTeamIds();
 
-        return $players->map(function ($gp) use ($activeLoans, $shortlistedIds, $teamId, $userTeamIds) {
+        return $players->map(function ($gp) use ($activeLoans, $shortlistedIds, $preContractStatuses, $teamId, $userTeamIds) {
             $loan = $activeLoans->get($gp->id);
             $gp->is_loaned_in = $loan && $loan->loan_team_id === $teamId;
             $gp->is_on_loan = $loan !== null;
@@ -158,6 +162,7 @@ class ExploreService
             $gp->is_user_owned = $loan
                 ? in_array($loan->parent_team_id, $userTeamIds, true)
                 : in_array($gp->team_id, $userTeamIds, true);
+            $gp->user_pre_contract_status = $preContractStatuses[$gp->id] ?? null;
 
             return $gp;
         })->sort(fn ($a, $b) => $this->sortByPositionThenValue($a, $b));
@@ -180,11 +185,16 @@ class ExploreService
 
         $players = $query->get();
 
-        $shortlistedIds = $this->getShortlistedIds($game->id, $players->pluck('id')->toArray());
+        $playerIds = $players->pluck('id')->toArray();
+        $shortlistedIds = $this->getShortlistedIds($game->id, $playerIds);
+        $preContractStatuses = TransferOffer::getUserPreContractStatuses(
+            $game->id, $game->team_id, $playerIds
+        );
 
-        return $players->map(function ($gp) use ($shortlistedIds, $game) {
+        return $players->map(function ($gp) use ($shortlistedIds, $preContractStatuses, $game) {
             $gp->is_shortlisted = in_array($gp->id, $shortlistedIds);
             $gp->is_user_owned = false;
+            $gp->user_pre_contract_status = $preContractStatuses[$gp->id] ?? null;
             $gp->free_agent_willingness = $this->scoutingService->getFreeAgentWillingnessLevel(
                 $gp, $game->id, $game->team_id
             );
@@ -320,16 +330,20 @@ class ExploreService
             ->active()
             ->get()
             ->keyBy('game_player_id');
+        $preContractStatuses = TransferOffer::getUserPreContractStatuses(
+            $game->id, $game->team_id, $playerIds
+        );
         $userTeamIds = $game->userTeamIds();
 
         $players = $players
-            ->map(function ($gp) use ($shortlistedIds, $activeLoans, $userTeamIds) {
+            ->map(function ($gp) use ($shortlistedIds, $activeLoans, $preContractStatuses, $userTeamIds) {
                 $loan = $activeLoans->get($gp->id);
                 $gp->is_shortlisted = in_array($gp->id, $shortlistedIds);
                 $gp->is_on_loan = $loan !== null;
                 $gp->is_user_owned = $loan
                     ? in_array($loan->parent_team_id, $userTeamIds, true)
                     : in_array($gp->team_id, $userTeamIds, true);
+                $gp->user_pre_contract_status = $preContractStatuses[$gp->id] ?? null;
 
                 return $gp;
             })

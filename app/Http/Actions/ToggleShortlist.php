@@ -5,6 +5,7 @@ namespace App\Http\Actions;
 use App\Models\Game;
 use App\Models\GamePlayer;
 use App\Models\ShortlistedPlayer;
+use App\Models\TransferOffer;
 use App\Modules\Transfer\Services\ScoutingService;
 use App\Support\Money;
 use App\Support\PositionMapper;
@@ -39,6 +40,28 @@ class ToggleShortlist
             }
 
             return redirect()->back()->with('error', $message);
+        }
+
+        // Block shortlisting players the user already has an active pre-contract
+        // with (pending or agreed) — the UI hides the action, this guards
+        // against direct POSTs / replays.
+        if (!$existing) {
+            $preContractStatus = TransferOffer::getUserPreContractStatuses(
+                $gameId, $game->team_id, [$playerId]
+            )[$playerId] ?? null;
+
+            if ($preContractStatus !== null) {
+                $message = __('transfers.shortlist_disabled_pre_contract');
+
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $message,
+                    ], 422);
+                }
+
+                return redirect()->back()->with('error', $message);
+            }
         }
 
         if ($existing) {

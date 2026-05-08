@@ -43,6 +43,10 @@
             </thead>
             <tbody>
                 @foreach($players as $gp)
+                @php
+                    $userPreContractStatus = $gp->user_pre_contract_status ?? null;
+                    $hasUserPreContract = $userPreContractStatus !== null;
+                @endphp
                 <tr class="border-b border-border-default transition-colors hover:bg-[rgba(59,130,246,0.05)]">
                     {{-- Position badge --}}
                     <td class="py-2.5 pl-4">
@@ -55,6 +59,9 @@
                             <img src="{{ Storage::disk('assets')->url('flags/' . $gp->nationality_flag['code'] . '.svg') }}" class="w-4 h-3 rounded-xs shadow-xs shrink-0" title="{{ $gp->nationality_flag['name'] }}">
                             @endif
                             <span class="font-medium text-text-primary truncate">{{ $gp->name }}</span>
+                            @if($hasUserPreContract)
+                                <x-pre-contract-badge :status="$userPreContractStatus" class="shrink-0" />
+                            @endif
                         </div>
                         {{-- Mobile-only details --}}
                         <div class="md:hidden text-xs text-text-muted mt-0.5 flex items-center gap-1 flex-wrap">
@@ -91,7 +98,9 @@
                     </td>
                     {{-- Negotiate button --}}
                     <td class="py-2.5 pr-2 text-center">
-                        @if($willingness !== 'unwilling')
+                        @if($hasUserPreContract)
+                            {{-- Pre-contract already in place — no negotiation action --}}
+                        @elseif($willingness !== 'unwilling')
                             @php
                                 $posDisp = $gp->position_display;
                                 $freeAgentPayload = \Illuminate\Support\Js::from([
@@ -122,6 +131,18 @@
                         @endif
                     </td>
                     {{-- Shortlist star --}}
+                    @if($hasUserPreContract)
+                    <td class="py-2.5 pr-4 text-center">
+                        <x-icon-button
+                            size="sm"
+                            class="rounded-full opacity-40 cursor-not-allowed"
+                            title="{{ __('transfers.shortlist_disabled_pre_contract') }}">
+                            <svg class="w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                            </svg>
+                        </x-icon-button>
+                    </td>
+                    @else
                     <td class="py-2.5 pr-4 text-center"
                         x-data="{
                             isShortlisted: {{ $gp->is_shortlisted ? 'true' : 'false' }},
@@ -154,6 +175,7 @@
                             </svg>
                         </x-icon-button>
                     </td>
+                    @endif
                 </tr>
                 @endforeach
             </tbody>

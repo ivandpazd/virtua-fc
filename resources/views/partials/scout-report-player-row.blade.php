@@ -23,6 +23,8 @@
     $willingnessLabel = $detail['willingness_label'] ?? null;
     $isExpiring = !$isFreeAgent && $player->contract_until && $player->contract_until <= $game->getSeasonEndDate();
     $isShortlisted = in_array($player->id, $shortlistedPlayerIds ?? []);
+    $userPreContractStatus = $detail['user_pre_contract_status'] ?? null;
+    $hasUserPreContract = $userPreContractStatus !== null;
 @endphp
 <div class="px-4 md:px-6 py-4" x-data="{ expanded: false, shortlisted: {{ $isShortlisted ? 'true' : 'false' }}, toggling: false }" @shortlist-toggled.window="if($event.detail.playerId === '{{ $player->id }}') { shortlisted = $event.detail.action === 'added' }">
     {{-- Player Summary Row --}}
@@ -42,6 +44,9 @@
                         <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-accent-green/10 text-accent-green">{{ __('transfers.free_agent') }}</span>
                     @elseif($isExpiring)
                         <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-accent-gold/10 text-accent-gold">{{ __('transfers.expiring_contract') }}</span>
+                    @endif
+                    @if($hasUserPreContract)
+                        <x-pre-contract-badge :status="$userPreContractStatus" />
                     @endif
                     @if($willingnessLabel)
                         <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-accent-blue/10 text-accent-blue">
@@ -69,16 +74,28 @@
                 <div class="text-sm font-semibold {{ $canAffordFee ? 'text-text-primary' : 'text-accent-red' }}">{{ $formattedAskingPrice }}</div>
             </div>
             {{-- Shortlist toggle --}}
-            <x-icon-button
-                @click.stop="if(toggling) return; toggling = true; fetch('{{ route('game.scouting.shortlist.toggle', [$game->id, $player->id]) }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'scout_report' }) }).then(r => r.json()).then(data => { if(data.success === false) { alert(data.message); toggling = false; return; } shortlisted = !shortlisted; toggling = false; window.dispatchEvent(new CustomEvent('shortlist-toggled', { detail: { action: data.action, playerId: data.playerId, player: data.player || null } })); }).catch(() => { toggling = false; })"
-                class="sm:min-h-0"
-                x-bind:class="shortlisted ? 'text-accent-gold hover:text-amber-400' : 'text-text-body hover:text-accent-gold'"
-                x-bind:title="shortlisted ? {{ \Illuminate\Support\Js::from(__('transfers.remove_from_shortlist')) }} : {{ \Illuminate\Support\Js::from(__('transfers.add_to_shortlist')) }}"
-            >
-                <svg class="w-5 h-5" x-bind:fill="shortlisted ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                </svg>
-            </x-icon-button>
+            @if($hasUserPreContract)
+                <x-icon-button
+                    @click.stop=""
+                    class="sm:min-h-0 opacity-40 cursor-not-allowed"
+                    title="{{ __('transfers.shortlist_disabled_pre_contract') }}"
+                >
+                    <svg class="w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                    </svg>
+                </x-icon-button>
+            @else
+                <x-icon-button
+                    @click.stop="if(toggling) return; toggling = true; fetch('{{ route('game.scouting.shortlist.toggle', [$game->id, $player->id]) }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'scout_report' }) }).then(r => r.json()).then(data => { if(data.success === false) { alert(data.message); toggling = false; return; } shortlisted = !shortlisted; toggling = false; window.dispatchEvent(new CustomEvent('shortlist-toggled', { detail: { action: data.action, playerId: data.playerId, player: data.player || null } })); }).catch(() => { toggling = false; })"
+                    class="sm:min-h-0"
+                    x-bind:class="shortlisted ? 'text-accent-gold hover:text-amber-400' : 'text-text-body hover:text-accent-gold'"
+                    x-bind:title="shortlisted ? {{ \Illuminate\Support\Js::from(__('transfers.remove_from_shortlist')) }} : {{ \Illuminate\Support\Js::from(__('transfers.add_to_shortlist')) }}"
+                >
+                    <svg class="w-5 h-5" x-bind:fill="shortlisted ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                    </svg>
+                </x-icon-button>
+            @endif
             <svg class="w-4 h-4 text-text-secondary transition-transform" :class="expanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>

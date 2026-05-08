@@ -54,7 +54,9 @@ class ShowScoutReportResults
             // scout reports directly (even without deep-intel tracking) because
             // the scout specifically filtered by it — exposing the reason is
             // consistent with the pitch.
-            $offerStatuses = TransferOffer::getOfferStatusesForPlayers($gameId, $players->pluck('id')->toArray(), $game->current_date);
+            $playerIdList = $players->pluck('id')->toArray();
+            $offerStatuses = TransferOffer::getOfferStatusesForPlayers($gameId, $playerIdList, $game->current_date);
+            $preContractStatuses = TransferOffer::getUserPreContractStatuses($gameId, $game->team_id, $playerIdList);
 
             foreach ($players as $player) {
                 $detail = $this->scoutingService->getPlayerScoutingDetail($player, $game);
@@ -64,6 +66,7 @@ class ShowScoutReportResults
                 $detail['offer_is_counter'] = $offerInfo['isCounter'] ?? false;
                 $detail['offer_type'] = $offerInfo['offerType'] ?? null;
                 $detail['on_cooldown'] = $offerInfo['onCooldown'] ?? false;
+                $detail['user_pre_contract_status'] = $preContractStatuses[$player->id] ?? null;
 
                 $teammates = $teamRosters->get($player->team_id, collect());
                 $importance = $this->scoutingService->calculatePlayerImportance($player, $teammates);

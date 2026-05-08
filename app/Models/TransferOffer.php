@@ -379,4 +379,39 @@ class TransferOffer extends Model
         return $statuses;
     }
 
+    /**
+     * Active pre-contract offers from $teamId for the given players.
+     *
+     * Used to mark players in search/listing UIs that already have a pending
+     * or agreed pre-contract from the user's team, so the UI can show a clear
+     * status badge and disable shortlist/follow actions.
+     *
+     * @return array<string,string> game_player_id => 'pending' | 'agreed'
+     */
+    public static function getUserPreContractStatuses(string $gameId, string $teamId, array $playerIds): array
+    {
+        if (empty($playerIds)) {
+            return [];
+        }
+
+        $offers = static::where('game_id', $gameId)
+            ->where('offering_team_id', $teamId)
+            ->where('direction', self::DIRECTION_INCOMING)
+            ->where('offer_type', self::TYPE_PRE_CONTRACT)
+            ->whereIn('status', [self::STATUS_PENDING, self::STATUS_AGREED])
+            ->whereIn('game_player_id', $playerIds)
+            ->get(['game_player_id', 'status']);
+
+        $statuses = [];
+        foreach ($offers as $offer) {
+            // Agreed wins over pending if both somehow exist for the same player.
+            if (($statuses[$offer->game_player_id] ?? null) === self::STATUS_AGREED) {
+                continue;
+            }
+            $statuses[$offer->game_player_id] = $offer->status;
+        }
+
+        return $statuses;
+    }
+
 }
