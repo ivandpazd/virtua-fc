@@ -1406,14 +1406,25 @@ class AITransferMarketService
     }
 
     /**
-     * Load all AI team rosters (excludes human player's team).
+     * Load all AI team rosters (excludes human player's team and reserve teams).
+     *
+     * Reserve teams (parent_team_id IS NOT NULL) are development pipelines
+     * for their parent club, not transfer-market participants. Excluding
+     * them here keeps them out of both the seller and buyer sides of
+     * AI-to-AI transfers.
      */
     private function loadAIRosters(Game $game): Collection
     {
-        return $this->loadGamePlayersWithPlayerDob(function ($query) use ($game): void {
+        // PLANES-SEAM: teams lookup is cross-plane (control), but we issue
+        // it as a separate query so loadGamePlayersWithPlayerDob keeps
+        // querying game_players directly without ambiguous column joins.
+        $reserveTeamIds = Team::whereNotNull('parent_team_id')->pluck('id')->all();
+
+        return $this->loadGamePlayersWithPlayerDob(function ($query) use ($game, $reserveTeamIds): void {
             $query->where('game_players.game_id', $game->id)
                 ->whereNotNull('game_players.team_id')
-                ->where('game_players.team_id', '!=', $game->team_id);
+                ->where('game_players.team_id', '!=', $game->team_id)
+                ->when(! empty($reserveTeamIds), fn ($q) => $q->whereNotIn('game_players.team_id', $reserveTeamIds));
         })->groupBy('team_id');
     }
 

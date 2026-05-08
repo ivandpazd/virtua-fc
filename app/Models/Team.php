@@ -81,13 +81,17 @@ class Team extends Model
     }
 
     /**
-     * Exclude national teams and cup-only teams (e.g. Primera RFEF filler)
-     * from transfer market queries.
+     * Exclude national teams, cup-only teams (e.g. Primera RFEF filler),
+     * and reserve teams from transfer market queries. Reserve teams are
+     * pure development pipelines for their parent club — they receive
+     * promotions/call-ups, not open-market signings, so they must never
+     * appear as buyers or sellers anywhere in the transfer ecosystem.
      */
     public function scopeTransferMarketEligible(Builder $query): Builder
     {
         return $query
             ->where('type', '!=', 'national')
+            ->whereNull('parent_team_id')
             ->whereHas('competitions', fn (Builder $q) => $q->where('role', '!=', Competition::ROLE_DOMESTIC_CUP));
     }
 
