@@ -203,6 +203,7 @@ class MatchSimulator
             awayBenchPlayers: $awayBenchPlayers,
             matchSeed: $matchSeed,
             neutralVenue: $neutralVenue,
+            userTeamId: $userTeamId,
         );
     }
 
@@ -249,9 +250,10 @@ class MatchSimulator
         $awayTacticalDrain = $awayPlayingStyle->energyDrainMultiplier() * $awayPressing->energyDrainMultiplier();
 
         // Determine how many tactical subs each AI team will make.
-        // The user's team gets 0 tactical windows — their bench is only here
-        // so processInjurySubstitution() can fire inside simulateRemainder().
-        // Tactical AI subs for the user team are deferred to "Skip to end".
+        // The user's team gets 0 tactical windows in live mode and is also
+        // excluded from injury auto-subs inside simulateRemainder (gated on
+        // $userTeamId). All sub decisions for the user's team stay with the
+        // human; fast mode and "Skip to end" pass userTeamId=null to opt back in.
         $homeTotalSubs = ($homeBenchPlayers !== null && $userTeamId !== $homeTeam->id)
             ? $this->aiSubstitutionService->decideTotalSubs($homeBenchPlayers->count())
             : 0;
@@ -289,6 +291,7 @@ class MatchSimulator
                 homeDefLine: $homeDefLine,
                 awayDefLine: $awayDefLine,
                 matchSeed: $matchSeed,
+                userTeamId: $userTeamId,
             );
         }
 
@@ -352,6 +355,7 @@ class MatchSimulator
                 preservePerformance: true,
                 toMinute: $splitMinute,
                 skipXGAdjustment: true,
+                userTeamId: $userTeamId,
             );
 
             $periodResult = $periodOutput->result;
@@ -441,6 +445,7 @@ class MatchSimulator
             awayExistingSubstitutions: $awaySubsUsed,
             preservePerformance: true,
             skipXGAdjustment: true,
+            userTeamId: $userTeamId,
         );
 
         $finalResult = $finalOutput->result;
@@ -804,6 +809,7 @@ class MatchSimulator
                 matchSeed: $matchSeed,
                 homeExistingSubstitutions: $homeExistingSubstitutions,
                 awayExistingSubstitutions: $awayExistingSubstitutions,
+                userTeamId: $userTeamId,
             );
         }
 
@@ -856,6 +862,7 @@ class MatchSimulator
                 preservePerformance: true,
                 toMinute: $splitMinute,
                 skipXGAdjustment: true,
+                userTeamId: $userTeamId,
             );
 
             $periodResult = $periodOutput->result;
@@ -944,6 +951,7 @@ class MatchSimulator
             awayExistingSubstitutions: $awaySubsUsed,
             preservePerformance: true,
             skipXGAdjustment: true,
+            userTeamId: $userTeamId,
         );
 
         $finalResult = $finalOutput->result;
@@ -1910,6 +1918,7 @@ class MatchSimulator
         bool $skipXGAdjustment = false,
         ?array $homePlayerSlots = null,
         ?array $awayPlayerSlots = null,
+        ?string $userTeamId = null,
     ): MatchSimulationOutput {
         if (! $preservePerformance) {
             $this->matchPerformance = [];
@@ -2020,10 +2029,19 @@ class MatchSimulator
                 ? SubstitutionService::MAX_ET_SUBSTITUTIONS
                 : SubstitutionService::MAX_SUBSTITUTIONS;
 
+            // Injury auto-subs fire for AI-controlled teams only. The user's
+            // team keeps the injury event but the substitution decision stays
+            // with the human in live mode — they must manually sub on a bench
+            // player from the tactical panel (or accept playing a man down).
+            // Fast mode and "Skip to end" both pass userTeamId = null, which
+            // opts the user team back into auto-subs as expected.
+            $homeIsUserTeam = $userTeamId !== null && $userTeamId === $homeTeam->id;
+            $awayIsUserTeam = $userTeamId !== null && $userTeamId === $awayTeam->id;
+
             if (! in_array($homeTeam->id, $existingInjuryTeamIds) && $fromMinute + 1 <= $injuryMaxMinute) {
                 $homeInjuryEvents = $this->generateInjuryEventsInRange($homeTeam->id, $homePlayersForInjury, $fromMinute + 1, $injuryMaxMinute, $game);
                 $events = $events->merge($homeInjuryEvents);
-                if ($homeInjuryEvents->isNotEmpty() && $homeBenchPlayers !== null && $homeBenchPlayers->isNotEmpty() && $homeExistingSubstitutions < $maxSubs) {
+                if (! $homeIsUserTeam && $homeInjuryEvents->isNotEmpty() && $homeBenchPlayers !== null && $homeBenchPlayers->isNotEmpty() && $homeExistingSubstitutions < $maxSubs) {
                     [$subEvents, $homePlayers, $homeBenchPlayers] = $this->processInjurySubstitution(
                         $homeTeam->id, $homeInjuryEvents, $homePlayers, $homeBenchPlayers
                     );
@@ -2036,7 +2054,7 @@ class MatchSimulator
             if (! in_array($awayTeam->id, $existingInjuryTeamIds) && $fromMinute + 1 <= $injuryMaxMinute) {
                 $awayInjuryEvents = $this->generateInjuryEventsInRange($awayTeam->id, $awayPlayersForInjury, $fromMinute + 1, $injuryMaxMinute, $game);
                 $events = $events->merge($awayInjuryEvents);
-                if ($awayInjuryEvents->isNotEmpty() && $awayBenchPlayers !== null && $awayBenchPlayers->isNotEmpty() && $awayExistingSubstitutions < $maxSubs) {
+                if (! $awayIsUserTeam && $awayInjuryEvents->isNotEmpty() && $awayBenchPlayers !== null && $awayBenchPlayers->isNotEmpty() && $awayExistingSubstitutions < $maxSubs) {
                     [$subEvents, $awayPlayers, $awayBenchPlayers] = $this->processInjurySubstitution(
                         $awayTeam->id, $awayInjuryEvents, $awayPlayers, $awayBenchPlayers
                     );

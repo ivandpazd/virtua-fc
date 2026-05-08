@@ -303,6 +303,9 @@ class MatchResimulationService
                 preservePerformance: true,
                 homePlayerSlots: $homePlayerSlots,
                 awayPlayerSlots: $awayPlayerSlots,
+                // Mirrors the AI-subs branch above: passing null opts the
+                // user team INTO injury auto-subs (Skip to end / fast mode).
+                userTeamId: $autoSubUserTeam ? null : $game->team_id,
             );
         }
 

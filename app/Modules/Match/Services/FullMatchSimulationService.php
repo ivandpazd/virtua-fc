@@ -140,10 +140,11 @@ class FullMatchSimulationService
         $homePlayers = $this->getLineupPlayers($match, $allPlayers, 'home');
         $awayPlayers = $this->getLineupPlayers($match, $allPlayers, 'away');
 
-        // Always pass both benches so injury auto-subs fire for the user's
-        // team too. The user team is excluded from tactical AI substitution
-        // windows (those only trigger via "Skip to end"); see
-        // simulateWithAISubstitutions() in MatchSimulator.
+        // Both benches are passed so the simulator knows what's available, but
+        // the user team is excluded from BOTH tactical AI subs AND injury
+        // auto-subs in live mode — all sub decisions stay with the human via
+        // the tactical panel. Fast mode and "Skip to end" pass userTeamId=null
+        // to opt the user team back into all auto-subs.
         $isUserMatch = $match->involvesTeam($game->team_id);
 
         $homeBenchPlayers = $this->getBenchPlayers($match, $allPlayers, 'home', $game, $suspendedPlayerIds);
