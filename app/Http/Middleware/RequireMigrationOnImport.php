@@ -49,6 +49,14 @@ class RequireMigrationOnImport
         }
 
         $path = '/'.ltrim($request->path(), '/');
+
+        // Admins must always be able to reach /admin/* — operating the
+        // migration itself depends on it, even when their own user row is
+        // still in pending/in_progress/failed state.
+        if ($user->is_admin && str_starts_with($path, '/admin')) {
+            return $next($request);
+        }
+
         foreach (self::ALLOWED_PATHS as $allowed) {
             if (str_starts_with($path, $allowed)) {
                 return $next($request);
