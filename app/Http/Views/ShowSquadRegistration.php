@@ -29,6 +29,12 @@ class ShowSquadRegistration
         $academyPlayers = [];
         $unregistered = [];
 
+        // Slot eligibility is locked to the season's reference date, so the
+        // page shows the reference-date age — otherwise a 23-year-old who
+        // turned 24 mid-season would look ineligible for his current
+        // academy slot.
+        $referenceDate = $game->getRegistrationReferenceDate();
+
         foreach ($gamePlayers as $gp) {
             $dto = [
                 'id' => $gp->id,
@@ -37,7 +43,7 @@ class ShowSquadRegistration
                 'position_group' => $gp->position_group,
                 'position_abbreviation' => PositionMapper::toAbbreviation($gp->position),
                 'overall' => $gp->effective_rating,
-                'age' => $gp->age($game->current_date),
+                'age' => $gp->age($referenceDate),
             ];
 
             $players[$gp->id] = $dto;

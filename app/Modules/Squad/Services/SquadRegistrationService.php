@@ -85,7 +85,7 @@ class SquadRegistrationService
             ->where(
                 'date_of_birth',
                 '<=',
-                PlayerAge::dateOfBirthCutoff(PlayerAge::YOUNG_END + 1, $game->current_date),
+                PlayerAge::dateOfBirthCutoff(PlayerAge::YOUNG_END + 1, $game->getRegistrationReferenceDate()),
             )
             ->count();
 

@@ -593,6 +593,18 @@ class Game extends Model
     }
 
     /**
+     * Reference date used to evaluate squad-registration age eligibility for
+     * the season (e.g. filial / "ficha del filial" slots). Frozen at January 1
+     * of the season-start year — FIFA-style "U23 = born on or after Jan 1 of
+     * YYYY" convention. A player's slot eligibility is fixed for the whole
+     * season and doesn't flip when they have a birthday mid-season.
+     */
+    public function getRegistrationReferenceDate(): Carbon
+    {
+        return Carbon::createFromDate((int) $this->season, 1, 1);
+    }
+
+    /**
      * Effective date a newly-finalized loan will start on: today if the
      * transfer window is open, otherwise the next window opening date.
      * Used so loans agreed while the window is closed record the date on
