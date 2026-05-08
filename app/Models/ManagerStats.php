@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int $id
+ * @property string $id
  * @property int $user_id
  * @property string|null $game_id
  * @property string|null $team_id
@@ -25,6 +26,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ManagerStats extends Model
 {
+    use HasUuids;
+
     /**
      * Cross-tenant aggregate; lives on the control plane. See CLAUDE.md →
      * "Control plane / tenant plane".
