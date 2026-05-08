@@ -6,6 +6,7 @@
     /** @var array $shortlistedPlayerIds */
 
     $isFreeAgent = $detail['is_free_agent'] ?? false;
+    $isOnLoan = $detail['is_on_loan'] ?? false;
     $hasOffer = $detail['has_existing_offer'] ?? false;
     $offerStatus = $detail['offer_status'] ?? null;
     $offerIsCounter = $detail['offer_is_counter'] ?? false;
@@ -189,6 +190,11 @@
                                 })">
                                 {{ __('transfers.negotiate_pre_contract') }}
                             </x-primary-button>
+                        @elseif($isOnLoan)
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                {{ __('transfers.player_on_loan_unavailable') }}
+                            </div>
                         @elseif($availableBudget <= 0 && !$canAffordLoan)
                             <div>
                                 <div class="text-xs text-accent-red font-medium">

@@ -37,6 +37,7 @@ return [
     'accept_loan_offer' => 'Aceptar',
     // Legacy keys kept for compatibility
     'loans' => 'Cesiones',
+    'loaned' => 'Cedido',
 
     'loan_request' => 'Solicitud de Cesión',
     'loan_no_fee' => 'Cesión (sin coste)',
@@ -127,6 +128,8 @@ return [
     'counter_offer_received' => 'Contraoferta Recibida',
     'transfer_agreed' => 'Fichaje Acordado',
     'already_bidding' => 'Ya tienes una oferta por este jugador',
+    'player_on_loan_unavailable' => 'Este jugador está cedido y no se puede fichar.',
+    'cannot_target_own_player' => 'Este jugador ya pertenece a tu club.',
     'pre_contract_player_not_interested' => ':player no está interesado en fichar por un club de nuestra categoría.',
     'negotiation_cooldown' => 'Las negociaciones con este jugador se rompieron recientemente. Espera a la siguiente jornada para intentarlo de nuevo.',
     'negotiation_cooldown_short' => 'Espera a la próxima jornada',

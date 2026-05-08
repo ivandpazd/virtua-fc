@@ -13,9 +13,14 @@
 @php
 /** @var App\Models\GamePlayer $player */
 /** @var App\Models\Game $game */
-$canOffer = !$isOwnTeam && $player->team_id !== null;
+$isOnLoan = $player->is_on_loan ?? false;
+// `is_user_owned` covers first-team, reserve-team, and loaned-out players the
+// user's organisation actually owns. `$isOwnTeam` only knows about the first
+// team, so it stays as the fallback for callers that haven't been migrated.
+$isUserOwned = $player->is_user_owned ?? $isOwnTeam;
+$canOffer = !$isUserOwned && $player->team_id !== null && !$isOnLoan;
 $isFreeAgent = $player->team_id === null;
-$canNegotiateFreeAgent = $isFreeAgent && !$isOwnTeam;
+$canNegotiateFreeAgent = $isFreeAgent && !$isUserOwned;
 // Default: contract column shown when the team column isn't rendered.
 $showContract = $showContract ?? !$showTeam;
 // When rendering alongside listings, the asking-price cell must always be
@@ -47,8 +52,8 @@ $showAskingPrice = $showAskingPrice ?? ($askingPrice !== null);
                 <span class="truncate">{{ __('transfers.free_agent') }}</span>
             </span>
             @endif
-            @if(!$showTeam && $player->is_loaned_in)
-            <span class="text-[10px] bg-violet-500/10 text-violet-400 px-1.5 py-0.5 rounded-sm font-medium shrink-0">{{ __('transfers.loans') }}</span>
+            @if($isOnLoan || (!$showTeam && $player->is_loaned_in))
+            <span class="text-[10px] bg-violet-500/10 text-violet-400 px-1.5 py-0.5 rounded-sm font-medium shrink-0">{{ __('transfers.loaned') }}</span>
             @endif
         </div>
         {{-- Mobile-only details --}}
@@ -110,7 +115,7 @@ $showAskingPrice = $showAskingPrice ?? ($askingPrice !== null);
     <td class="py-2 pr-3 hidden md:table-cell text-text-secondary tabular-nums">{{ \App\Support\Money::format($player->market_value_cents) }}</td>
     @if($showContract)
     {{-- Contract --}}
-    <td class="py-2 pr-3 hidden md:table-cell text-center text-text-muted tabular-nums">{{ $isFreeAgent ? '—' : ($player->contract_until?->year ?? '—') }}</td>
+    <td class="py-2 pr-3 hidden md:table-cell text-text-secondary tabular-nums">{{ $isFreeAgent ? '—' : ($player->contract_until?->year ?? '—') }}</td>
     @endif
     @if($showAskingPrice)
     {{-- Asking price --}}
@@ -144,6 +149,7 @@ $showAskingPrice = $showAskingPrice ?? ($askingPrice !== null);
                 ]);
             @endphp
             <x-icon-button
+                size="sm"
                 x-data
                 x-on:click.prevent="$dispatch('open-negotiation', {{ $offerPayload }})"
                 class="rounded-full text-text-body hover:text-accent-blue"
@@ -171,6 +177,7 @@ $showAskingPrice = $showAskingPrice ?? ($askingPrice !== null);
                 ]);
             @endphp
             <x-icon-button
+                size="sm"
                 x-data
                 x-on:click.prevent="$dispatch('open-negotiation', {{ $freeAgentPayload }})"
                 class="rounded-full text-text-body hover:text-accent-green"
@@ -181,7 +188,10 @@ $showAskingPrice = $showAskingPrice ?? ($askingPrice !== null);
             </x-icon-button>
         @endif
     </td>
-    {{-- Shortlist star --}}
+    {{-- Shortlist star (hidden for players the user already owns) --}}
+    @if($isUserOwned)
+    <td class="py-2 pr-4"></td>
+    @else
     <td class="py-2 pr-4 text-center"
         x-data="{
             isShortlisted: {{ $player->is_shortlisted ? 'true' : 'false' }},
@@ -205,6 +215,7 @@ $showAskingPrice = $showAskingPrice ?? ($askingPrice !== null);
             }
         }">
         <x-icon-button @click.prevent="toggle()"
+                size="sm"
                 class="rounded-full"
                 x-bind:class="isShortlisted ? 'text-accent-gold hover:text-amber-400' : 'text-text-body hover:text-accent-gold'"
                 x-bind:title="isShortlisted ? {{ \Illuminate\Support\Js::from(__('transfers.remove_from_shortlist')) }} : {{ \Illuminate\Support\Js::from(__('transfers.add_to_shortlist')) }}">
@@ -213,4 +224,5 @@ $showAskingPrice = $showAskingPrice ?? ($askingPrice !== null);
             </svg>
         </x-icon-button>
     </td>
+    @endif
 </tr>

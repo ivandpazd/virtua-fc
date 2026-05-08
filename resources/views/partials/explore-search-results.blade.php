@@ -56,7 +56,7 @@
             </thead>
             <tbody>
                 @foreach($players as $player)
-                <x-explore-player-row :player="$player" :game="$game" :show-team="true" :show-ovr="true" :is-own-team="$player->team_id === $game->team_id" />
+                <x-explore-player-row :player="$player" :game="$game" :show-team="true" :show-ovr="true" :is-own-team="$game->ownsTeam($player->team_id)" />
                 @endforeach
             </tbody>
         </table>

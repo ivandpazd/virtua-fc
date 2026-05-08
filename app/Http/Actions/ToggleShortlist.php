@@ -21,23 +21,25 @@ class ToggleShortlist
         $game = Game::findOrFail($gameId);
         $gamePlayer = GamePlayer::where('game_id', $gameId)->with('team')->findOrFail($playerId);
 
-        // Reserve-team (filial) players are not transferable through normal
-        // channels — they belong to the parent club and move only via
-        // call-up / promotion. Block adding them to the shortlist regardless
-        // of which game the user is in.
-        if ($gamePlayer->team && $gamePlayer->team->parent_team_id !== null) {
-            $message = __('messages.shortlist_reserve_blocked');
+        $existing = ShortlistedPlayer::where('game_id', $gameId)
+            ->where('game_player_id', $playerId)
+            ->first();
+
+        // Removal is always allowed — even if the player has since become
+        // user-owned (e.g. shortlisted before signing), we want the user to be
+        // able to clear them out. Only block *adding* an own-club player.
+        if (!$existing && $gamePlayer->isUserOwned($game)) {
+            $message = __('transfers.cannot_target_own_player');
 
             if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => $message], 422);
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                ], 422);
             }
 
             return redirect()->back()->with('error', $message);
         }
-
-        $existing = ShortlistedPlayer::where('game_id', $gameId)
-            ->where('game_player_id', $playerId)
-            ->first();
 
         if ($existing) {
             $existing->delete();

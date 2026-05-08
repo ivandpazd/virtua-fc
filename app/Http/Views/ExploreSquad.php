@@ -32,7 +32,7 @@ class ExploreSquad
             'team' => $team,
             'players' => $players,
             'game' => $game,
-            'isOwnTeam' => $teamId === $game->team_id,
+            'isOwnTeam' => $game->ownsTeam($teamId),
         ]);
     }
 }

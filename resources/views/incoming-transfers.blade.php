@@ -183,7 +183,7 @@
                                                     <div class="text-sm text-text-secondary">
                                                         {{ $transfer->gamePlayer->position_name }} &middot; {{ $transfer->gamePlayer->age($game->current_date) }} {{ __('app.years') }}
                                                         @if($transfer->offer_type === 'loan_in')
-                                                            &middot; <span class="text-accent-green font-medium">{{ __('transfers.loans') }}</span>
+                                                            &middot; <span class="text-accent-green font-medium">{{ __('transfers.loaned') }}</span>
                                                         @endif
                                                     </div>
                                                 </div>

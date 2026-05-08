@@ -6,6 +6,7 @@ use App\Modules\Transfer\Services\ScoutingService;
 use App\Modules\Transfer\Services\TransferHeaderService;
 use App\Models\Game;
 use App\Models\GamePlayer;
+use App\Models\Loan;
 use App\Models\ShortlistedPlayer;
 use App\Models\TransferOffer;
 use App\Support\Money;
@@ -55,6 +56,15 @@ class ShowScoutingHub
         // Check existing offers for shortlisted players (map player_id => status details)
         $existingOfferStatuses = TransferOffer::getOfferStatusesForPlayers($gameId, $shortlistedPlayerIds, $game->current_date);
 
+        // Players currently tied to an active loan can't be transferred — the
+        // parent club retains authority. Bulk-load once so the per-player
+        // template doesn't issue an exists() query each iteration.
+        $loanedPlayerIds = Loan::where('game_id', $gameId)
+            ->whereIn('game_player_id', $shortlistedPlayerIds)
+            ->active()
+            ->pluck('game_player_id')
+            ->all();
+
         // Pre-load team rosters for all shortlisted players' teams (avoids N+1 in calculatePlayerImportance)
         $teamIds = collect($shortlistedPlayers)->pluck('gamePlayer.team_id')->filter()->unique();
         $teamRosters = GamePlayer::where('game_id', $gameId)
@@ -96,6 +106,7 @@ class ShowScoutingHub
                 'offerIsCounter' => $existingOfferStatuses[$gp->id]['isCounter'] ?? false,
                 'offerType' => $existingOfferStatuses[$gp->id]['offerType'] ?? null,
                 'onCooldown' => $existingOfferStatuses[$gp->id]['onCooldown'] ?? false,
+                'isOnLoan' => in_array($gp->id, $loanedPlayerIds, true),
                 // Locked by default — populated below if intel level warrants it
                 'overallRange' => null,
                 'formattedAskingPrice' => null,

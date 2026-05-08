@@ -4,6 +4,7 @@ namespace App\Modules\Transfer\Services;
 
 use App\Models\Game;
 use App\Models\GamePlayer;
+use App\Models\Loan;
 use App\Models\ScoutReport;
 use App\Models\ShortlistedPlayer;
 use App\Models\Team;
@@ -781,6 +782,9 @@ class ScoutingService
     public function getPlayerScoutingDetail(GamePlayer $player, Game $game): array
     {
         $isFreeAgent = $player->team_id === null;
+        $isOnLoan = !$isFreeAgent && Loan::where('game_player_id', $player->id)
+            ->where('status', Loan::STATUS_ACTIVE)
+            ->exists();
         $askingPrice = $isFreeAgent ? 0 : $this->calculateAskingPrice($player, $game->current_date);
         $transferDemand = $this->contractService->calculateWageDemand($player, NegotiationScenario::TRANSFER, $game->team);
         $wageDemand = $transferDemand['wage'];
@@ -808,6 +812,7 @@ class ScoutingService
         return [
             'player' => $player,
             'is_free_agent' => $isFreeAgent,
+            'is_on_loan' => $isOnLoan,
             'asking_price' => $askingPrice,
             'formatted_asking_price' => $isFreeAgent ? __('transfers.free_transfer') : Money::format($askingPrice),
             'wage_demand' => $wageDemand,

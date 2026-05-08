@@ -42,6 +42,13 @@ class NegotiateLoan
 
     private function handleStart(Game $game, GamePlayer $player): JsonResponse
     {
+        if ($player->isUserOwned($game)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('transfers.cannot_target_own_player'),
+            ], 422);
+        }
+
         // Validate loan eligibility
         if (!$player->team_id) {
             return response()->json([

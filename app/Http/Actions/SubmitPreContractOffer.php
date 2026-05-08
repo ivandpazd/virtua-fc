@@ -18,6 +18,11 @@ class SubmitPreContractOffer
         $game = Game::findOrFail($gameId);
         $player = GamePlayer::where('game_id', $gameId)->with(['team'])->findOrFail($playerId);
 
+        if ($player->isUserOwned($game)) {
+            return redirect()->route('game.transfers', $gameId)
+                ->with('error', __('transfers.cannot_target_own_player'));
+        }
+
         $validated = $request->validate([
             'offered_wage' => 'required|integer|min:0',
         ]);

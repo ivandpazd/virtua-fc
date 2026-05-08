@@ -37,6 +37,7 @@ return [
     'accept_loan_offer' => 'Accept',
     // Legacy keys kept for compatibility
     'loans' => 'Loans',
+    'loaned' => 'Loaned',
 
     'loan_request' => 'Loan Request',
     'loan_no_fee' => 'Loan (no fee)',
@@ -126,6 +127,8 @@ return [
     'counter_offer_received' => 'Counter Offer Received',
     'transfer_agreed' => 'Transfer Agreed',
     'already_bidding' => 'You already have a bid for this player',
+    'player_on_loan_unavailable' => 'This player is currently on loan and cannot be transferred.',
+    'cannot_target_own_player' => 'This player already belongs to your club.',
     'pre_contract_player_not_interested' => ":player isn't interested in signing for a club at our level.",
     'negotiation_cooldown' => 'Negotiations with this player broke down recently. Wait until the next matchday to try again.',
     'negotiation_cooldown_short' => 'Wait until next matchday',

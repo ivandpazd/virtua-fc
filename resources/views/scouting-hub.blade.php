@@ -500,8 +500,16 @@
                                                                 </x-primary-button>
                                                             </template>
 
+                                                            {{-- Action: Player on loan — parent club retains authority, no transfer/loan possible --}}
+                                                            <template x-if="!player.isFreeAgent && !player.hasExistingOffer && !player.onCooldown && !(player.isExpiring && isPreContractPeriod) && player.isOnLoan">
+                                                                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                                                    {{ __('transfers.player_on_loan_unavailable') }}
+                                                                </div>
+                                                            </template>
+
                                                             {{-- Action: Budget is zero and can't afford loan — fully blocked --}}
-                                                            <template x-if="!player.isFreeAgent && !player.hasExistingOffer && !player.onCooldown && !(player.isExpiring && isPreContractPeriod) && player.availableBudget <= 0 && !player.canAffordLoan">
+                                                            <template x-if="!player.isFreeAgent && !player.hasExistingOffer && !player.onCooldown && !(player.isExpiring && isPreContractPeriod) && !player.isOnLoan && player.availableBudget <= 0 && !player.canAffordLoan">
                                                                 <div>
                                                                     <div class="text-xs text-accent-red font-medium">
                                                                         {{ __('transfers.loan_fee_exceeds_budget') }}
@@ -513,7 +521,7 @@
                                                             </template>
 
                                                             {{-- Action: Negotiate + Loan (soft block: always show when budget > 0 or can afford loan) --}}
-                                                            <template x-if="!player.isFreeAgent && !player.hasExistingOffer && !player.onCooldown && !(player.isExpiring && isPreContractPeriod) && (player.availableBudget > 0 || player.canAffordLoan)">
+                                                            <template x-if="!player.isFreeAgent && !player.hasExistingOffer && !player.onCooldown && !(player.isExpiring && isPreContractPeriod) && !player.isOnLoan && (player.availableBudget > 0 || player.canAffordLoan)">
                                                                 <div class="flex flex-col gap-2">
                                                                     <template x-if="!player.canAffordFee">
                                                                         <div class="text-xs text-accent-gold font-medium">

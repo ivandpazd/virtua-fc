@@ -98,7 +98,6 @@ return [
     'reserve_player_sent_back' => ':player ha vuelto al filial.',
     'reserve_player_call_up_blocked_full' => 'La plantilla del primer equipo está completa. Libera un dorsal antes de subir más jugadores.',
     'reserve_player_promoted' => ':player ha subido al primer equipo.',
-    'shortlist_reserve_blocked' => 'Los jugadores del filial pertenecen al club matriz y no son transferibles.',
 
     // Player release messages
     'player_released' => ':player ha sido liberado. Indemnización pagada: :severance.',

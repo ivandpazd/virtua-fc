@@ -25,6 +25,11 @@ class SignFreeAgent
         $game = Game::findOrFail($gameId);
         $player = GamePlayer::where('game_id', $gameId)->findOrFail($playerId);
 
+        if ($player->isUserOwned($game)) {
+            return redirect()->route('game.transfers', $gameId)
+                ->with('error', __('transfers.cannot_target_own_player'));
+        }
+
         // Must be a free agent
         if ($player->team_id !== null) {
             return redirect()->route('game.transfers', $gameId)

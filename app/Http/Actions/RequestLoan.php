@@ -35,6 +35,14 @@ class RequestLoan
 
     private function handleLoanIn(Game $game, GamePlayer $player)
     {
+        // Defence in depth: a player the user already owns (e.g. loaned-out
+        // from the first team but currently sitting on a third club's roster)
+        // should never enter the loan-in flow.
+        if ($player->isUserOwned($game)) {
+            return redirect()->back()
+                ->with('error', __('transfers.cannot_target_own_player'));
+        }
+
         // Can't loan a free agent — no parent team to return to
         if ($player->team_id === null) {
             return redirect()->back()

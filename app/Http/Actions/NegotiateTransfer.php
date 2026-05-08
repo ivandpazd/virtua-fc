@@ -58,6 +58,20 @@ class NegotiateTransfer
 
     private function handleStart(Game $game, GamePlayer $player): JsonResponse
     {
+        if ($player->isUserOwned($game)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('transfers.cannot_target_own_player'),
+            ], 422);
+        }
+
+        if ($this->transferService->playerHasActiveLoan($player)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('transfers.player_on_loan_unavailable'),
+            ], 422);
+        }
+
         // Check for existing countered offer to resume
         $existing = TransferOffer::where('game_id', $game->id)
             ->where('game_player_id', $player->id)

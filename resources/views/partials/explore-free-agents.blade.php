@@ -110,6 +110,7 @@
                                 ]);
                             @endphp
                             <x-icon-button
+                                size="sm"
                                 x-data
                                 x-on:click.prevent="$dispatch('open-negotiation', {{ $freeAgentPayload }})"
                                 class="rounded-full text-text-body hover:text-accent-green"
@@ -144,6 +145,7 @@
                             }
                         }">
                         <x-icon-button @click.prevent="toggle()"
+                                size="sm"
                                 class="rounded-full"
                                 x-bind:class="isShortlisted ? 'text-accent-gold hover:text-amber-400' : 'text-text-body hover:text-accent-gold'"
                                 x-bind:title="isShortlisted ? {{ \Illuminate\Support\Js::from(__('transfers.remove_from_shortlist')) }} : {{ \Illuminate\Support\Js::from(__('transfers.add_to_shortlist')) }}">

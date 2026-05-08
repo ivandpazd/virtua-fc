@@ -17,6 +17,7 @@ use App\Models\Competition;
 use App\Models\Game;
 use App\Models\GamePlayer;
 use App\Models\GameTransfer;
+use App\Models\Loan;
 use App\Models\ShortlistedPlayer;
 use App\Models\Team;
 use App\Models\TeamReputation;
@@ -1133,6 +1134,23 @@ class TransferService
     }
 
     /**
+     * Players with an active loan are not available for transfer offers — the
+     * parent club retains authority and the loan team isn't free to sell. The
+     * UI hides the bid action, but the service guards the same rule so a
+     * direct request can't bypass it.
+     */
+    public function playerHasActiveLoan(GamePlayer $player): bool
+    {
+        if ($player->relationLoaded('activeLoan')) {
+            return $player->activeLoan !== null;
+        }
+
+        return Loan::where('game_player_id', $player->id)
+            ->where('status', Loan::STATUS_ACTIVE)
+            ->exists();
+    }
+
+    /**
      * Calculate the available transfer budget (transfer_budget minus committed pending/agreed offers).
      */
     public function availableBudget(Game $game): int
@@ -1203,6 +1221,14 @@ class TransferService
      */
     public function negotiateTransferFeeSync(Game $game, GamePlayer $player, int $bidCents, ScoutingService $scoutingService): array
     {
+        if ($player->isUserOwned($game)) {
+            throw new \InvalidArgumentException(__('transfers.cannot_target_own_player'));
+        }
+
+        if ($this->playerHasActiveLoan($player)) {
+            throw new \InvalidArgumentException(__('transfers.player_on_loan_unavailable'));
+        }
+
         // Check for existing countered offer to resume
         $existing = TransferOffer::where('game_id', $game->id)
             ->where('game_player_id', $player->id)

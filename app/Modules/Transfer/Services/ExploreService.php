@@ -148,11 +148,16 @@ class ExploreService
             ->keyBy('game_player_id');
 
         $shortlistedIds = $this->getShortlistedIds($game->id, $playerIds);
+        $userTeamIds = $game->userTeamIds();
 
-        return $players->map(function ($gp) use ($activeLoans, $shortlistedIds, $teamId) {
+        return $players->map(function ($gp) use ($activeLoans, $shortlistedIds, $teamId, $userTeamIds) {
             $loan = $activeLoans->get($gp->id);
             $gp->is_loaned_in = $loan && $loan->loan_team_id === $teamId;
+            $gp->is_on_loan = $loan !== null;
             $gp->is_shortlisted = in_array($gp->id, $shortlistedIds);
+            $gp->is_user_owned = $loan
+                ? in_array($loan->parent_team_id, $userTeamIds, true)
+                : in_array($gp->team_id, $userTeamIds, true);
 
             return $gp;
         })->sort(fn ($a, $b) => $this->sortByPositionThenValue($a, $b));
@@ -179,6 +184,7 @@ class ExploreService
 
         return $players->map(function ($gp) use ($shortlistedIds, $game) {
             $gp->is_shortlisted = in_array($gp->id, $shortlistedIds);
+            $gp->is_user_owned = false;
             $gp->free_agent_willingness = $this->scoutingService->getFreeAgentWillingnessLevel(
                 $gp, $game->id, $game->team_id
             );
@@ -307,11 +313,23 @@ class ExploreService
 
         $players = $query->limit(self::ADVANCED_SEARCH_LIMIT)->get();
 
-        $shortlistedIds = $this->getShortlistedIds($game->id, $players->pluck('id')->toArray());
+        $playerIds = $players->pluck('id')->toArray();
+        $shortlistedIds = $this->getShortlistedIds($game->id, $playerIds);
+        $activeLoans = Loan::where('game_id', $game->id)
+            ->whereIn('game_player_id', $playerIds)
+            ->active()
+            ->get()
+            ->keyBy('game_player_id');
+        $userTeamIds = $game->userTeamIds();
 
         $players = $players
-            ->map(function ($gp) use ($shortlistedIds) {
+            ->map(function ($gp) use ($shortlistedIds, $activeLoans, $userTeamIds) {
+                $loan = $activeLoans->get($gp->id);
                 $gp->is_shortlisted = in_array($gp->id, $shortlistedIds);
+                $gp->is_on_loan = $loan !== null;
+                $gp->is_user_owned = $loan
+                    ? in_array($loan->parent_team_id, $userTeamIds, true)
+                    : in_array($gp->team_id, $userTeamIds, true);
 
                 return $gp;
             })

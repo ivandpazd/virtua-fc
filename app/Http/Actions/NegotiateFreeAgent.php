@@ -50,6 +50,13 @@ class NegotiateFreeAgent
 
     private function handleStart(Game $game, GamePlayer $player): JsonResponse
     {
+        if ($player->isUserOwned($game)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('transfers.cannot_target_own_player'),
+            ], 422);
+        }
+
         if ($player->team_id !== null) {
             return response()->json([
                 'status' => 'error',
