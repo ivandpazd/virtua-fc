@@ -347,7 +347,7 @@
                             <div class="space-y-2 mb-5 p-3 bg-surface-700/50 rounded-lg">
                                 @if($gamePlayer->contract_until)
                                     @php
-                                        $remainingYears = max(0, round($game->current_date->floatDiffInYears($gamePlayer->contract_until), 1));
+                                        $remainingYears = max(0, round($game->current_date->diffInYears($gamePlayer->contract_until, true), 1));
                                     @endphp
                                     <div class="flex justify-between text-sm">
                                         <span class="text-text-muted">{{ __('squad.release_remaining_contract') }}</span>

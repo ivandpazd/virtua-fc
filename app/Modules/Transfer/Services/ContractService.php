@@ -840,7 +840,7 @@ class ContractService
             return 0;
         }
 
-        $remainingYears = max(0, $game->current_date->floatDiffInYears($player->contract_until));
+        $remainingYears = max(0, $game->current_date->diffInYears($player->contract_until, true));
 
         return (int) ($player->annual_wage * $remainingYears * self::SEVERANCE_RATE);
     }
