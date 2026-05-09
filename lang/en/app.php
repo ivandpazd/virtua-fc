@@ -5,6 +5,7 @@ return [
     'dashboard' => 'Dashboard',
     'squad' => 'Squad',
     'starting_xi' => 'Starting XI',
+    'scout_opponent' => 'Scout Opponent',
     'finances' => 'Finances',
     'club' => 'Club',
     'transfers' => 'Transfers',
@@ -63,5 +64,8 @@ return [
     // Common actions
     'close' => 'Close',
     'more' => 'More',
+    'loading' => 'Loading…',
+    'load_failed' => 'Could not load this content. Please try again.',
+    'retry' => 'Retry',
 
 ];

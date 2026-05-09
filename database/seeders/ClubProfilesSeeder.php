@@ -333,6 +333,141 @@ class ClubProfilesSeeder extends Seeder
     ];
 
     /**
+     * Curated reputation tier for national teams keyed by FIFA code.
+     * Reputation drives AI mentality, instructions, and the formation-bias
+     * fallback pool for any national-team match (currently World Cup
+     * tournament mode). Without this, every national team would default to
+     * REPUTATION_LOCAL and behave like a small-club squad regardless of
+     * stature.
+     *
+     * Calibrated against current strength (FIFA ranking + recent tournament
+     * performance) rather than historic prestige alone — Hungary is not on
+     * this list because they aren't at WC2026; Morocco sits at CONTINENTAL
+     * after their 2022 semifinal run, etc.
+     */
+    private const NATIONAL_TEAM_REPUTATION = [
+        // Elite — title contenders
+        'ARG' => ClubProfile::REPUTATION_ELITE,        // World champions
+        'BRA' => ClubProfile::REPUTATION_ELITE,
+        'FRA' => ClubProfile::REPUTATION_ELITE,
+        'ESP' => ClubProfile::REPUTATION_ELITE,        // Euro 2024 champions
+        'ENG' => ClubProfile::REPUTATION_ELITE,
+        'GER' => ClubProfile::REPUTATION_ELITE,
+        'POR' => ClubProfile::REPUTATION_ELITE,
+        'NED' => ClubProfile::REPUTATION_ELITE,
+
+        // Continental — strong regular contenders
+        'BEL' => ClubProfile::REPUTATION_CONTINENTAL,
+        'CRO' => ClubProfile::REPUTATION_CONTINENTAL, // 2022 semifinalists
+        'URU' => ClubProfile::REPUTATION_CONTINENTAL,
+        'COL' => ClubProfile::REPUTATION_CONTINENTAL, // Copa America 2024 finalist
+        'MAR' => ClubProfile::REPUTATION_CONTINENTAL, // 2022 semifinalists
+        'SEN' => ClubProfile::REPUTATION_CONTINENTAL,
+        'SUI' => ClubProfile::REPUTATION_CONTINENTAL,
+        'MEX' => ClubProfile::REPUTATION_CONTINENTAL,
+        'USA' => ClubProfile::REPUTATION_CONTINENTAL,
+        'JPN' => ClubProfile::REPUTATION_CONTINENTAL,
+        'TUR' => ClubProfile::REPUTATION_CONTINENTAL,
+
+        // Established — qualified regularly, mid-tier
+        'SWE' => ClubProfile::REPUTATION_ESTABLISHED,
+        'NOR' => ClubProfile::REPUTATION_ESTABLISHED, // Haaland-led generation
+        'AUT' => ClubProfile::REPUTATION_ESTABLISHED,
+        'EGY' => ClubProfile::REPUTATION_ESTABLISHED,
+        'CIV' => ClubProfile::REPUTATION_ESTABLISHED, // AFCON 2023 winners
+        'IRN' => ClubProfile::REPUTATION_ESTABLISHED,
+        'KOR' => ClubProfile::REPUTATION_ESTABLISHED,
+        'AUS' => ClubProfile::REPUTATION_ESTABLISHED,
+        'CZE' => ClubProfile::REPUTATION_ESTABLISHED,
+        'SCO' => ClubProfile::REPUTATION_ESTABLISHED,
+        'ECU' => ClubProfile::REPUTATION_ESTABLISHED,
+        'PAR' => ClubProfile::REPUTATION_ESTABLISHED,
+        'ALG' => ClubProfile::REPUTATION_ESTABLISHED,
+        'TUN' => ClubProfile::REPUTATION_ESTABLISHED,
+        'GHA' => ClubProfile::REPUTATION_ESTABLISHED,
+        'KSA' => ClubProfile::REPUTATION_ESTABLISHED,
+
+        // Modest — first-time or sporadic qualifiers
+        'QAT' => ClubProfile::REPUTATION_MODEST,
+        'BIH' => ClubProfile::REPUTATION_MODEST,
+        'CAN' => ClubProfile::REPUTATION_MODEST,
+        'NZL' => ClubProfile::REPUTATION_MODEST,
+        'CPV' => ClubProfile::REPUTATION_MODEST,
+        'COD' => ClubProfile::REPUTATION_MODEST,
+        'IRQ' => ClubProfile::REPUTATION_MODEST,
+        'JOR' => ClubProfile::REPUTATION_MODEST,
+        'UZB' => ClubProfile::REPUTATION_MODEST,
+        'PAN' => ClubProfile::REPUTATION_MODEST,
+        'CUR' => ClubProfile::REPUTATION_MODEST,
+
+        // Local — outsiders / debutants
+        'RSA' => ClubProfile::REPUTATION_LOCAL,
+        'HAI' => ClubProfile::REPUTATION_LOCAL,
+    ];
+
+    /**
+     * Curated preferred formation for national teams keyed by FIFA code.
+     * Reflects current managerial identity. Unlisted national teams fall
+     * back to the reputation-tier formation pool in FormationBiasResolver.
+     */
+    private const NATIONAL_TEAM_PREFERRED_FORMATION = [
+        'ARG' => '4-1-2-3',
+        'BRA' => '4-2-1-3',
+        'FRA' => '4-1-2-3',
+        'ESP' => '4-2-1-3',
+        'ENG' => '3-4-3',
+        'GER' => '4-2-3-1',
+        'POR' => '4-3-3',
+        'NED' => '4-3-3',
+        'BEL' => '3-4-3',
+        'CRO' => '4-3-3',
+        'URU' => '4-4-2',
+        'COL' => '4-2-3-1',
+        'MAR' => '4-3-3',
+        'SEN' => '4-3-3',
+        'SUI' => '4-2-3-1',
+        'MEX' => '4-3-3',
+        'USA' => '4-3-3',
+        'JPN' => '4-2-3-1',
+        'TUR' => '4-2-3-1',
+        'NOR' => '4-3-3',
+        'AUT' => '4-3-3',
+        'KOR' => '4-2-3-1',
+        'AUS' => '4-2-3-1',
+        'IRN' => '5-4-1',
+        'KSA' => '4-2-3-1',
+        'QAT' => '5-3-2',
+        'PAR' => '4-4-2',
+    ];
+
+    /**
+     * Curated tactical aggression (-2..+2) for national teams keyed by FIFA
+     * code. International football skews more conservative than club football
+     * (cup format, less drilled-in pressing), so most teams sit at 0; only
+     * sides with a pronounced identity shift one or two notches.
+     */
+    private const NATIONAL_TEAM_TACTICAL_AGGRESSION = [
+        'ESP' => 1,
+        'BRA' => 1,
+        'POR' => 1,
+        'NED' => 1,
+        'AUT' => 1,
+        'JPN' => 1,
+        'SEN' => 1,
+        'MAR' => -1,
+        'URU' => -1,
+        'SUI' => -1,
+        'IRN' => -2,
+        'KSA' => -1,
+        'QAT' => -1,
+        'NZL' => -1,
+        'JOR' => -1,
+        'PAN' => -1,
+        'HAI' => -1,
+        'RSA' => -1,
+    ];
+
+    /**
      * Curated per-club fan_loyalty on a 0-10 editorial scale. Anchor for
      * TeamReputation.base_loyalty at game start. Only clubs whose loyalty
      * differs from the neutral midpoint need an entry; everyone else
@@ -495,21 +630,263 @@ class ClubProfilesSeeder extends Seeder
         'ACF Fiorentina' => 3,           // 47.2%
     ];
 
+    /**
+     * Curated per-club preferred formation. Captures real-world tactical
+     * identity so AI opponents feel distinct rather than every club
+     * defaulting to 4-3-3. Used by FormationRecommender as a positive
+     * bias on formation scoring; the recommender still overrides when
+     * squad makeup makes the preferred shape genuinely unviable.
+     *
+     * Only clubs with a clear tactical identity are listed. Unlisted
+     * clubs fall back to a reputation-tier formation pool (see
+     * FormationBiasResolver).
+     */
+    private const PREFERRED_FORMATION_OVERRIDES = [
+        // ── Spain — La Liga ──────────────────────────────────────────
+        'Real Madrid' => '4-3-1-2',
+        'FC Barcelona' => '4-2-1-3',
+        'Atlético de Madrid' => '4-4-2',
+        'Athletic Club' => '4-2-1-3',
+        'Villarreal CF' => '4-4-2',
+        'Real Betis Balompié' => '4-1-2-3',
+        'Sevilla FC' => '3-4-3',
+        'Real Sociedad' => '4-2-1-3',
+        'Valencia CF' => '4-2-1-3',
+        'RCD Espanyol Barcelona' => '4-1-2-3',
+        'RC Celta' => '3-4-3',
+        'RCD Mallorca' => '4-3-1-2',
+        'CA Osasuna' => '4-2-1-3',
+        'Getafe CF' => '5-3-2',
+        'Rayo Vallecano' => '4-2-1-3',
+        'Girona FC' => '4-2-1-3',
+        'Deportivo Alavés' => '3-5-2',
+        'Elche CF' => '5-3-2',
+        'Levante UD' => '4-1-2-3',
+        'Real Oviedo' => '4-2-1-3',
+
+        // ── Spain — La Liga 2 ────────────────────────────────────────
+        'Deportivo de La Coruña' => '4-2-3-1',
+        'Málaga CF' => '4-2-3-1',
+        'Sporting Gijón' => '4-2-3-1',
+        'UD Las Palmas' => '4-3-3',
+        'Real Valladolid CF' => '4-4-2',
+        'Granada CF' => '4-2-3-1',
+        'Cádiz CF' => '5-4-1',
+        'Racing Santander' => '4-3-3',
+        'UD Almería' => '4-2-3-1',
+        'Real Zaragoza' => '4-4-2',
+        'Córdoba CF' => '4-2-3-1',
+        'CD Castellón' => '4-3-3',
+        'Albacete Balompié' => '4-2-3-1',
+        'SD Huesca' => '4-2-3-1',
+        'SD Eibar' => '4-4-2',
+        'CD Leganés' => '4-2-3-1',
+        'Burgos CF' => '4-4-2',
+        'Cultural Leonesa' => '4-4-2',
+        'CD Mirandés' => '4-2-3-1',
+        'AD Ceuta FC' => '4-4-2',
+        'FC Andorra' => '4-3-3',
+        'Real Sociedad B' => '4-3-3',
+
+        // ── England ──────────────────────────────────────────────────
+        'Manchester City' => '4-3-3',             // Guardiola
+        'Liverpool FC' => '4-3-3',
+        'Arsenal FC' => '4-3-3',                  // Arteta
+        'Chelsea FC' => '4-2-3-1',
+        'Manchester United' => '3-4-3',           // Amorim
+        'Tottenham Hotspur' => '4-3-3',
+        'Newcastle United' => '4-3-3',
+        'Aston Villa' => '4-2-3-1',               // Emery
+        'West Ham United' => '4-2-3-1',
+        'Everton FC' => '4-2-3-1',
+        'Brighton & Hove Albion' => '4-2-3-1',
+        'Crystal Palace' => '3-4-3',              // Glasner
+        'Wolverhampton Wanderers' => '3-4-3',
+        'Leeds United' => '4-2-3-1',
+        'Nottingham Forest' => '4-2-3-1',
+        'Fulham FC' => '4-2-3-1',
+        'Brentford FC' => '4-3-3',
+        'AFC Bournemouth' => '4-2-3-1',
+        'Sunderland AFC' => '4-2-3-1',
+        'Burnley FC' => '4-4-2',
+
+        // ── Germany ──────────────────────────────────────────────────
+        'Bayern Munich' => '4-2-3-1',
+        'Borussia Dortmund' => '4-2-3-1',
+        'Bayer 04 Leverkusen' => '3-4-3',         // Alonso shape
+        'Eintracht Frankfurt' => '3-4-3',
+        'RB Leipzig' => '4-2-3-1',
+        '1.FC Union Berlin' => '5-3-2',           // Compact block
+        'FC St. Pauli' => '3-4-3',
+        '1.FC Heidenheim 1846' => '4-4-2',
+
+        // ── France ───────────────────────────────────────────────────
+        'Paris Saint-Germain' => '4-3-3',         // Luis Enrique
+        'Olympique Marseille' => '4-2-3-1',       // De Zerbi
+        'RC Lens' => '3-4-3',
+        'Stade Brestois 29' => '4-4-2',
+
+        // ── Italy ────────────────────────────────────────────────────
+        'Inter Milan' => '3-5-2',                 // Inzaghi trademark
+        'Juventus FC' => '4-2-3-1',
+        'AC Milan' => '4-2-3-1',
+        'SSC Napoli' => '4-3-3',                  // Conte 4-3-3 base
+        'Atalanta BC' => '3-4-3',                 // Gasperini
+        'AS Roma' => '3-4-3',
+        'SS Lazio' => '4-3-3',
+        'ACF Fiorentina' => '4-2-3-1',
+        'Bologna FC 1909' => '4-2-3-1',
+        'Torino FC' => '3-5-2',
+        'Genoa CFC' => '3-5-2',
+        'Udinese Calcio' => '3-5-2',
+        'Cagliari Calcio' => '4-4-2',
+        'Hellas Verona' => '3-4-3',
+        'US Cremonese' => '3-5-2',
+
+        // ── European pool ────────────────────────────────────────────
+        'SL Benfica' => '4-3-3',
+        'FC Porto' => '4-2-3-1',
+        'Ajax Amsterdam' => '4-3-3',
+        'Sporting CP' => '3-4-3',                 // Amorim legacy shape
+        'Celtic FC' => '4-3-3',
+        'Feyenoord Rotterdam' => '4-3-3',
+        'PSV Eindhoven' => '4-3-3',
+
+        // ── International pool ───────────────────────────────────────
+        'CA Boca Juniors' => '4-3-3',
+        'CA River Plate' => '4-3-3',
+        'CR Flamengo' => '4-2-3-1',
+        'SE Palmeiras' => '4-3-3',
+        'Al-Hilal SFC' => '4-3-3',
+    ];
+
+    /**
+     * Curated per-club tactical aggression on a -2..+2 scale. Captures
+     * how much more attacking (or more cautious) a club is than its
+     * reputation tier alone would suggest. Used by LineupService to
+     * shift mentality, pressing, defensive line, and playing style
+     * one or two notches up/down the ladder.
+     *
+     *   +2 — extreme front-foot (Gasperini's Atalanta, peak Pep)
+     *   +1 — high-press, attacking by default
+     *    0 — tier-typical (the implicit default)
+     *   -1 — pragmatic / cautious
+     *   -2 — deep low-block (Simeone, Bordalás)
+     *
+     * Only clubs whose tactical identity meaningfully diverges from
+     * the tier-typical baseline need an entry; everyone else stays at 0.
+     */
+    private const TACTICAL_AGGRESSION_OVERRIDES = [
+        // ── Spain — La Liga ──────────────────────────────────────────
+        'FC Barcelona' => 1,                      // Flick possession-press
+        'Atlético de Madrid' => -2,               // Cholismo trademark
+        'Athletic Club' => 1,                     // Valverde aggressive press
+        'Real Sociedad' => 1,                     // Imanol high-tempo
+        'Valencia CF' => -1,
+        'RCD Espanyol Barcelona' => -1,
+        'RC Celta' => 1,                          // Giráldez attacking
+        'RCD Mallorca' => -2,                     // Aguirre block
+        'CA Osasuna' => -1,
+        'Getafe CF' => -2,                        // Bordalás compact
+        'Rayo Vallecano' => 1,                    // Iñigo Pérez attacking
+        'Girona FC' => 1,                         // Míchel possession
+        'Deportivo Alavés' => -1,
+        'Real Oviedo' => -1,
+
+        // ── Spain — La Liga 2 ────────────────────────────────────────
+        'UD Las Palmas' => 1,                     // Possession identity
+        'Cádiz CF' => -2,                         // Survival deep block
+        'Racing Santander' => 1,
+        'Córdoba CF' => 1,
+        'CD Castellón' => 1,
+        'SD Eibar' => -1,                         // Compact identity
+        'CD Leganés' => -1,
+        'AD Ceuta FC' => -1,
+        'FC Andorra' => 1,                        // Eder Sarabia possession
+        'Real Sociedad B' => 1,                   // Mirrors first team
+
+        // ── England ──────────────────────────────────────────────────
+        'Manchester City' => 2,                   // Pep extreme press
+        'Liverpool FC' => 1,
+        'Arsenal FC' => 1,                        // Arteta front-foot
+        'Tottenham Hotspur' => 1,
+        'Newcastle United' => 1,                  // Howe pressing
+        'Brighton & Hove Albion' => 1,            // Progressive system
+        'Everton FC' => -1,
+        'Nottingham Forest' => -1,
+
+        // ── Germany ──────────────────────────────────────────────────
+        'Bayern Munich' => 1,
+        'Borussia Dortmund' => 1,
+        'Bayer 04 Leverkusen' => 1,               // Alonso possession-press
+        'RB Leipzig' => 1,                        // Red Bull press
+        '1.FC Union Berlin' => -2,                // Compact 5-3-2
+        'FC Augsburg' => -1,
+        '1.FC Heidenheim 1846' => -1,
+
+        // ── France ───────────────────────────────────────────────────
+        'Paris Saint-Germain' => 1,               // Luis Enrique press
+        'Olympique Marseille' => 1,               // De Zerbi
+        'RC Lens' => 1,
+        'Angers SCO' => -1,
+
+        // ── Italy ────────────────────────────────────────────────────
+        'SSC Napoli' => 1,                        // Conte intense
+        'Atalanta BC' => 2,                       // Gasperini all-out
+        'Bologna FC 1909' => 1,                   // Italiano
+        'Cagliari Calcio' => -1,
+        'Como 1907' => 1,                         // Fabregas progressive
+
+        // ── European pool ────────────────────────────────────────────
+        'SL Benfica' => 1,
+        'Ajax Amsterdam' => 1,
+        'Sporting CP' => 1,
+        'Celtic FC' => 1,
+        'Feyenoord Rotterdam' => 1,
+        'PSV Eindhoven' => 1,
+        'Red Bull Salzburg' => 1,                 // Red Bull press
+
+        // ── International pool ───────────────────────────────────────
+        'CA River Plate' => 1,                    // Gallardo attacking
+        'Al-Hilal SFC' => 1,
+        'Inter Miami CF' => 1,
+    ];
+
     public function run(): void
     {
         $allTeams = Team::all();
         $seeded = 0;
 
         foreach ($allTeams as $team) {
-            $reputation = self::CLUB_DATA[$team->name] ?? ClubProfile::REPUTATION_LOCAL;
-            $fanLoyalty = self::FAN_LOYALTY_OVERRIDES[$team->name]
-                ?? ClubProfile::FAN_LOYALTY_DEFAULT;
+            // National teams key on fifa_code (locale-independent and stable),
+            // because Team::name applies the countries.* translation accessor
+            // for type='national' rows and would otherwise miss the lookup.
+            $isNational = $team->getRawOriginal('type') === 'national';
+            $rawName = $team->getRawOriginal('name');
+            $fifaCode = $team->fifa_code;
+
+            if ($isNational && $fifaCode) {
+                $reputation = self::NATIONAL_TEAM_REPUTATION[$fifaCode] ?? ClubProfile::REPUTATION_LOCAL;
+                $preferredFormation = self::NATIONAL_TEAM_PREFERRED_FORMATION[$fifaCode] ?? null;
+                $tacticalAggression = self::NATIONAL_TEAM_TACTICAL_AGGRESSION[$fifaCode] ?? 0;
+                // Fan loyalty doesn't apply to national teams (no club fanbase
+                // demand curve), so we leave it at the neutral default.
+                $fanLoyalty = ClubProfile::FAN_LOYALTY_DEFAULT;
+            } else {
+                $reputation = self::CLUB_DATA[$rawName] ?? ClubProfile::REPUTATION_LOCAL;
+                $fanLoyalty = self::FAN_LOYALTY_OVERRIDES[$rawName]
+                    ?? ClubProfile::FAN_LOYALTY_DEFAULT;
+                $preferredFormation = self::PREFERRED_FORMATION_OVERRIDES[$rawName] ?? null;
+                $tacticalAggression = self::TACTICAL_AGGRESSION_OVERRIDES[$rawName] ?? 0;
+            }
 
             ClubProfile::updateOrCreate(
                 ['team_id' => $team->id],
                 [
                     'reputation_level' => $reputation,
                     'fan_loyalty' => $fanLoyalty,
+                    'preferred_formation' => $preferredFormation,
+                    'tactical_aggression' => $tacticalAggression,
                 ]
             );
 

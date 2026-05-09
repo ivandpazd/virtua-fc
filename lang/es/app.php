@@ -5,6 +5,7 @@ return [
     'dashboard' => 'Inicio',
     'squad' => 'Plantilla',
     'starting_xi' => 'Alineación',
+    'scout_opponent' => 'Estudiar Rival',
     'finances' => 'Finanzas',
     'club' => 'Club',
     'transfers' => 'Fichajes',
@@ -63,5 +64,8 @@ return [
     // Common actions
     'close' => 'Cerrar',
     'more' => 'Más',
+    'loading' => 'Cargando…',
+    'load_failed' => 'No se pudo cargar este contenido. Inténtalo de nuevo.',
+    'retry' => 'Reintentar',
 
 ];

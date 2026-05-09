@@ -2,7 +2,6 @@
 
 namespace App\Http\Views;
 
-use App\Modules\Competition\Services\CalendarService;
 use App\Modules\Lineup\Enums\DefensiveLineHeight;
 use App\Modules\Lineup\Enums\Formation;
 use App\Modules\Lineup\Enums\Mentality;
@@ -10,38 +9,30 @@ use App\Modules\Lineup\Enums\PlayingStyle;
 use App\Modules\Lineup\Enums\PressingIntensity;
 use App\Modules\Lineup\Services\LineupService;
 
-use App\Models\Game;
 use App\Support\PitchGrid;
 use App\Support\PositionSlotMapper;
+use App\Support\PreMatchContext;
 use App\Support\TeamColors;
 
 class ShowLineup
 {
     public function __construct(
         private readonly LineupService $lineupService,
-        private readonly CalendarService $calendarService,
     ) {}
 
     public function __invoke(string $gameId)
     {
-        $game = Game::with(['team', 'tactics', 'tacticalPresets'])->findOrFail($gameId);
-        $match = $game->next_match;
-
-        abort_unless($match, 404);
-
-        $match->load(['homeTeam', 'awayTeam', 'competition']);
-
-        // Determine if user is home or away
-        $isHome = $match->home_team_id === $game->team_id;
-        $opponent = $isHome ? $match->awayTeam : $match->homeTeam;
+        $context = PreMatchContext::resolve($gameId, ['team', 'tactics', 'tacticalPresets']);
+        $game = $context->game;
+        $match = $context->match;
+        $isHome = $context->isHome;
+        $opponent = $context->opponent;
+        $matchDate = $context->matchDate;
+        $competitionId = $context->competitionId;
 
         // Get all players (including unavailable for display), sorted and grouped
         $playersByGroup = $this->lineupService->getPlayersByPositionGroup($gameId, $game->team_id);
         $allPlayers = $playersByGroup['all'];
-
-        // Get match date and competition for availability checks
-        $matchDate = $match->scheduled_date;
-        $competitionId = $match->competition_id;
 
         // Get current lineup if any
         $currentLineup = $this->lineupService->getLineup($match, $game->team_id);
@@ -139,16 +130,12 @@ class ShowLineup
         // Pass slot compatibility matrix to JavaScript
         $slotCompatibility = PositionSlotMapper::SLOT_COMPATIBILITY;
 
-        // User's best XI average for coach assistant comparison
-        $userBestXI = $this->lineupService->getBestXIWithAverage($gameId, $game->team_id, $matchDate, $competitionId, requireEnrollment: $requireEnrollment);
-        $userTeamAverage = $userBestXI['average'];
+        // User's best XI average for coach assistant comparison + opponent prediction.
+        $userTeamAverage = $this->lineupService
+            ->getBestXIWithAverage($gameId, $game->team_id, $matchDate, $competitionId, requireEnrollment: $requireEnrollment)['average'];
 
         // Get opponent scouting data (including predicted formation, mentality, and instructions)
-        $opponentData = $this->lineupService->predictOpponentTactics($gameId, $opponent->id, $matchDate, $competitionId, !$isHome, $userTeamAverage);
-
-        // Radar chart data for coach assistant
-        $userRadar = $this->calculateRadarValues($userBestXI['players']);
-        $opponentRadar = $this->calculateRadarValues($opponentData['bestXIPlayers']);
+        $opponentData = $this->lineupService->predictOpponentTactics($gameId, $opponent->id, $matchDate, $competitionId, $match->hasHomeAdvantage($opponent->id), $userTeamAverage);
 
         // Formation modifiers for coach assistant tips (attack/defense per formation)
         $formationModifiers = [];
@@ -159,11 +146,9 @@ class ShowLineup
             ];
         }
 
-        // User's team form for coach assistant display
-        $playerForm = $this->calendarService->getTeamForm($gameId, $game->team_id);
-
         // Team shirt colors for pitch visualization
         $teamColorsHex = TeamColors::toHex($game->team->colors ?? TeamColors::get($game->team->getRawOriginal('name')));
+        $opponentColorsHex = TeamColors::toHex($opponent->colors ?? TeamColors::get($opponent->getRawOriginal('name')));
 
         // Instruction defaults and available options
         $defaultPlayingStyle = $game->tactics?->default_playing_style ?? 'balanced';
@@ -203,43 +188,6 @@ class ShowLineup
             'tooltip' => $d->tooltip(),
             'summary' => $d->summary(),
         ], DefensiveLineHeight::cases());
-
-        // Tactical guide data (for inline modal)
-        $guideFormations = collect(config('match_simulation.formations'))->map(fn ($mods, $name) => [
-            'name' => $name,
-            'attack' => $mods['attack'],
-            'defense' => $mods['defense'],
-        ])->values();
-
-        $guideMentalities = collect(config('match_simulation.mentalities'))->map(fn ($mods, $name) => [
-            'name' => $name,
-            'own_goals' => $mods['own_goals'],
-            'opponent_goals' => $mods['opponent_goals'],
-        ])->values();
-
-        $guidePlayingStyles = collect(PlayingStyle::cases())->map(fn (PlayingStyle $s) => [
-            'label' => $s->label(),
-            'own_xg' => $s->ownXGModifier(),
-            'opp_xg' => $s->opponentXGModifier(),
-            'energy' => $s->energyDrainMultiplier(),
-        ]);
-
-        $guidePressingOptions = collect(PressingIntensity::cases())->map(fn (PressingIntensity $p) => [
-            'label' => $p->label(),
-            'own_xg' => $p->ownXGModifier(),
-            'opp_xg' => config("match_simulation.pressing.{$p->value}.opp_xg"),
-            'energy' => $p->energyDrainMultiplier(),
-            'fades' => config("match_simulation.pressing.{$p->value}.fade_after") !== null,
-            'fade_to' => config("match_simulation.pressing.{$p->value}.fade_opp_xg"),
-        ]);
-
-        $guideDefensiveLines = collect(DefensiveLineHeight::cases())->map(fn (DefensiveLineHeight $d) => [
-            'label' => $d->label(),
-            'own_xg' => $d->ownXGModifier(),
-            'opp_xg' => $d->opponentXGModifier(),
-        ]);
-
-        $tacticalInteractions = config('match_simulation.tactical_interactions');
 
         // xG preview config: all modifiers needed for frontend calculation
         $xgConfig = [
@@ -292,27 +240,19 @@ class ShowLineup
             'formationSlots' => $formationSlots,
             'slotCompatibility' => $slotCompatibility,
             'opponentData' => $opponentData,
+            'opponentColors' => $opponentColorsHex,
             'teamColors' => $teamColorsHex,
             'userTeamAverage' => $userTeamAverage,
             'formationModifiers' => $formationModifiers,
-            'playerForm' => $playerForm,
             'playingStyles' => $playingStyles,
             'pressingOptions' => $pressingOptions,
             'defensiveLineOptions' => $defensiveLineOptions,
             'currentPlayingStyle' => $defaultPlayingStyle,
             'currentPressing' => $defaultPressing,
             'currentDefLine' => $defaultDefLine,
-            'guideFormations' => $guideFormations,
-            'guideMentalities' => $guideMentalities,
-            'guidePlayingStyles' => $guidePlayingStyles,
-            'guidePressingOptions' => $guidePressingOptions,
-            'guideDefensiveLines' => $guideDefensiveLines,
-            'tacticalInteractions' => $tacticalInteractions,
             'xgConfig' => $xgConfig,
             'gridConfig' => $gridConfig,
             'currentPitchPositions' => $currentPitchPositions,
-            'userRadar' => $userRadar,
-            'opponentRadar' => $opponentRadar,
 
             'tacticalPresets' => $game->tacticalPresets,
             'presetsConfig' => $game->tacticalPresets->map(fn ($p) => [
@@ -332,32 +272,4 @@ class ShowLineup
         ]);
     }
 
-    /**
-     * Calculate radar chart values from a collection of best XI players.
-     * Returns 8 axes: GK, DEF, MID, FWD averages + fitness, morale, technical, physical.
-     *
-     * @return array<string, int>
-     */
-    private function calculateRadarValues(\Illuminate\Support\Collection $players): array
-    {
-        if ($players->isEmpty()) {
-            return array_fill_keys(['goalkeeper', 'defense', 'midfield', 'attack', 'fitness', 'morale', 'overall'], 0);
-        }
-
-        $grouped = $players->groupBy(fn ($p) => $p->position_group);
-
-        $avgOverall = fn (string $group) => (int) round(
-            ($grouped->get($group) ?? collect())->avg(fn ($p) => $p->effective_rating) ?? 0
-        );
-
-        return [
-            'goalkeeper' => $avgOverall('Goalkeeper'),
-            'defense' => $avgOverall('Defender'),
-            'midfield' => $avgOverall('Midfielder'),
-            'attack' => $avgOverall('Forward'),
-            'fitness' => (int) round($players->avg('fitness')),
-            'morale' => (int) round($players->avg('morale')),
-            'overall' => (int) round($players->avg(fn ($p) => $p->effective_rating)),
-        ];
-    }
 }
