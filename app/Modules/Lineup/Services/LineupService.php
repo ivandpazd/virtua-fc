@@ -248,7 +248,8 @@ class LineupService
     /**
      * Calculate effective score for AI rotation: penalizes low-fitness players.
      * Players above the threshold are unaffected. Below it, score degrades linearly.
-     * Example with threshold 80: 85-rated player at fitness 60 → effective ~72.3
+     * With threshold 70 and floor 0.60: 85-rated player at fitness 30 → effective ~64.6,
+     * which is now beatable by a fresh same-position sub in the high 60s / low 70s.
      */
     private function effectiveScore(GamePlayer $player): float
     {
@@ -258,8 +259,8 @@ class LineupService
             return (float) $player->overall_score;
         }
 
-        // Linear penalty: 1.0 at threshold, 0.80 at fitness 0
-        $fitnessMultiplier = 0.80 + ($player->fitness / $threshold) * 0.20;
+        // Linear penalty: 1.0 at threshold, 0.60 at fitness 0
+        $fitnessMultiplier = 0.60 + ($player->fitness / $threshold) * 0.40;
 
         return $player->overall_score * $fitnessMultiplier;
     }
