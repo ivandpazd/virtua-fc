@@ -25,6 +25,8 @@ return [
     'overall_short' => 'OVR',
     'attack_short' => 'ATK',
     'defense_short' => 'DEF',
+    'attack_xg_label' => 'Attack xG',
+    'defense_xg_label' => 'Defense xG',
 
     // Status labels
     'on_loan' => 'On Loan',

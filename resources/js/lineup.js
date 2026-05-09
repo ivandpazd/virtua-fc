@@ -328,6 +328,47 @@ export default function lineupManager(config) {
             });
         },
 
+        /**
+         * Combined "own xG" multiplier from the user's tactical setup, expressed
+         * as a percent delta vs. baseline (0 = neutral, +N = boost, -N = penalty).
+         * Folds in everything that scales the user's own xG in MatchSimulator's
+         * formula (and the xg-calculator JS module): formation attack, mentality
+         * own_goals, playing-style own_xg, pressing own_xg, def-line own_xg.
+         * Opponent-conditional tactical interactions are excluded — those are
+         * already surfaced in xgPreview, which knows the opponent's selections.
+         */
+        get attackImpactPct() {
+            const cfg = this.xgConfig;
+            const fmMods = this.formationModifiers[this.selectedFormation];
+            if (!cfg || !fmMods) return 0;
+            const m = fmMods.attack
+                * (cfg.mentalities[this.selectedMentality]?.own_goals ?? 1.0)
+                * (cfg.playing_styles[this.selectedPlayingStyle]?.own_xg ?? 1.0)
+                * (cfg.pressing[this.selectedPressing]?.own_xg ?? 1.0)
+                * (cfg.defensive_line[this.selectedDefLine]?.own_xg ?? 1.0);
+            return Math.round((m - 1) * 100);
+        },
+
+        /**
+         * Combined "opponent xG suppression" from the user's tactical setup, as
+         * a percent delta where positive = better defense (we suppress opponent
+         * xG) and negative = worse defense (our setup amplifies it). Mirrors
+         * the same formula as attackImpactPct but on the opponent_goals / opp_xg
+         * channels, then flipped to read in the natural "higher is better"
+         * direction for a defense readout.
+         */
+        get defenseImpactPct() {
+            const cfg = this.xgConfig;
+            const fmMods = this.formationModifiers[this.selectedFormation];
+            if (!cfg || !fmMods) return 0;
+            const oppXgMult = fmMods.defense
+                * (cfg.mentalities[this.selectedMentality]?.opponent_goals ?? 1.0)
+                * (cfg.playing_styles[this.selectedPlayingStyle]?.opp_xg ?? 1.0)
+                * (cfg.pressing[this.selectedPressing]?.opp_xg ?? 1.0)
+                * (cfg.defensive_line[this.selectedDefLine]?.opp_xg ?? 1.0);
+            return Math.round((1 - oppXgMult) * 100);
+        },
+
         get slotAssignments() {
             // Pure projection of the authoritative slot map onto the slot list.
             // No algorithm, no reshuffling — what the map says, the pitch shows.

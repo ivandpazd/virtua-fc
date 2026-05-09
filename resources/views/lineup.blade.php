@@ -400,20 +400,20 @@
                         {{-- Team Instructions --}}
                         <x-section-card title="{{ __('game.instructions_title') }}">
                             <div class="px-5 py-4 space-y-4">
-                                {{-- Formation impact (ATK/DEF modifiers) --}}
+                                {{-- Tactical impact (combined ATK/DEF deltas from formation + mentality + style + pressing + def line) --}}
                                 <template x-if="formationModifiers[selectedFormation]">
                                     <div class="grid grid-cols-2 gap-3 pb-4 border-b border-border-default">
                                         <div>
-                                            <div class="text-[10px] font-medium text-text-secondary uppercase tracking-wide mb-1">{{ __('squad.attack_short') }}</div>
+                                            <div class="text-[10px] font-medium text-text-secondary tracking-wide mb-1">{{ __('squad.attack_xg_label') }}</div>
                                             <div class="font-heading text-xl font-bold tabular-nums"
-                                                 :class="formationModifiers[selectedFormation]?.attack > 0 ? 'text-accent-green' : (formationModifiers[selectedFormation]?.attack < 0 ? 'text-accent-red' : 'text-text-primary')"
-                                                 x-text="(formationModifiers[selectedFormation]?.attack > 0 ? '+' : '') + formationModifiers[selectedFormation]?.attack + '%'"></div>
+                                                 :class="attackImpactPct > 0 ? 'text-accent-green' : (attackImpactPct < 0 ? 'text-accent-red' : 'text-text-primary')"
+                                                 x-text="(attackImpactPct > 0 ? '+' : '') + attackImpactPct + '%'"></div>
                                         </div>
                                         <div>
-                                            <div class="text-[10px] font-medium text-text-secondary uppercase tracking-wide mb-1">{{ __('squad.defense_short') }}</div>
+                                            <div class="text-[10px] font-medium text-text-secondary tracking-wide mb-1">{{ __('squad.defense_xg_label') }}</div>
                                             <div class="font-heading text-xl font-bold tabular-nums"
-                                                 :class="formationModifiers[selectedFormation]?.defense > 0 ? 'text-accent-green' : (formationModifiers[selectedFormation]?.defense < 0 ? 'text-accent-red' : 'text-text-primary')"
-                                                 x-text="(formationModifiers[selectedFormation]?.defense > 0 ? '+' : '') + formationModifiers[selectedFormation]?.defense + '%'"></div>
+                                                 :class="defenseImpactPct > 0 ? 'text-accent-green' : (defenseImpactPct < 0 ? 'text-accent-red' : 'text-text-primary')"
+                                                 x-text="(defenseImpactPct > 0 ? '+' : '') + defenseImpactPct + '%'"></div>
                                         </div>
                                     </div>
                                 </template>

@@ -25,6 +25,8 @@ return [
     'overall_short' => 'MED',
     'attack_short' => 'ATQ',
     'defense_short' => 'DEF',
+    'attack_xg_label' => 'Ataque xG',
+    'defense_xg_label' => 'Defensa xG',
 
     // Status labels
     'on_loan' => 'Cedido',
