@@ -38,6 +38,16 @@ class BetaInviteService
         return InviteCode::where('email', strtolower($email))->exists();
     }
 
+    public function resend(InviteCode $invite): void
+    {
+        Mail::to($invite->email)->queue(new BetaInvite($invite));
+
+        $invite->update([
+            'invite_sent' => true,
+            'invite_sent_at' => now(),
+        ]);
+    }
+
     private function generateCode(): string
     {
         do {

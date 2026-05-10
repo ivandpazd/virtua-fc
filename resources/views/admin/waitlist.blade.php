@@ -114,6 +114,19 @@
                                         {{ __('admin.waitlist_send_invite') }}
                                     </x-ghost-button>
                                 </form>
+                            @elseif($entry->inviteCode->times_used === 0 && config('beta.enabled'))
+                                <form
+                                    method="POST"
+                                    action="{{ route('admin.resend-waitlist-invite', $entry) }}"
+                                    class="inline"
+                                    x-data="{ confirmMsg: @js(__('admin.waitlist_resend_confirm')) }"
+                                    x-on:submit.prevent="if (confirm(confirmMsg)) $el.submit()"
+                                >
+                                    @csrf
+                                    <x-ghost-button type="submit" color="blue" size="xs">
+                                        {{ __('admin.waitlist_resend_invite') }}
+                                    </x-ghost-button>
+                                </form>
                             @endif
                         </td>
                     </tr>

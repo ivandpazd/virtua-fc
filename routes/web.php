@@ -14,6 +14,7 @@ use App\Http\Actions\StopImpersonation;
 use App\Http\Actions\ToggleCareerAccess;
 use App\Http\Actions\ToggleDatabaseEditing;
 use App\Http\Actions\ToggleTournamentAccess;
+use App\Http\Actions\ResendWaitlistInvite;
 use App\Http\Actions\SendBulkWaitlistInvites;
 use App\Http\Actions\SendWaitlistInvite;
 use App\Http\Views\AdminActivation;
@@ -316,6 +317,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/game-stats', AdminGameStats::class)->name('game-stats');
         Route::get('/waitlist', AdminWaitlist::class)->name('waitlist');
         Route::post('/waitlist/{waitlistEntry}/invite', SendWaitlistInvite::class)->name('send-waitlist-invite');
+        Route::post('/waitlist/{waitlistEntry}/resend', ResendWaitlistInvite::class)->name('resend-waitlist-invite');
         Route::post('/waitlist/bulk-invite', SendBulkWaitlistInvites::class)->name('bulk-waitlist-invite');
         Route::post('/impersonate/{userId}', StartImpersonation::class)->name('impersonate');
         Route::post('/users/{userId}/toggle-career', ToggleCareerAccess::class)->name('toggle-career');
