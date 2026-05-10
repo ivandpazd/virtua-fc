@@ -8,10 +8,13 @@
 @if($record)
     @php
         $isAcademy = $record->joined_from === \App\Models\UserSquadCareerRecord::ORIGIN_ACADEMY;
+        $isFreeAgent = $record->joined_from === \App\Models\UserSquadCareerRecord::ORIGIN_FREE_AGENT;
         $isCurrentSeason = $currentSeason !== null && (string) $record->joined_season === (string) $currentSeason;
-        $label = $isAcademy
-            ? ($isCurrentSeason ? __('squad.origin_academy') : '')
-            : ($record->joined_from ?? '');
+        $label = match (true) {
+            $isAcademy => $isCurrentSeason ? __('squad.origin_academy') : '',
+            $isFreeAgent => __('squad.origin_free_agent'),
+            default => $record->joined_from ?? '',
+        };
         $title = trim(($label !== '' ? $label . ' · ' : '') . __('squad.joined') . ' ' . \App\Models\Game::formatSeason((string) $record->joined_season));
         $classes = $isAcademy
             ? 'bg-accent-green/10 text-accent-green'

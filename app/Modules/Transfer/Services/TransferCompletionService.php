@@ -256,6 +256,7 @@ class TransferCompletionService
             player: $player,
             previousTeamId: $previousTeamId,
             previousTeamName: $previousTeamName,
+            originOverride: UserSquadCareerRecord::ORIGIN_FREE_AGENT,
         );
 
         $offer->update([
@@ -293,6 +294,7 @@ class TransferCompletionService
         GamePlayer $player,
         ?string $previousTeamId,
         ?string $previousTeamName,
+        ?string $originOverride = null,
     ): void {
         $wasOwned = $game->ownsTeam($previousTeamId);
         $isOwned = $game->ownsTeam($player->team_id);
@@ -306,7 +308,7 @@ class TransferCompletionService
             return;
         }
 
-        $origin = $previousTeamName ?? UserSquadCareerRecord::ORIGIN_ACADEMY;
+        $origin = $originOverride ?? $previousTeamName ?? UserSquadCareerRecord::ORIGIN_ACADEMY;
 
         UserSquadCareerRecord::updateOrCreate(
             ['game_player_id' => $player->id],

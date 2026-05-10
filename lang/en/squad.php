@@ -189,6 +189,7 @@ return [
     'origin' => 'Origin',
     'joined' => 'Joined',
     'origin_academy' => 'Academy',
+    'origin_free_agent' => 'Free agent',
     'career_history' => 'Career history',
     'no_career_history' => 'No completed seasons yet.',
 

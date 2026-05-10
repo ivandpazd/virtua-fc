@@ -32,6 +32,8 @@ class UserSquadCareerRecord extends Model
 
     public const ORIGIN_ACADEMY = 'Academy';
 
+    public const ORIGIN_FREE_AGENT = 'FreeAgent';
+
     public $timestamps = false;
 
     protected $fillable = [

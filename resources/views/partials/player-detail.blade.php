@@ -164,9 +164,11 @@
                 @if($gamePlayer->careerRecord)
                     @php
                         $cr = $gamePlayer->careerRecord;
-                        $originLabel = $cr->joined_from === \App\Models\UserSquadCareerRecord::ORIGIN_ACADEMY
-                            ? __('squad.origin_academy')
-                            : ($cr->joined_from ?? '');
+                        $originLabel = match ($cr->joined_from) {
+                            \App\Models\UserSquadCareerRecord::ORIGIN_ACADEMY => __('squad.origin_academy'),
+                            \App\Models\UserSquadCareerRecord::ORIGIN_FREE_AGENT => __('squad.origin_free_agent'),
+                            default => $cr->joined_from ?? '',
+                        };
                     @endphp
                     @if($originLabel !== '')
                         <div class="flex items-center justify-between">

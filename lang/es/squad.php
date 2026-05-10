@@ -189,6 +189,7 @@ return [
     'origin' => 'Procedencia',
     'joined' => 'Incorporación',
     'origin_academy' => 'Filial',
+    'origin_free_agent' => 'Agente libre',
     'career_history' => 'Trayectoria',
     'no_career_history' => 'Aún no hay temporadas completadas.',
 
