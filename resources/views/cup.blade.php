@@ -22,7 +22,7 @@
                     @else
                         <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-white/10 text-text-secondary">{{ __('cup.not_yet_entered') }}</span>
                     @endif
-                    <x-other-leagues-menu :game="$game" :current-competition-id="$competition->id" :other-leagues="$otherLeagues" />
+                    <x-other-leagues-menu :game="$game" :current-competition-id="$competition->id" :user-leagues="$userLeagues" :other-leagues="$otherLeagues" />
                 </div>
             </div>
         </div>

@@ -233,6 +233,8 @@ return [
     'reputation_help' => 'La reputación refleja la posición de tu club en el mundo del fútbol. Evoluciona según el rendimiento sostenido en liga y afecta a tu presupuesto, la capacidad de atraer jugadores y las expectativas de la directiva.',
     'your_competitions' => 'Tus Competiciones',
     'other_leagues' => 'Otras Ligas',
+    'leagues' => 'Ligas',
+    'your_leagues' => 'Tus Ligas',
     'competition_role_league' => 'Liga',
     'competition_role_cup' => 'Copa',
     'competition_role_continental' => 'Competición Europea',

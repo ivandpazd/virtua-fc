@@ -33,7 +33,7 @@
                     @elseif($knockoutStatus === 'group_stage')
                         <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-accent-blue/20 text-accent-blue">{{ __('game.group_stage') }}</span>
                     @endif
-                    <x-other-leagues-menu :game="$game" :current-competition-id="$competition->id" :other-leagues="$otherLeagues" />
+                    <x-other-leagues-menu :game="$game" :current-competition-id="$competition->id" :user-leagues="$userLeagues" :other-leagues="$otherLeagues" />
                 </div>
             </div>
         </div>
