@@ -9,6 +9,7 @@ use App\Models\TransferOffer;
 use App\Modules\Transfer\Services\ScoutingService;
 use App\Support\Money;
 use App\Support\PositionMapper;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 
 class ToggleShortlist
@@ -84,15 +85,23 @@ class ToggleShortlist
                 ? ShortlistedPlayer::INTEL_REPORT
                 : ShortlistedPlayer::INTEL_SURFACE;
 
-            $entry = ShortlistedPlayer::create([
-                'game_id' => $gameId,
-                'game_player_id' => $playerId,
-                'added_at' => $game->current_date,
-                'intel_level' => $intelLevel,
-            ]);
+            try {
+                $entry = ShortlistedPlayer::create([
+                    'game_id' => $gameId,
+                    'game_player_id' => $playerId,
+                    'added_at' => $game->current_date,
+                    'intel_level' => $intelLevel,
+                ]);
 
-            // Auto-track if slots available
-            $this->scoutingService->startTracking($entry, $game);
+                // Auto-track if slots available
+                $this->scoutingService->startTracking($entry, $game);
+            } catch (UniqueConstraintViolationException $e) {
+                // Concurrent toggle (e.g. double-click) — another request already
+                // created the row. Treat as success and reuse the winning row.
+                $entry = ShortlistedPlayer::where('game_id', $gameId)
+                    ->where('game_player_id', $playerId)
+                    ->firstOrFail();
+            }
 
             $message = __('messages.shortlist_added', ['player' => $gamePlayer->name]);
             $action = 'added';

@@ -146,7 +146,10 @@
                     <td class="py-2.5 pr-4 text-center"
                         x-data="{
                             isShortlisted: {{ $gp->is_shortlisted ? 'true' : 'false' }},
+                            inFlight: false,
                             async toggle() {
+                                if (this.inFlight) return;
+                                this.inFlight = true;
                                 try {
                                     const response = await fetch('{{ route('game.scouting.shortlist.toggle', [$game->id, $gp->id]) }}', {
                                         method: 'POST',
@@ -162,7 +165,9 @@
                                     } else if (data.message) {
                                         alert(data.message);
                                     }
-                                } catch (e) {}
+                                } catch (e) {} finally {
+                                    this.inFlight = false;
+                                }
                             }
                         }">
                         <x-icon-button @click.prevent="toggle()"

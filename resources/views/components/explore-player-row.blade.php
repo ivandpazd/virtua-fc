@@ -211,7 +211,10 @@ $showAskingPrice = $showAskingPrice ?? ($askingPrice !== null);
     <td class="py-2 pr-4 text-center"
         x-data="{
             isShortlisted: {{ $player->is_shortlisted ? 'true' : 'false' }},
+            inFlight: false,
             async toggle() {
+                if (this.inFlight) return;
+                this.inFlight = true;
                 try {
                     const response = await fetch('{{ route('game.scouting.shortlist.toggle', [$game->id, $player->id]) }}', {
                         method: 'POST',
@@ -227,7 +230,9 @@ $showAskingPrice = $showAskingPrice ?? ($askingPrice !== null);
                     } else if (data.message) {
                         alert(data.message);
                     }
-                } catch (e) {}
+                } catch (e) {} finally {
+                    this.inFlight = false;
+                }
             }
         }">
         <x-icon-button @click.prevent="toggle()"
