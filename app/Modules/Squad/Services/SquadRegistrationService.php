@@ -4,7 +4,6 @@ namespace App\Modules\Squad\Services;
 
 use App\Models\Game;
 use App\Models\GamePlayer;
-use App\Modules\Player\PlayerAge;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -82,11 +81,7 @@ class SquadRegistrationService
         $overageCount = GamePlayer::where('game_id', $game->id)
             ->where('team_id', $game->team_id)
             ->whereIn('id', $academyPlayerIds)
-            ->where(
-                'date_of_birth',
-                '<=',
-                PlayerAge::dateOfBirthCutoff(PlayerAge::YOUNG_END + 1, $game->getRegistrationReferenceDate()),
-            )
+            ->where('date_of_birth', '<', $game->getU23BirthCutoff())
             ->count();
 
         if ($overageCount > 0) {

@@ -593,15 +593,36 @@ class Game extends Model
     }
 
     /**
-     * Reference date used to evaluate squad-registration age eligibility for
-     * the season (e.g. filial / "ficha del filial" slots). Frozen at January 1
-     * of the season-start year — FIFA-style "U23 = born on or after Jan 1 of
-     * YYYY" convention. A player's slot eligibility is fixed for the whole
-     * season and doesn't flip when they have a birthday mid-season.
+     * Reference date used to display "age at registration" on the squad
+     * registration screen. Frozen at January 1 of the season-start year so the
+     * displayed age doesn't flip mid-season. NOT the U-23 eligibility cutoff —
+     * use getU23BirthCutoff() for filial / "ficha del filial" slot checks.
      */
     public function getRegistrationReferenceDate(): Carbon
     {
         return Carbon::createFromDate((int) $this->season, 1, 1);
+    }
+
+    /**
+     * Date-of-birth cutoff for U-23 registration eligibility (filial slots).
+     *
+     * A player is U-23 for the season iff their date_of_birth is on or after
+     * this cutoff: FIFA-style "U-23 for season Y = born on or after Jan 1 of
+     * (Y - 23)". A player born Dec 31, (Y - 24) is NOT U-23 even though they
+     * are still 23 on the season's Jan 1 reference date — they turn 24 during
+     * the calendar year the season starts, which disqualifies them.
+     *
+     * Use with `where('date_of_birth', '>=', $cutoff)` for query-side filters
+     * and `$player->date_of_birth->greaterThanOrEqualTo($cutoff)` in PHP.
+     *
+     * Pass an explicit $seasonYear when evaluating eligibility for a season
+     * other than the current one (e.g. season-close auto-promotion needs the
+     * next season's cutoff before $game->season is incremented).
+     */
+    public function getU23BirthCutoff(?int $seasonYear = null): Carbon
+    {
+        $seasonYear ??= (int) $this->season;
+        return Carbon::createFromDate($seasonYear - 23, 1, 1);
     }
 
     /**

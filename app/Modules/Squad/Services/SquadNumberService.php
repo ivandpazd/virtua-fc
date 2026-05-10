@@ -4,7 +4,6 @@ namespace App\Modules\Squad\Services;
 
 use App\Models\Game;
 use App\Models\GamePlayer;
-use App\Modules\Player\PlayerAge;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -44,11 +43,10 @@ class SquadNumberService
      */
     public function assignNumberForNewPlayer(Game $game, GamePlayer $player): ?int
     {
-        // Use the season's frozen registration reference date so a signing's
-        // slot eligibility doesn't depend on which day of the season they sign.
-        $referenceDate = $game->getRegistrationReferenceDate();
-        $age = $player->age($referenceDate);
-        $isYoung = $age <= PlayerAge::YOUNG_END;
+        // Use the season's U-23 birth cutoff so a signing's slot eligibility
+        // doesn't depend on which day of the season they sign.
+        $u23BirthCutoff = $game->getU23BirthCutoff();
+        $isYoung = $player->date_of_birth->greaterThanOrEqualTo($u23BirthCutoff);
 
         $teamPlayers = GamePlayer::where('game_id', $game->id)
             ->where('team_id', $game->team_id)
@@ -77,8 +75,8 @@ class SquadNumberService
         // 1-25 full — find youngest under-23 in 1-25 to bump to 26+
         $bumpCandidate = $teamPlayers
             ->filter(fn ($p) => $p->number >= 1 && $p->number <= self::FIRST_TEAM_MAX)
-            ->filter(fn ($p) => $p->age($referenceDate) <= PlayerAge::YOUNG_END)
-            ->sortBy(fn ($p) => $p->age($referenceDate))
+            ->filter(fn ($p) => $p->date_of_birth->greaterThanOrEqualTo($u23BirthCutoff))
+            ->sortByDesc(fn ($p) => $p->date_of_birth)
             ->first();
 
         if (! $bumpCandidate) {
@@ -133,10 +131,10 @@ class SquadNumberService
             return 0;
         }
 
-        // Slot eligibility is locked to the season's reference date so a
+        // Slot eligibility is locked to the season's U-23 birth cutoff so a
         // birthday mid-season doesn't shuffle players between filial and
         // first-team slots.
-        $referenceDate = $game->getRegistrationReferenceDate();
+        $u23BirthCutoff = $game->getU23BirthCutoff();
 
         // Categorize players by age and current number position
         $over23InFirstTeam = collect();
@@ -146,8 +144,7 @@ class SquadNumberService
         $under23InAcademy = collect();
 
         foreach ($players as $player) {
-            $age = $player->age($referenceDate);
-            $isYoung = $age <= PlayerAge::YOUNG_END;
+            $isYoung = $player->date_of_birth->greaterThanOrEqualTo($u23BirthCutoff);
             $number = $player->number;
             $inFirstTeam = $number !== null && $number >= 1 && $number <= self::FIRST_TEAM_MAX;
             $inAcademy = $number !== null && $number > self::FIRST_TEAM_MAX;
@@ -182,7 +179,7 @@ class SquadNumberService
 
         // Determine which under-23 to bump (youngest first)
         $toBump = $under23InFirstTeam
-            ->sortBy(fn ($p) => $p->age($referenceDate))
+            ->sortByDesc(fn ($p) => $p->date_of_birth)
             ->take($bumpCount);
 
         // Build the set of all taken numbers that won't change

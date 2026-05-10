@@ -7,7 +7,6 @@ use App\Models\GamePlayer;
 use App\Models\GameTransfer;
 use App\Models\Loan;
 use App\Modules\Notification\Services\NotificationService;
-use App\Modules\Player\PlayerAge;
 use App\Modules\ReserveTeam\Exceptions\FirstTeamSquadFullException;
 use App\Modules\ReserveTeam\Exceptions\FirstTeamSquadMinimumException;
 use App\Modules\ReserveTeam\Exceptions\ReserveSquadMinimumException;
@@ -15,7 +14,6 @@ use App\Modules\Squad\Services\SquadMinimumService;
 use App\Modules\Squad\Services\SquadNumberService;
 use App\Modules\Transfer\Enums\TransferWindowType;
 use App\Modules\Transfer\Services\LoanService;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 /**
@@ -175,14 +173,13 @@ class ReserveTeamService
         }
 
         // Season close runs before $game->season is incremented, so we evaluate
-        // against January 1 of the upcoming season-start year — the registration
-        // reference date that filial-slot eligibility will be locked to next season.
-        $upcomingReferenceDate = Carbon::createFromDate((int) $game->season + 1, 1, 1);
-        $cutoff = PlayerAge::dateOfBirthCutoff(PlayerAge::YOUNG_END + 1, $upcomingReferenceDate);
+        // against next season's U-23 cutoff: players who'd be overage (NOT
+        // U-23) under next season's rule must move up to the first team now.
+        $nextSeasonU23Cutoff = $game->getU23BirthCutoff((int) $game->season + 1);
 
         $candidates = GamePlayer::ownedByTeam($game->reserve_team_id)
             ->where('game_id', $game->id)
-            ->where('date_of_birth', '<=', $cutoff)
+            ->where('date_of_birth', '<', $nextSeasonU23Cutoff)
             ->with(['activeLoan'])
             ->get();
 

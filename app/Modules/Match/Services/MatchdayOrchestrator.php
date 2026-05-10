@@ -7,7 +7,6 @@ use App\Modules\Match\DTOs\MatchdayAdvanceResult;
 use App\Modules\Match\Jobs\ProcessCareerActions;
 use App\Modules\Notification\Services\NotificationService;
 use App\Modules\Squad\Services\EligibilityService;
-use App\Modules\Player\PlayerAge;
 use App\Modules\Player\Services\InjuryService;
 use App\Modules\Stadium\Services\MatchAttendanceService;
 use App\Models\Competition;
@@ -277,14 +276,13 @@ class MatchdayOrchestrator
                 $game->endPreSeason();
 
                 if ($game->squad_registration_enabled) {
+                    // Notify only about overage (not U-23) unenrolled players —
+                    // U-23 players can keep playing without a 1-25 slot via
+                    // academy registration.
                     $unenrolledCount = GamePlayer::where('game_id', $game->id)
                         ->where('team_id', $game->team_id)
                         ->whereNull('number')
-                        ->where(
-                            'date_of_birth',
-                            '<=',
-                            PlayerAge::dateOfBirthCutoff(PlayerAge::YOUNG_END, $game->current_date),
-                        )
+                        ->where('date_of_birth', '<', $game->getU23BirthCutoff())
                         ->count();
 
                     if ($unenrolledCount > 0) {
