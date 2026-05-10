@@ -56,7 +56,7 @@ $getZoneClass = function($position) use ($standingsZones, $borderColorMap) {
                     $isPlayer = $standing->team_id === $game->team_id;
                     $zoneClass = $getZoneClass($standing->position);
                 @endphp
-                <tr class="border-b border-border-default text-sm transition-colors hover:bg-[rgba(59,130,246,0.05)] {{ $zoneClass }} @if($isPlayer) bg-accent-gold/10 @endif">
+                <tr class="group border-b border-border-default text-sm transition-colors hover:bg-[rgba(59,130,246,0.05)] {{ $zoneClass }} @if($isPlayer) bg-accent-gold/10 @endif">
                     <td class="align-middle whitespace-nowrap text-left px-3 py-2 text-text-primary font-semibold">
                         <div class="flex items-center gap-1">
                             <span>{{ $standing->position }}</span>
@@ -71,6 +71,7 @@ $getZoneClass = function($position) use ($standingsZones, $borderColorMap) {
                         <div class="flex items-center space-x-2 @if($isPlayer) font-semibold @endif">
                             <x-team-crest :team="$standing->team" class="w-6 h-6 shrink-0" />
                             <span class="text-text-primary truncate">{{ $standing->team->name }}</span>
+                            <x-team-explore-link :game="$game" :team="$standing->team" />
                         </div>
                     </td>
                     <td class="align-middle whitespace-nowrap px-2 py-2 text-text-secondary tabular-nums">{{ $standing->played }}</td>

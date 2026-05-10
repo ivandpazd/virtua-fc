@@ -323,6 +323,7 @@ return [
     'explore_nationality' => 'Nationality',
     'explore_search_showing_first' => 'showing first :count',
     'explore_search_refine_hint' => 'Too many matches — refine your filters to narrow the list.',
+    'explore_view_team' => 'View :team in Explore',
 
     // Cross-discoverability (Explore ↔ Scouting)
     'explore_link_to_scouting' => 'scouting',

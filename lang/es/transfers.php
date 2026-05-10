@@ -328,6 +328,7 @@ return [
     'explore_nationality' => 'Nacionalidad',
     'explore_search_showing_first' => 'mostrando los primeros :count',
     'explore_search_refine_hint' => 'Demasiadas coincidencias — ajusta los filtros para acotar la lista.',
+    'explore_view_team' => 'Ver :team en Explorar',
 
     // Enlaces cruzados (Explorar ↔ Ojeadores)
     'explore_link_to_scouting' => 'ojeadores',
