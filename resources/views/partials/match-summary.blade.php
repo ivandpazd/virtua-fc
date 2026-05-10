@@ -4,24 +4,17 @@
 
     // Optional props (set by the caller via @include data array).
     $showHeader = $showHeader ?? false;
-    $viewerTeamId = $viewerTeamId ?? null;
+    $mode = $mode ?? MatchSummaryPresenter::MODE_COMPACT;
 
-    $summary = app(MatchSummaryPresenter::class)->present(
-        $match,
-        $showHeader ? $viewerTeamId : null,
-    );
+    $summary = app(MatchSummaryPresenter::class)->present($match, $mode);
+    $isFull = $mode === MatchSummaryPresenter::MODE_FULL;
 @endphp
 
 <div class="rounded-xl border border-border-default bg-surface-800 overflow-hidden">
-    {{-- Optional header: competition pill + result badge + venue · date --}}
+    {{-- Optional header: competition pill + venue · date --}}
     @if($showHeader)
         <div class="px-4 py-3 md:py-4 border-b border-border-default">
-            <x-match-card-header
-                :match="$match"
-                :result-label="$summary->resultLabel"
-                :result-bg="$summary->resultBg"
-                :result-color="$summary->resultColor"
-            />
+            <x-match-card-header :match="$match" />
         </div>
     @endif
 
@@ -73,5 +66,40 @@
                 @endforeach
             </div>
         @endif
+
+        {{-- MVP --}}
+        @if($summary->mvp)
+            <div class="mt-3 pt-2 border-t border-border-default flex items-center justify-center gap-1.5 text-[11px] md:text-xs">
+                <span class="text-accent-gold">★</span>
+                <span class="text-text-muted uppercase tracking-wider">{{ __('game.mvp') }}:</span>
+                <span class="font-semibold text-text-primary truncate">{{ $summary->mvp['name'] }}</span>
+            </div>
+        @endif
     </div>
+
+    {{-- Lineups / ratings — reuses the live-match lineups markup via
+         partials/live-match/lineups-roster.blade.php, mounted under the
+         read-only `matchSummaryLineups` Alpine factory so the same partial
+         renders identically post-match. --}}
+    @if($isFull && $summary->lineups && $summary->lineups->hasAny())
+        @php
+            $homeFormation = $summary->lineups->homeFormation ?? '';
+            $awayFormation = $summary->lineups->awayFormation ?? '';
+        @endphp
+        <div class="border-t border-border-default px-3 sm:px-4 py-3 sm:py-4">
+            <div x-data="matchSummaryLineups({
+                homeRoster: {{ Js::from($summary->lineups->homeRoster) }},
+                awayRoster: {{ Js::from($summary->lineups->awayRoster) }},
+                subInPlayers: {{ Js::from($summary->lineups->subInPlayers) }},
+                events: {{ Js::from($summary->lineups->events) }},
+                extraTimeEvents: {{ Js::from($summary->lineups->extraTimeEvents) }},
+                homeTeamId: {{ Js::from($summary->lineups->homeTeamId) }},
+                awayTeamId: {{ Js::from($summary->lineups->awayTeamId) }},
+                homeScore: {{ $summary->lineups->homeScore }},
+                awayScore: {{ $summary->lineups->awayScore }},
+            })">
+                @include('partials.live-match.lineups-roster')
+            </div>
+        </div>
+    @endif
 </div>

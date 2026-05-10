@@ -3,16 +3,27 @@
 namespace App\Modules\Match\Services;
 
 use App\Models\GameMatch;
-use App\Models\GamePlayer;
 use App\Models\MatchEvent;
+use App\Modules\Match\DTOs\MatchLineupsViewModel;
 use App\Modules\Match\DTOs\MatchSummaryViewModel;
+use App\Support\LiveMatchLineupPresenter;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Builds the prepared view-model for the shared match-summary partial.
+ *
+ * Two modes:
+ *   - 'compact': scoreline + scorers only (used by the matchday results list)
+ *   - 'full':    + MVP + lineups/ratings (fast-mode focal card and the
+ *                dedicated match-summary page)
  */
 class MatchSummaryPresenter
 {
-    public function present(GameMatch $match, ?string $viewerTeamId = null): MatchSummaryViewModel
+    public const MODE_COMPACT = 'compact';
+
+    public const MODE_FULL = 'full';
+
+    public function present(GameMatch $match, string $mode = self::MODE_COMPACT): MatchSummaryViewModel
     {
         // ET-inclusive score: 90-min score + ET goals (stored separately on
         // home_score_et / away_score_et).
@@ -21,13 +32,16 @@ class MatchSummaryPresenter
         $hasPenalties = $match->home_score_penalties !== null;
 
         [$homeScorers, $awayScorers] = $this->buildScorerLists($match);
-        [$resultLabel, $resultColor, $resultBg] = $this->resolveViewerResult(
-            $match,
-            $homeTotal,
-            $awayTotal,
-            $hasPenalties,
-            $viewerTeamId,
-        );
+
+        if ($mode !== self::MODE_FULL) {
+            return new MatchSummaryViewModel(
+                homeTotal: $homeTotal,
+                awayTotal: $awayTotal,
+                hasPenalties: $hasPenalties,
+                homeScorers: $homeScorers,
+                awayScorers: $awayScorers,
+            );
+        }
 
         return new MatchSummaryViewModel(
             homeTotal: $homeTotal,
@@ -35,9 +49,8 @@ class MatchSummaryPresenter
             hasPenalties: $hasPenalties,
             homeScorers: $homeScorers,
             awayScorers: $awayScorers,
-            resultLabel: $resultLabel,
-            resultColor: $resultColor,
-            resultBg: $resultBg,
+            mvp: $this->buildMvp($match),
+            lineups: $this->buildLineups($match),
         );
     }
 
@@ -56,9 +69,8 @@ class MatchSummaryPresenter
             fn (MatchEvent $e) => in_array($e->event_type, [MatchEvent::TYPE_GOAL, MatchEvent::TYPE_OWN_GOAL], true)
         );
 
-        $scorerIds = $goalEvents->pluck('game_player_id')->filter()->unique()->all();
-        $names = GamePlayer::whereIn('id', $scorerIds)->pluck('name', 'id');
-
+        // Scorer names come from the eager-loaded events.gamePlayer relation —
+        // every caller (ShowMatchSummary, FastModeService, CalendarService) loads it.
         $beneficiaryTeamId = function (MatchEvent $event) use ($match): string {
             if ($event->event_type === MatchEvent::TYPE_OWN_GOAL) {
                 return $event->team_id === $match->home_team_id
@@ -70,7 +82,7 @@ class MatchSummaryPresenter
         };
 
         $format = fn ($events) => $events
-            ->groupBy(fn (MatchEvent $e) => $names[$e->game_player_id] ?? '—')
+            ->groupBy(fn (MatchEvent $e) => $e->gamePlayer?->name ?? '—')
             ->map(function ($playerEvents, $name) {
                 $minutes = $playerEvents
                     ->map(function (MatchEvent $e) {
@@ -94,52 +106,76 @@ class MatchSummaryPresenter
     }
 
     /**
-     * W/L/D pill (label + color + background) from the viewer's perspective.
-     * Returns [null, null, null] when no viewer is supplied.
-     *
-     * @return array{0:?string,1:?string,2:?string}
+     * @return array{name:string, side:string}|null
      */
-    private function resolveViewerResult(
-        GameMatch $match,
-        int $homeTotal,
-        int $awayTotal,
-        bool $hasPenalties,
-        ?string $viewerTeamId,
-    ): array {
-        if ($viewerTeamId === null) {
-            return [null, null, null];
+    private function buildMvp(GameMatch $match): ?array
+    {
+        $mvp = $match->mvpPlayer;
+        if (! $mvp) {
+            return null;
         }
 
-        $isHome = $match->home_team_id === $viewerTeamId;
-        $yourTotal = $isHome ? $homeTotal : $awayTotal;
-        $oppTotal = $isHome ? $awayTotal : $homeTotal;
+        return [
+            'name' => $mvp->name,
+            'side' => $mvp->team_id === $match->home_team_id ? 'home' : 'away',
+        ];
+    }
 
-        if ($yourTotal !== $oppTotal) {
-            $result = $yourTotal > $oppTotal ? 'W' : 'L';
-        } elseif ($hasPenalties) {
-            $yourPens = $isHome ? $match->home_score_penalties : $match->away_score_penalties;
-            $oppPens = $isHome ? $match->away_score_penalties : $match->home_score_penalties;
-            $result = $yourPens > $oppPens ? 'W' : 'L';
-        } else {
-            $result = 'D';
+    /**
+     * Build the lineups/ratings payload consumed by `matchSummaryLineups` —
+     * the post-match twin of the live-match factory. Roster shape comes from
+     * `LiveMatchLineupPresenter::displayRoster()` and events go through
+     * `MatchResimulationService::formatMatchEvents()`, so the data lines up
+     * with what `partials/live-match/lineups-roster.blade.php` expects when
+     * mounted under either factory.
+     */
+    private function buildLineups(GameMatch $match): MatchLineupsViewModel
+    {
+        $performances = Cache::get("match_performances:{$match->id}", []);
+
+        // Sub-ins feed the rating calc only; team_id from the persisted
+        // substitutions JSON gets reattached so per-team bonuses apply.
+        $subInIds = [];
+        $subInTeamMap = [];
+        foreach ($match->substitutions ?? [] as $sub) {
+            $playerInId = $sub['player_in_id'] ?? null;
+            if (! $playerInId) {
+                continue;
+            }
+            $subInIds[] = $playerInId;
+            $subInTeamMap[$playerInId] = $sub['team_id'] ?? null;
         }
 
-        return match ($result) {
-            'W' => [
-                __('game.live_result_win'),
-                'text-accent-green',
-                'bg-accent-green/10 border-accent-green/20',
-            ],
-            'L' => [
-                __('game.live_result_loss'),
-                'text-accent-red',
-                'bg-accent-red/10 border-accent-red/20',
-            ],
-            'D' => [
-                __('game.live_result_draw'),
-                'text-text-secondary',
-                'bg-surface-700 border-border-default',
-            ],
-        };
+        // Single round trip for home XI + away XI + sub-ins.
+        $rosters = LiveMatchLineupPresenter::displayRosters([
+            'home' => $match->home_lineup ?? [],
+            'away' => $match->away_lineup ?? [],
+            'subIns' => $subInIds,
+        ], $performances);
+
+        $subInPlayers = array_map(
+            fn (array $entry) => $entry + ['teamId' => $subInTeamMap[$entry['id']] ?? null],
+            $rosters['subIns'],
+        );
+
+        // Mirror the live-match split: regular events (≤93') vs ET (>93').
+        // The shared ratings-glue module unions them but reads finalHomeScore/
+        // finalAwayScore as 90-min only, matching what ShowLiveMatch passes.
+        $regularEvents = $match->events->filter(fn (MatchEvent $e) => $e->minute <= 93);
+        $etEvents = $match->events->filter(fn (MatchEvent $e) => $e->minute > 93);
+
+        return new MatchLineupsViewModel(
+            homeRoster: $rosters['home'],
+            awayRoster: $rosters['away'],
+            subInPlayers: $subInPlayers,
+            events: MatchResimulationService::formatMatchEvents($regularEvents),
+            extraTimeEvents: MatchResimulationService::formatMatchEvents($etEvents),
+            homeFormation: $match->home_formation,
+            awayFormation: $match->away_formation,
+            homeTeamId: $match->home_team_id,
+            awayTeamId: $match->away_team_id,
+            homeScore: (int) $match->home_score,
+            awayScore: (int) $match->away_score,
+        );
     }
 }
