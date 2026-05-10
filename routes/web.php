@@ -252,6 +252,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/game/{gameId}/explore/squad/{teamId}', ExploreSquad::class)->name('game.explore.squad');
         Route::get('/game/{gameId}/explore/pool-teams/{poolId}', ExplorePoolTeams::class)->name('game.explore.pool-teams');
         Route::get('/game/{gameId}/explore/free-agents', ExploreFreeAgents::class)->name('game.explore.free-agents');
+        Route::get('/game/{gameId}/explore/team/{slug}', ShowExplore::class)->name('game.explore.team');
 
         // Loans (redirect old URL to transfers)
         Route::get('/game/{gameId}/loans', function (string $gameId) {

@@ -1,6 +1,9 @@
 export default function explore(config) {
     const initialFilters = config.initialFilters || {};
     const searchMode = !!config.searchMode;
+    const initialTeam = config.initialTeam || null;
+    const initialCompetitionId = config.initialCompetitionId || null;
+    const initialPoolId = config.initialPoolId || null;
 
     return {
         competitions: config.competitions || [],
@@ -45,6 +48,12 @@ export default function explore(config) {
             competition_id: initialFilters.competition_id || '',
             max_contract_year: initialFilters.max_contract_year || null,
         },
+
+        // When true, in-flight selection helpers skip the history.pushState
+        // call. Set during init() (so deep-link bootstrapping doesn't append
+        // history entries) and during popstate handling (so back/forward
+        // navigation doesn't push a fresh entry on top of itself).
+        _suppressHistory: false,
 
         // Dual-range bounds (mirrors scout-search-modal pattern)
         AGE_MIN_BOUND: 16,
@@ -102,7 +111,7 @@ export default function explore(config) {
             return this.searchQuery.trim().length >= 2 || this.activeFilterCount > 0;
         },
 
-        init() {
+        async init() {
             this.initRangesFromFilters();
 
             // The <select name="competition_id"> renders its options via
@@ -119,9 +128,81 @@ export default function explore(config) {
                 });
             }
 
-            if (!searchMode && this.competitions.length > 0) {
-                this.selectCompetition(this.competitions[0]);
+            window.addEventListener('popstate', () => this._handlePopState());
+
+            // Deep-link bootstrap: server resolved a slug → preselect the
+            // team's competition (or pool), then load its squad. Suppress
+            // history pushes so the bootstrap path doesn't litter the
+            // browser history with intermediate entries.
+            if (initialTeam) {
+                this._suppressHistory = true;
+                try {
+                    if (initialPoolId) {
+                        const pool = this.pools.find(p => p.id === initialPoolId);
+                        if (pool) {
+                            await this.selectPool(pool);
+                            await this.selectTeam(initialTeam);
+                        }
+                    } else if (initialCompetitionId) {
+                        const comp = this.competitions.find(c => c.id === initialCompetitionId);
+                        if (comp) {
+                            await this.selectCompetition(comp);
+                            await this.selectTeam(initialTeam);
+                        }
+                    }
+                } finally {
+                    this._suppressHistory = false;
+                }
+                return;
             }
+
+            if (!searchMode && this.competitions.length > 0) {
+                this._suppressHistory = true;
+                try {
+                    await this.selectCompetition(this.competitions[0]);
+                } finally {
+                    this._suppressHistory = false;
+                }
+            }
+        },
+
+        // Push a target path only when it actually differs from the current
+        // URL, so cycling between competitions (which all share the base
+        // /explore path) doesn't bloat the browser history.
+        _syncUrl(targetPath) {
+            if (this._suppressHistory) return;
+            if (window.location.pathname === targetPath) return;
+            history.pushState({}, '', targetPath);
+        },
+
+        _handlePopState() {
+            this._suppressHistory = true;
+            const m = window.location.pathname.match(/\/explore\/team\/([^/]+)$/);
+            if (m) {
+                const slug = m[1];
+                const fromComp = this.teams.find(t => t.slug === slug);
+                const fromPool = !fromComp
+                    ? this.poolGroups.flatMap(g => g.teams || []).find(t => t.slug === slug)
+                    : null;
+                const team = fromComp || fromPool;
+                if (team) {
+                    this.selectTeam(team).finally(() => {
+                        this._suppressHistory = false;
+                    });
+                    return;
+                }
+                // Cross-competition jump: the team isn't in the currently
+                // loaded list. Reloading is the simplest correct fallback —
+                // the server-side resolver will rebuild the right scope.
+                window.location.reload();
+                return;
+            }
+            // Base /explore URL: clear any team selection.
+            this.selectedTeam = null;
+            this.squadHtml = '';
+            if (this.$refs.squadPanel) this.$refs.squadPanel.innerHTML = '';
+            if (this.$refs.poolSquadPanel) this.$refs.poolSquadPanel.innerHTML = '';
+            this._suppressHistory = false;
         },
 
         initRangesFromFilters() {
@@ -147,6 +228,7 @@ export default function explore(config) {
             if (this.$refs.squadPanel) this.$refs.squadPanel.innerHTML = '';
             if (this.$refs.poolSquadPanel) this.$refs.poolSquadPanel.innerHTML = '';
             this.loadingTeams = true;
+            this._syncUrl(`/game/${this.gameId}/explore`);
 
             try {
                 const response = await fetch(`/game/${this.gameId}/explore/teams/${comp.id}`);
@@ -173,6 +255,12 @@ export default function explore(config) {
                     panel.innerHTML = html;
                     this.$nextTick(() => window.Alpine.initTree(panel));
                 }
+                // Push the deep-link URL only after a successful squad load
+                // so a failed fetch never leaves a misleading slug in the
+                // address bar.
+                if (team.slug) {
+                    this._syncUrl(`/game/${this.gameId}/explore/team/${team.slug}`);
+                }
             } catch (e) {
                 this.squadHtml = '';
                 if (panel) panel.innerHTML = '';
@@ -188,6 +276,7 @@ export default function explore(config) {
             this.squadHtml = '';
             if (this.$refs.poolSquadPanel) this.$refs.poolSquadPanel.innerHTML = '';
             this.mobileView = 'teams';
+            this._syncUrl(`/game/${this.gameId}/explore`);
 
             const switching = this.activePoolId !== pool.id;
             this.activePoolId = pool.id;
@@ -263,6 +352,7 @@ export default function explore(config) {
             this.selectedCompetition = null;
             this.selectedPositionFilter = 'all';
             this.mobileView = 'teams';
+            this._syncUrl(`/game/${this.gameId}/explore`);
             this.loadFreeAgents('all');
         },
 

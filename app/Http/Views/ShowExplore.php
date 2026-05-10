@@ -17,10 +17,23 @@ class ShowExplore
         private readonly CountryConfig $countryConfig,
     ) {}
 
-    public function __invoke(Request $request, string $gameId)
+    public function __invoke(Request $request, string $gameId, ?string $slug = null)
     {
         $game = Game::with(['team', 'finances'])->findOrFail($gameId);
         abort_if($game->isTournamentMode(), 404);
+
+        // Slug deep-link: resolve the team server-side so the page lands with
+        // the correct competition + squad already pre-selected. A stray
+        // ?query= on the URL is ignored — the slug wins.
+        $initialTeam = null;
+        $initialCompetitionId = null;
+        $initialPoolId = null;
+        if ($slug !== null) {
+            $scope = $this->exploreService->resolveTeamScope($gameId, $slug);
+            $initialTeam = $scope['team'];
+            $initialCompetitionId = $scope['competitionId'];
+            $initialPoolId = $scope['poolId'];
+        }
 
         $competitions = $this->exploreService->getCompetitionsWithTeamCounts($gameId);
         $freeAgentCount = $this->exploreService->getFreeAgentCount($gameId);
@@ -47,7 +60,9 @@ class ShowExplore
 
         $hasName = mb_strlen($filters['name']) >= 2;
         $hasFilters = ExploreService::hasAdvancedFilters($filters);
-        $searchMode = $hasName || $hasFilters;
+        // Slug visits suppress search mode so the page renders the team's
+        // squad in the right pane instead of a search result list.
+        $searchMode = $initialTeam === null && ($hasName || $hasFilters);
 
         $searchResults = null;
         if ($searchMode) {
@@ -71,6 +86,9 @@ class ShowExplore
             'searchMode' => $searchMode,
             'searchResults' => $searchResults,
             'initialFilters' => $filters,
+            'initialTeam' => $initialTeam,
+            'initialCompetitionId' => $initialCompetitionId,
+            'initialPoolId' => $initialPoolId,
             ...$this->headerService->getHeaderData($game),
         ]);
     }

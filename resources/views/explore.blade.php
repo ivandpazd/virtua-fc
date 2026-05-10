@@ -34,6 +34,9 @@
                              freeAgentCount: @js((int) $freeAgentCount),
                              assetUrl: @js(rtrim(Storage::disk('assets')->url(''), '/')),
                              gameId: @js($game->id),
+                             initialTeam: @js($initialTeam ?? null),
+                             initialCompetitionId: @js($initialCompetitionId ?? null),
+                             initialPoolId: @js($initialPoolId ?? null),
                              labels: {
                                  freeAgents: @js(__('transfers.explore_free_agents')),
                                  leagueKind: @js(__('transfers.league')),

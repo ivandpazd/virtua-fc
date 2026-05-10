@@ -10,6 +10,7 @@ use App\Models\Loan;
 use App\Models\ShortlistedPlayer;
 use App\Models\Team;
 use App\Models\TransferOffer;
+use App\Modules\Competition\Services\CountryConfig;
 use App\Support\CountryCodeMapper;
 use App\Support\PositionMapper;
 use Illuminate\Support\Collection;
@@ -26,6 +27,7 @@ class ExploreService
 
     public function __construct(
         private readonly ScoutingService $scoutingService,
+        private readonly CountryConfig $countryConfig,
     ) {}
 
     /**
@@ -62,6 +64,72 @@ class ExploreService
     }
 
     /**
+     * Resolve a team slug to the explore scope it should open in: either a
+     * domestic league competition (preferred) or a transfer pool. Aborts 404
+     * when the team can't be surfaced anywhere in this game.
+     *
+     * @return array{team: array{id: string, slug: string|null, name: string, image: string|null}, competitionId: ?string, poolId: ?string}
+     */
+    public function resolveTeamScope(string $gameId, string $slug): array
+    {
+        // Mirrors ShowTeamLeaderboard: clubs only, 404 on unknown slugs.
+        $team = Team::where('slug', $slug)
+            ->where('type', 'club')
+            ->firstOrFail();
+
+        $entryCompetitionIds = CompetitionEntry::where('game_id', $gameId)
+            ->where('team_id', $team->id)
+            ->pluck('competition_id')
+            ->all();
+
+        if ($entryCompetitionIds === []) {
+            abort(404);
+        }
+
+        $teamPayload = [
+            'id' => $team->id,
+            'slug' => $team->slug,
+            'name' => $team->name,
+            'image' => $team->image,
+        ];
+
+        // Prefer the team's country tier-1 league when it's actually one of
+        // this team's entries — keeps the left rail pointing at the league
+        // the user expects (e.g. La Liga for Real Madrid).
+        $tier1 = $team->country
+            ? $this->countryConfig->competitionForTier($team->country, 1)
+            : null;
+
+        if ($tier1 !== null && in_array($tier1, $entryCompetitionIds, true)) {
+            return ['team' => $teamPayload, 'competitionId' => $tier1, 'poolId' => null];
+        }
+
+        // Fall back to any domestic-league entry — the same filter the left
+        // rail uses in getCompetitionsWithTeamCounts().
+        $domesticLeagueId = Competition::whereIn('id', $entryCompetitionIds)
+            ->where('role', Competition::ROLE_LEAGUE)
+            ->where('scope', Competition::SCOPE_DOMESTIC)
+            ->orderBy('tier')
+            ->value('id');
+
+        if ($domesticLeagueId !== null) {
+            return ['team' => $teamPayload, 'competitionId' => $domesticLeagueId, 'poolId' => null];
+        }
+
+        // Pool-only team (e.g. surfaced via the EUR/INT transfer pools): open
+        // the page in pool mode so the squad still renders.
+        $poolId = Competition::whereIn('id', $entryCompetitionIds)
+            ->where('handler_type', 'team_pool')
+            ->value('id');
+
+        if ($poolId !== null) {
+            return ['team' => $teamPayload, 'competitionId' => null, 'poolId' => $poolId];
+        }
+
+        abort(404);
+    }
+
+    /**
      * Get teams for a competition in a game, sorted by name.
      */
     public function getTeamsForCompetition(string $gameId, string $competitionId): Collection
@@ -75,6 +143,7 @@ class ExploreService
             ->get()
             ->map(fn (Team $team) => [
                 'id' => $team->id,
+                'slug' => $team->slug,
                 'name' => $team->name,
                 'image' => $team->image,
             ]);
@@ -110,6 +179,7 @@ class ExploreService
                     'flag' => $code,
                     'teams' => $groupTeams->map(fn (Team $team) => [
                         'id' => $team->id,
+                        'slug' => $team->slug,
                         'name' => $team->name,
                         'image' => $team->image,
                     ])->values()->all(),
