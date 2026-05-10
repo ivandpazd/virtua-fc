@@ -13,18 +13,15 @@
 @endphp
 
 <div class="rounded-xl border border-border-default bg-surface-800 overflow-hidden">
-    {{-- Optional header bar: "LAST RESULT · WIN · Competition" --}}
+    {{-- Optional header: competition pill + result badge + venue · date --}}
     @if($showHeader)
-        <div class="flex items-center justify-between gap-2 px-4 py-2.5 border-b border-border-default bg-surface-800/60">
-            <div class="flex items-center gap-2 min-w-0">
-                <span class="text-[10px] text-text-faint uppercase tracking-widest">{{ __('game.last_result') }}</span>
-                @if($summary->resultLabel)
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border {{ $summary->resultBg }} {{ $summary->resultColor }}">
-                        {{ $summary->resultLabel }}
-                    </span>
-                @endif
-            </div>
-            <x-competition-pill :competition="$match->competition" :round-name="$match->round_name" :round-number="$match->round_number" :short="true" class="scale-90 origin-right" />
+        <div class="px-4 py-3 md:py-4 border-b border-border-default">
+            <x-match-card-header
+                :match="$match"
+                :result-label="$summary->resultLabel"
+                :result-bg="$summary->resultBg"
+                :result-color="$summary->resultColor"
+            />
         </div>
     @endif
 

@@ -18,19 +18,8 @@
 @endphp
 <div class="rounded-xl overflow-hidden border border-border-strong bg-surface-800">
     {{-- Competition & Match Info --}}
-    <div class="px-4 pt-4 md:px-6 md:pt-5">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-            @if($game->isTournamentMode())
-                <span class="text-xs font-medium text-text-secondary">
-                    {{ __($nextMatch->round_name ?? '') }}
-                </span>
-            @else
-                <x-competition-pill :competition="$comp" :round-name="$nextMatch->round_name" :round-number="$nextMatch->round_number" />
-            @endif
-            <span class="text-xs text-text-muted truncate">
-                {{ $nextMatch->venueName() ?? '' }} &middot; {{ $nextMatch->scheduled_date->locale(app()->getLocale())->translatedFormat('d M Y') }}
-            </span>
-        </div>
+    <div class="px-4 py-3 md:px-6 md:py-4 border-b border-border-default">
+        <x-match-card-header :match="$nextMatch" :tournament-mode="$game->isTournamentMode()" />
     </div>
 
     {{-- First Leg Score (cup ties) --}}

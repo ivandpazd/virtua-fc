@@ -23,6 +23,7 @@ class ShowMatchSummary
 
         return view('partials.match-summary', [
             'match' => $match,
+            'showHeader' => true,
         ]);
     }
 }

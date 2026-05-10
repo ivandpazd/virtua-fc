@@ -30,11 +30,8 @@
 @unless($inModal)
     {{-- Match meta strip (page-only; the modal already lives inside the
          pre-match flow and doesn't need to repeat the fixture metadata). --}}
-    <div class="rounded-xl border border-border-default bg-surface-800 px-4 py-3 mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-        <x-competition-pill :competition="$match->competition" :round-name="$match->round_name" :round-number="$match->round_number" />
-        <span class="text-xs text-text-muted">
-            {{ $match->venueName() ?? '' }} &middot; {{ $match->scheduled_date->locale(app()->getLocale())->translatedFormat('d M Y') }}
-        </span>
+    <div class="rounded-xl border border-border-default bg-surface-800 px-4 py-3 mb-4">
+        <x-match-card-header :match="$match" />
     </div>
 @endunless
 
