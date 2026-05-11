@@ -247,7 +247,7 @@ return [
     'playing_styles' => [
         'possession'     => ['own_xg' => 0.97, 'opp_xg' => 0.90, 'energy_drain' => 0.90],
         'balanced'       => ['own_xg' => 1.00, 'opp_xg' => 1.00, 'energy_drain' => 1.00],
-        'counter_attack' => ['own_xg' => 0.93, 'opp_xg' => 0.88, 'energy_drain' => 1.05],
+        'counter_attack' => ['own_xg' => 0.97, 'opp_xg' => 0.88, 'energy_drain' => 1.05],
         'direct'         => ['own_xg' => 1.08, 'opp_xg' => 1.08, 'energy_drain' => 1.04],
     ],
 

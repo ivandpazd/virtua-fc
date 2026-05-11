@@ -108,11 +108,11 @@ return [
     'style_direct' => 'Juego Directo',
     'style_tip_possession' => 'Muchos menos goles en contra y menos desgaste, pero menos ocasiones propias.',
     'style_tip_balanced' => 'Sin modificadores. Estilo neutro.',
-    'style_tip_counter_attack' => 'Muy sólido defensivamente con transiciones rápidas, pero menos ocasiones propias.',
+    'style_tip_counter_attack' => 'Muy sólido defensivamente con transiciones rápidas: ocasiones escasas pero de gran calidad.',
     'style_tip_direct' => 'Partido mucho más abierto con goles en ambas porterías. Más desgaste.',
     'style_summary_possession' => 'Controlar el balón para anular al rival. Ahorra energía pero limita tu ataque.',
     'style_summary_balanced' => 'Juego equilibrado sin bonificaciones.',
-    'style_summary_counter_attack' => 'Ceder territorio y golpear a la contra. Muy sólido pero genera menos ocasiones.',
+    'style_summary_counter_attack' => 'Ceder territorio y golpear a la contra. Muy sólido y con ocasiones de alta calidad en la transición.',
     'style_summary_direct' => 'Balones largos y transiciones rápidas. Alto riesgo/recompensa — más goles en ambas porterías.',
 
     // Pressing Intensity

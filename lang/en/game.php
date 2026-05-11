@@ -108,11 +108,11 @@ return [
     'style_direct' => 'Direct Play',
     'style_tip_possession' => 'Significantly fewer goals conceded and less energy drain, but fewer chances created.',
     'style_tip_balanced' => 'No modifiers. Neutral style.',
-    'style_tip_counter_attack' => 'Very solid defensively with quick breaks, but fewer chances created.',
+    'style_tip_counter_attack' => 'Very solid defensively with quick breaks: fewer chances but high quality on the transition.',
     'style_tip_direct' => 'Much more open game with goals at both ends. More tiring.',
     'style_summary_possession' => 'Control the ball to shut the opponent out. Saves energy but limits your attack.',
     'style_summary_balanced' => 'Balanced play with no bonuses.',
-    'style_summary_counter_attack' => 'Concede territory and strike on the break. Very solid but creates fewer chances.',
+    'style_summary_counter_attack' => 'Concede territory and strike on the break. Very solid, with high-quality chances on the transition.',
     'style_summary_direct' => 'Long balls and quick transitions. High risk/reward — more goals at both ends.',
 
     // Pressing Intensity
