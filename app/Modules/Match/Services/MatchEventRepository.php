@@ -17,8 +17,6 @@ class MatchEventRepository
      */
     public function bulkInsert(Collection $events, string $gameId, string $matchId, int $chunkSize = 50): array
     {
-        $now = now();
-
         $rows = $events->map(fn (MatchEventData $e) => [
             'id' => Str::uuid()->toString(),
             'game_id' => $gameId,
@@ -28,7 +26,6 @@ class MatchEventRepository
             'minute' => $e->minute,
             'event_type' => $e->type,
             'metadata' => $e->metadata ? json_encode($e->metadata) : null,
-            'created_at' => $now,
         ])->all();
 
         foreach (array_chunk($rows, $chunkSize) as $chunk) {

@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $minute
  * @property string $event_type
  * @property array<array-key, mixed>|null $metadata
- * @property \Illuminate\Support\Carbon $created_at
  * @property-read \App\Models\Game $game
  * @property-read \App\Models\GameMatch $gameMatch
  * @property-read \App\Models\GamePlayer $gamePlayer
@@ -25,7 +24,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchEvent newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchEvent newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchEvent query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchEvent whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchEvent whereEventType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchEvent whereGameId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchEvent whereGameMatchId($value)
@@ -40,7 +38,7 @@ class MatchEvent extends Model
 {
     use HasUuids;
 
-    const UPDATED_AT = null;
+    public $timestamps = false;
 
     protected $fillable = [
         'game_id',
@@ -55,7 +53,6 @@ class MatchEvent extends Model
     protected $casts = [
         'minute' => 'integer',
         'metadata' => 'array',
-        'created_at' => 'datetime',
     ];
 
     // Event types

@@ -276,7 +276,6 @@ class MatchResultProcessor
      */
     private function bulkInsertMatchEvents(string $gameId, array $matchResults): void
     {
-        $now = now();
         $allRows = [];
 
         foreach ($matchResults as $result) {
@@ -290,7 +289,6 @@ class MatchResultProcessor
                     'minute' => $eventData['minute'],
                     'event_type' => $eventData['event_type'],
                     'metadata' => isset($eventData['metadata']) ? json_encode($eventData['metadata']) : null,
-                    'created_at' => $now,
                 ];
             }
         }
