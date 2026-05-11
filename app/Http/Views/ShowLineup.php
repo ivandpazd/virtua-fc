@@ -42,7 +42,12 @@ class ShowLineup
         $defaultFormation = $game->tactics?->default_formation ?? Formation::F_4_3_3->value;
         $currentFormation = $this->lineupService->getFormation($match, $game->team_id);
 
-        // If no lineup set, try to prefill from previous match
+        // If no lineup set, try to prefill from previous match. Carrying the
+        // previous match's slot map (alongside its lineup) keeps healthy
+        // players pinned to the spots the user last played them in — an
+        // injury just leaves that player's slot empty instead of letting
+        // the placement algorithm reshuffle everyone by primary position.
+        $previousSlotMap = null;
         if (empty($currentLineup)) {
             $previous = $this->lineupService->getPreviousLineup(
                 $gameId,
@@ -53,6 +58,7 @@ class ShowLineup
                 $requireEnrollment,
             );
             $currentLineup = $previous['lineup'];
+            $previousSlotMap = $previous['slot_assignments'] ?? null;
         }
 
         $currentFormation = $currentFormation ?? $defaultFormation;
@@ -104,9 +110,15 @@ class ShowLineup
         // Resolve the authoritative slot map for this match. If the match row
         // already has a persisted map, use it; otherwise lazily compute from
         // the stored lineup + formation (no persistence on the read path).
-        // Falls back to the team's default_slot_assignments for brand-new
-        // games where the match has no lineup yet.
+        // When we filled the lineup from the previous played match above,
+        // we prefer that match's slot map so healthy players stay pinned to
+        // the spots the user last played them in. Falls back to the team's
+        // default_slot_assignments for brand-new games where the match has
+        // no lineup yet.
         $currentSlotMap = $this->lineupService->resolveSlotAssignments($match, $game->team_id);
+        if (empty($currentSlotMap) && ! empty($previousSlotMap)) {
+            $currentSlotMap = $previousSlotMap;
+        }
         if (empty($currentSlotMap) && ! empty($game->tactics?->default_slot_assignments)) {
             $currentSlotMap = $game->tactics->default_slot_assignments;
         }

@@ -734,7 +734,15 @@ class LineupService
     /**
      * Get the previous match's lineup for a team (filtering out unavailable players).
      *
-     * @return array{lineup: array, formation: string|null}
+     * Also carries over the previous match's slot assignments so the lineup
+     * page can render players in the exact spots the user last played them.
+     * Without this, an injured player leaves the algorithm free to re-solve
+     * placement from scratch, which silently shuffles healthy players into
+     * different slots (e.g. a CB injury that cascades into an empty RM).
+     * Slot entries pointing at no-longer-available players are dropped so
+     * the injured/suspended player's spot simply becomes empty.
+     *
+     * @return array{lineup: array, slot_assignments: array<int|string, string>}
      */
     public function getPreviousLineup(
         string $gameId,
@@ -756,7 +764,7 @@ class LineupService
             ->first();
 
         if (!$previousMatch) {
-            return ['lineup' => []];
+            return ['lineup' => [], 'slot_assignments' => []];
         }
 
         // Get the lineup from that match (formation is not carried over —
@@ -764,7 +772,7 @@ class LineupService
         $previousLineup = $this->getLineup($previousMatch, $teamId) ?? [];
 
         if (empty($previousLineup)) {
-            return ['lineup' => []];
+            return ['lineup' => [], 'slot_assignments' => []];
         }
 
         // Filter out players who are no longer available
@@ -776,8 +784,17 @@ class LineupService
             fn ($playerId) => in_array($playerId, $availableIds)
         ));
 
+        $prefix = $this->prefixFor($previousMatch, $teamId);
+        $previousSlotMap = $prefix !== null
+            ? ($previousMatch->{"{$prefix}_slot_assignments"} ?? [])
+            : [];
+        $filteredSlotMap = is_array($previousSlotMap)
+            ? array_filter($previousSlotMap, fn ($playerId) => in_array($playerId, $availableIds))
+            : [];
+
         return [
             'lineup' => $filteredLineup,
+            'slot_assignments' => $filteredSlotMap,
         ];
     }
 
