@@ -72,6 +72,9 @@ class DispositionService
      * Minimum reputation-tier gap (player-tier floor minus team reputation)
      * required to flag a stature gap. A gap of 1 is normal stretch; only a
      * 2-tier gap indicates the player has materially outgrown the club.
+     *
+     * Academy-origin players are exempt from this check — homegrown players
+     * stay loyal to the club that developed them (see `isAcademyOrigin`).
      */
     public const STATURE_GAP_MIN_REPUTATION_GAP = 2;
 
@@ -786,6 +789,12 @@ class DispositionService
             return false;
         }
 
+        // Homegrown players stay loyal to the club that developed them,
+        // even when their stature has outgrown its reputation.
+        if ($player->isAcademyOrigin()) {
+            return false;
+        }
+
         return $this->tierReputationGap($player, $player->game_id, $teamId) >= self::STATURE_GAP_MIN_REPUTATION_GAP;
     }
 
@@ -918,7 +927,7 @@ class DispositionService
      */
     public function buildSquadFlags(Game $game, ?Collection $squad = null): Collection
     {
-        $squad ??= GamePlayer::with('activeLoan')
+        $squad ??= GamePlayer::with(['activeLoan', 'careerRecord'])
             ->where('game_id', $game->id)
             ->where('team_id', $game->team_id)
             ->get();
@@ -998,6 +1007,9 @@ class DispositionService
     private function hasStatureGapAgainst(GamePlayer $player, int $teamIndex): bool
     {
         if (!$player->team_id || $player->isOnLoan()) {
+            return false;
+        }
+        if ($player->isAcademyOrigin()) {
             return false;
         }
         $playerTier = $player->tier ?? PlayerTierService::tierFromMarketValue($player->market_value_cents);

@@ -239,6 +239,24 @@ class GamePlayer extends Model
     }
 
     /**
+     * Check if this player joined the user's first team from the youth
+     * academy. Homegrown players carry loyalty effects (e.g. they engage
+     * in renewal talks even when their stature outgrows the club's
+     * reputation). Returns false when no career record exists — that's
+     * the AI-vs-AI case, which has no academy concept.
+     */
+    public function isAcademyOrigin(): bool
+    {
+        if ($this->relationLoaded('careerRecord')) {
+            return $this->careerRecord?->joined_from === UserSquadCareerRecord::ORIGIN_ACADEMY;
+        }
+
+        return $this->careerRecord()
+            ->where('joined_from', UserSquadCareerRecord::ORIGIN_ACADEMY)
+            ->exists();
+    }
+
+    /**
      * Get the active loan for this player (if any).
      */
     public function activeLoan(): HasOne
