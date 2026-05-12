@@ -72,6 +72,11 @@ class GamePlayerTemplateService
     public function generateForWorldCup(string $season = '2025'): int
     {
         $this->clearTemplatesForNationalTeams($season);
+        // Wipe any satellite rows that the buggy initial implementation may
+        // have attached to non-national templates. Those rows survived
+        // `clearTemplatesForNationalTeams` and tripped the unique constraint
+        // on re-runs.
+        $this->clearOrphanTournamentInfo();
 
         $basePath = base_path('data/2025/WC2026/teams');
 
@@ -99,6 +104,7 @@ class GamePlayerTemplateService
 
         $processedPlayerIds = [];
         $rows = [];
+        $tournamentInfoByPlayerId = [];
 
         foreach ($teamRosters as $roster) {
             foreach ($roster['players'] as $playerData) {
@@ -107,6 +113,11 @@ class GamePlayerTemplateService
                     $row['number'] = null; // WC templates must not store squad numbers
                     $rows[] = $row;
                     $processedPlayerIds[$row['player_id']] = true;
+                    $tournamentInfoByPlayerId[$row['player_id']] = [
+                        'club_name' => $playerData['club']['name'] ?? null,
+                        'club_crest_url' => $playerData['club']['image'] ?? null,
+                        'is_injured' => (bool) ($playerData['injured'] ?? false),
+                    ];
                 }
             }
         }
@@ -115,7 +126,82 @@ class GamePlayerTemplateService
             DB::connection('pgsql_control')->table('game_player_templates')->insert($chunk);
         }
 
+        $this->upsertTournamentInfo($season, $tournamentInfoByPlayerId, $nationalTeams->pluck('id')->all());
+
         return count($rows);
+    }
+
+    /**
+     * Upsert satellite tournament-info rows keyed by the templates we just
+     * inserted. Filters by national-team team_ids because the same real-world
+     * player can also have a club-team template in the same season — without
+     * the filter, the lookup may resolve to the club template, attach the
+     * satellite there, and that orphan row then survives subsequent
+     * `clearTemplatesForNationalTeams` calls and trips the unique constraint
+     * on re-run.
+     */
+    private function upsertTournamentInfo(string $season, array $tournamentInfoByPlayerId, array $nationalTeamIds): void
+    {
+        if (empty($tournamentInfoByPlayerId) || empty($nationalTeamIds)) {
+            return;
+        }
+
+        $templateIdsByPlayerId = DB::connection('pgsql_control')
+            ->table('game_player_templates')
+            ->where('season', $season)
+            ->whereIn('team_id', $nationalTeamIds)
+            ->whereIn('player_id', array_keys($tournamentInfoByPlayerId))
+            ->pluck('id', 'player_id');
+
+        $satelliteRows = [];
+        foreach ($tournamentInfoByPlayerId as $playerId => $info) {
+            $templateId = $templateIdsByPlayerId[$playerId] ?? null;
+            if (!$templateId) {
+                continue;
+            }
+
+            // Skip rows with no useful data so the satellite stays small.
+            if (!$info['is_injured'] && !$info['club_name'] && !$info['club_crest_url']) {
+                continue;
+            }
+
+            $satelliteRows[] = [
+                'game_player_template_id' => $templateId,
+                'is_injured' => $info['is_injured'],
+                'club_name' => $info['club_name'],
+                'club_crest_url' => $info['club_crest_url'],
+            ];
+        }
+
+        foreach (array_chunk($satelliteRows, 500) as $chunk) {
+            DB::connection('pgsql_control')
+                ->table('game_player_template_tournament_info')
+                ->upsert(
+                    $chunk,
+                    ['game_player_template_id'],
+                    ['is_injured', 'club_name', 'club_crest_url'],
+                );
+        }
+    }
+
+    /**
+     * Delete satellite rows that point to templates which aren't national
+     * teams. Tournament info is only meaningful on national-team templates,
+     * so any other row is an orphan from the buggy initial implementation
+     * that resolved player_id to an ambiguous template id.
+     */
+    private function clearOrphanTournamentInfo(): void
+    {
+        DB::connection('pgsql_control')
+            ->table('game_player_template_tournament_info')
+            ->whereIn('game_player_template_id', function ($query) {
+                $query->select('id')
+                    ->from('game_player_templates')
+                    ->whereNotIn('team_id', function ($inner) {
+                        $inner->select('id')->from('teams')->where('type', 'national');
+                    });
+            })
+            ->delete();
     }
 
     /**
