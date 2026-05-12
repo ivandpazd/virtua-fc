@@ -39,7 +39,32 @@
                 {{-- Center: Desktop nav --}}
                 <nav class="hidden lg:flex items-center gap-1">
                     <a href="{{ route('show-game', $game->id) }}" class="nav-item @if(Route::currentRouteName() == 'show-game') active @endif whitespace-nowrap px-3 py-2 text-xs font-medium uppercase tracking-wider {{ Route::currentRouteName() == 'show-game' ? 'text-text-primary' : 'text-text-muted hover:text-text-body' }}">{{ __('app.dashboard') }}</a>
+                    @if($game->isCareerMode())
+                    @php
+                        $squadActive = Str::startsWith(Route::currentRouteName(), 'game.squad');
+                        $squadSecondary = $game->isFilial()
+                            ? ['route' => 'game.squad.reserve', 'label' => __('squad.reserve_team')]
+                            : ['route' => 'game.squad.academy', 'label' => __('squad.academy')];
+                    @endphp
+                    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                        <button type="button" @click="open = !open" class="nav-item @if($squadActive) active @endif inline-flex items-center gap-1 whitespace-nowrap px-3 py-2 text-xs font-medium uppercase tracking-wider transition-colors {{ $squadActive ? 'text-text-primary' : 'text-text-muted hover:text-text-body' }}">
+                            {{ __('app.squad') }}
+                            <svg class="w-3 h-3 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 z-50 mt-2 w-48 rounded-lg shadow-xl bg-surface-800 border border-border-strong" style="display: none;">
+                            <div class="py-1">
+                                <a href="{{ route('game.squad', $game->id) }}" class="block px-4 py-2 text-sm {{ Route::currentRouteName() == 'game.squad' ? 'bg-surface-700 text-text-primary font-semibold' : 'text-text-body hover:bg-surface-700 hover:text-text-primary' }}">{{ __('squad.first_team') }}</a>
+                                <a href="{{ route('game.squad.planner', $game->id) }}" class="block px-4 py-2 text-sm {{ Route::currentRouteName() == 'game.squad.planner' ? 'bg-surface-700 text-text-primary font-semibold' : 'text-text-body hover:bg-surface-700 hover:text-text-primary' }}">{{ __('planner.planner') }}</a>
+                                <a href="{{ route($squadSecondary['route'], $game->id) }}" class="block px-4 py-2 text-sm {{ Route::currentRouteName() == $squadSecondary['route'] ? 'bg-surface-700 text-text-primary font-semibold' : 'text-text-body hover:bg-surface-700 hover:text-text-primary' }}">{{ $squadSecondary['label'] }}</a>
+                                <a href="{{ route('game.squad.registration', $game->id) }}" class="block px-4 py-2 text-sm {{ Route::currentRouteName() == 'game.squad.registration' ? 'bg-surface-700 text-text-primary font-semibold' : 'text-text-body hover:bg-surface-700 hover:text-text-primary' }}">{{ __('squad.registration') }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    @else
                     <a href="{{ route('game.squad', $game->id) }}" class="nav-item @if(Str::startsWith(Route::currentRouteName(), 'game.squad')) active @endif whitespace-nowrap px-3 py-2 text-xs font-medium uppercase tracking-wider {{ Str::startsWith(Route::currentRouteName(), 'game.squad') ? 'text-text-primary' : 'text-text-muted hover:text-text-body' }}">{{ __('app.squad') }}</a>
+                    @endif
                     @if($nextMatch)
                     <a href="{{ route('game.lineup', $game->id) }}" class="nav-item @if(Route::currentRouteName() == 'game.lineup') active @endif whitespace-nowrap px-3 py-2 text-xs font-medium uppercase tracking-wider {{ Route::currentRouteName() == 'game.lineup' ? 'text-text-primary' : 'text-text-muted hover:text-text-body' }}">{{ __('app.starting_xi') }}</a>
                     @endif
