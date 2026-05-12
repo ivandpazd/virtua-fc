@@ -9,6 +9,7 @@ return [
     'section_staying' => 'Se quedan',
     'section_outgoing' => 'Bajas',
     'section_incoming' => 'Altas',
+    'section_next_season' => 'Plantilla próxima temporada',
     'section_staying_count' => ':count jugador|:count jugadores',
 
     // Position group labels

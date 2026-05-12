@@ -9,6 +9,7 @@ return [
     'section_staying' => 'Staying',
     'section_outgoing' => 'Outgoing',
     'section_incoming' => 'Incoming',
+    'section_next_season' => 'Next season squad',
     'section_staying_count' => ':count player|:count players',
 
     // Position group labels

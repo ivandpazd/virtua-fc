@@ -7,12 +7,22 @@
     $incoming = $projection['incoming'];
     $counts = $projection['counts'];
 
+    $incomingByGroup = $incoming->groupBy('position_group');
+
+    $mergeGroup = fn (\Illuminate\Support\Collection $stayingGroup, string $group) =>
+        $stayingGroup
+            ->concat($incomingByGroup->get($group, collect()))
+            ->sortByDesc('overall_score')
+            ->values();
+
     $positionGroups = [
-        ['key' => 'goalkeepers', 'label' => __('planner.goalkeepers'), 'group' => 'Goalkeeper', 'players' => $staying['goalkeepers']],
-        ['key' => 'defenders', 'label' => __('planner.defenders'), 'group' => 'Defender', 'players' => $staying['defenders']],
-        ['key' => 'midfielders', 'label' => __('planner.midfielders'), 'group' => 'Midfielder', 'players' => $staying['midfielders']],
-        ['key' => 'forwards', 'label' => __('planner.forwards'), 'group' => 'Forward', 'players' => $staying['forwards']],
+        ['key' => 'goalkeepers', 'label' => __('planner.goalkeepers'), 'group' => 'Goalkeeper', 'players' => $mergeGroup($staying['goalkeepers'], 'Goalkeeper')],
+        ['key' => 'defenders', 'label' => __('planner.defenders'), 'group' => 'Defender', 'players' => $mergeGroup($staying['defenders'], 'Defender')],
+        ['key' => 'midfielders', 'label' => __('planner.midfielders'), 'group' => 'Midfielder', 'players' => $mergeGroup($staying['midfielders'], 'Midfielder')],
+        ['key' => 'forwards', 'label' => __('planner.forwards'), 'group' => 'Forward', 'players' => $mergeGroup($staying['forwards'], 'Forward')],
     ];
+
+    $nextSeasonCount = $counts['staying'] + $counts['incoming'];
 
     $secondaryItem = $game->isFilial()
         ? ['href' => route('game.squad.reserve', $game->id), 'label' => __('squad.reserve_team'), 'active' => false]
@@ -109,14 +119,14 @@
 
             {{-- ===== Main column ===== --}}
             <div>
-                {{-- ===== Staying ===== --}}
+                {{-- ===== Next season squad (staying + incoming, merged by position) ===== --}}
                 <div>
                     <h3 class="font-heading text-sm font-semibold uppercase tracking-widest text-text-secondary mb-3">
-                        {{ __('planner.section_staying') }}
-                        <span class="text-text-faint font-normal normal-case tracking-normal ml-1">· {{ $counts['staying'] }}</span>
+                        {{ __('planner.section_next_season') }}
+                        <span class="text-text-faint font-normal normal-case tracking-normal ml-1">· {{ $nextSeasonCount }}</span>
                     </h3>
 
-                    @if($counts['staying'] === 0)
+                    @if($nextSeasonCount === 0)
                         <div class="bg-surface-800 border border-border-default rounded-xl px-5 py-8 text-center text-sm text-text-muted">
                             {{ __('planner.empty_staying') }}
                         </div>
@@ -136,23 +146,6 @@
                                         @include('partials.squad-planner.player-row', ['gp' => $gp, 'group' => $group['group'], 'game' => $game])
                                     @endforeach
                                 @endif
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-
-                {{-- ===== Incoming ===== --}}
-                <div class="mt-8">
-                    <h3 class="font-heading text-sm font-semibold uppercase tracking-widest text-text-secondary mb-3">
-                        {{ __('planner.section_incoming') }}
-                        <span class="text-text-faint font-normal normal-case tracking-normal ml-1">· {{ $incoming->isEmpty() ? '—' : $counts['incoming'] }}</span>
-                    </h3>
-
-                    @if($incoming->isNotEmpty())
-                        <div class="bg-surface-800 border border-border-default rounded-xl overflow-hidden">
-                            @include('partials.squad-planner.column-header')
-                            @foreach($incoming as $gp)
-                                @include('partials.squad-planner.player-row', ['gp' => $gp, 'group' => $gp->position_group, 'game' => $game])
                             @endforeach
                         </div>
                     @endif
