@@ -293,7 +293,7 @@ class ContractService
             deterministic: true,
         );
 
-        $premium = $scenario->wagePremium($player->market_value_cents);
+        $premium = $scenario->wagePremium($player->market_value_cents, $player->tier);
         $demandedWage = (int) ($baseWage * $premium);
 
         // Renewals: peg the demand at peer-median ("market rate") for every
@@ -569,7 +569,7 @@ class ContractService
             maxRounds: self::MAX_NEGOTIATION_ROUNDS,
             salaryFloor: $salaryFloor,
             previousCounter: $negotiation->counter_offer,
-            flexibilityRatio: NegotiationScenario::RENEWAL->flexibilityRatio(),
+            flexibilityRatio: NegotiationScenario::RENEWAL->flexibilityRatio($player->tier),
         );
 
         $updateData = ['disposition' => $disposition];
@@ -1001,7 +1001,7 @@ class ContractService
             maxRounds: self::MAX_NEGOTIATION_ROUNDS,
             salaryFloor: $buyingClubFloor,
             previousCounter: $offer->wage_counter_offer,
-            flexibilityRatio: $scenario->flexibilityRatio(),
+            flexibilityRatio: $scenario->flexibilityRatio($player->tier),
         );
 
         $extraStatusUpdates = [];
