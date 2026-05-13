@@ -34,7 +34,7 @@
             <x-slot name="trigger">
                 <div class="flex items-center gap-2.5 overflow-x-auto scrollbar-hide pb-1">
                     <x-summary-card :label="__('squad.academy_tier')" :value="$tierDescription" :value-class="$tier >= 3 ? 'text-accent-green' : ($tier >= 1 ? 'text-accent-blue' : 'text-text-secondary')" />
-                    <x-summary-card :label="__('squad.academy_players')" :value="$academyCount" />
+                    <x-summary-card :label="__('squad.academy_players')" :value="$academyCount > 0 ? $academyCount : '—'" :value-class="$academyCount > 0 ? 'text-accent-green' : 'text-text-faint'" />
                     <div class="ml-auto shrink-0">
                         <x-help-toggle :label="__('squad.academy_help_toggle')" />
                     </div>
