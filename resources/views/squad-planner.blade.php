@@ -46,6 +46,10 @@
         {{-- Sub-navigation --}}
         <x-section-nav :items="$squadNavItems" />
 
+        {{-- Flash messages --}}
+        <x-flash-message type="success" :message="session('success')" class="mt-4" />
+        <x-flash-message type="error" :message="session('error')" class="mt-4" />
+
         {{-- Page header --}}
         <div class="mt-6 mb-2">
             <h2 class="font-heading text-2xl lg:text-3xl font-bold uppercase tracking-wide text-text-primary">

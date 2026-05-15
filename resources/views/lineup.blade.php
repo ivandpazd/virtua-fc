@@ -618,7 +618,6 @@
     </div>
 
     @include('partials.tactical-guide-modal')
-    <x-player-detail-modal />
 
     {{-- Auto-lineup preference modal --}}
     <x-modal name="auto-lineup" maxWidth="sm">
