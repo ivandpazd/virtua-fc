@@ -19,12 +19,28 @@ namespace App\Modules\Migration;
  */
 final class TableManifest
 {
-    /** Control-plane tables that hold a per-user row to be copied during migration. */
+    /**
+     * Control-plane tables that hold per-user rows to be copied during
+     * migration.
+     *
+     * Two columns per table, because the export-side scope and the
+     * import-side uniqueness aren't always the same:
+     *   - `user_key`  — column on this table that links a row to the user.
+     *                   Used by the exporter to pick which rows to ship.
+     *   - `row_key`   — column that uniquely identifies a single row.
+     *                   Used by the importer as the upsert lookup.
+     *
+     * For `users` both happen to be `id`. For `manager_stats` they differ:
+     * the table holds one row per career game (unique on `game_id` since
+     * the 2026_03_17_233425 schema change dropped the original `user_id`
+     * unique), so the exporter filters by `user_id` but the importer must
+     * upsert per-row by `id` — keying the upsert on `user_id` would
+     * collapse every shipped row into a single survivor and wipe every
+     * earlier game's streaks and totals.
+     */
     public const CONTROL_PLANE_TABLES = [
-        // Single row per user, keyed by id; the user row itself.
-        'users' => ['key' => 'id'],
-        // Single row per user, keyed by user_id.
-        'manager_stats' => ['key' => 'user_id'],
+        'users' => ['user_key' => 'id', 'row_key' => 'id'],
+        'manager_stats' => ['user_key' => 'user_id', 'row_key' => 'id'],
     ];
 
     /**
