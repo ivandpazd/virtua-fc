@@ -325,8 +325,6 @@ $uefaCompletionLabel           = $upgrade['uefa_completion_label'];
                 </div>
             </div>
 
-            <x-status-banner color="blue" :description="__('club.stadium.upgrades.stand_expansion_disruption_note')" />
-
             <div class="flex justify-end gap-3 pt-4">
                 <x-secondary-button type="button" x-on:click="$dispatch('close-modal', 'stadium-stand-expansion')">
                     {{ __('app.cancel') }}
@@ -380,8 +378,6 @@ $uefaCompletionLabel           = $upgrade['uefa_completion_label'];
                 <span class="text-sm text-text-muted">{{ __('club.stadium.upgrades.completion_date') }}</span>
                 <span class="font-heading text-lg font-bold text-text-primary">{{ $uefaCompletionLabel }}</span>
             </div>
-
-            <x-status-banner color="blue" :description="__('club.stadium.upgrades.uefa_no_capacity_change_note')" />
 
             <div class="flex justify-end gap-3 pt-4">
                 <x-secondary-button type="button" x-on:click="$dispatch('close-modal', 'stadium-uefa-upgrade')">

@@ -100,7 +100,6 @@ return [
             'modal_supplementary_description' => 'Gradas modulares provisionales: rápidas (30 días) y al contado, pero sin espacio comercial nuevo y se retiran al reformar el estadio.',
             'modal_stand_expansion_title' => 'Ampliar una grada',
             'modal_stand_expansion_description' => 'Demuele una grada y la reconstruye más grande. Los asientos son permanentes, a diferencia de las gradas supletorias.',
-            'stand_expansion_disruption_note' => 'El resto del estadio sigue operativo durante las obras. Los nuevos asientos se estrenan en la fecha de finalización.',
             'modal_rebuild_title' => 'Reconstruir el estadio',
             'modal_rebuild_description' => 'Derriba el estadio actual y construye uno nuevo. El precio por asiento crece por tramos: cuanto más grande el estadio, más cara cada plaza adicional. El estadio nuevo se entrega con la mejor categoría UEFA que permita su aforo, sin coste adicional.',
             'rebuild_marginal_rate_prefix' => 'Coste por asiento en este tamaño:',
@@ -123,7 +122,6 @@ return [
             'modal_uefa_title' => 'Subir a Categoría UEFA :to',
             'modal_uefa_description' => 'Reforma de las instalaciones para alcanzar los requisitos de la siguiente categoría UEFA (iluminación, vestuarios, zonas de prensa, palcos y accesibilidad). El aforo no se ve afectado durante las obras: la nueva categoría queda inscrita al inicio de la próxima temporada.',
             'uefa_transition_label' => 'Categoría',
-            'uefa_no_capacity_change_note' => 'El estadio sigue plenamente operativo durante las obras. La nueva categoría UEFA queda registrada al inicio de la próxima temporada.',
         ],
 
         'history' => [

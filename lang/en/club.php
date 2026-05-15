@@ -100,7 +100,6 @@ return [
             'modal_supplementary_description' => 'Temporary modular bleachers: quick (30 days) and cash-only, but add no commercial space and are removed when you rebuild.',
             'modal_stand_expansion_title' => 'Expand a stand',
             'modal_stand_expansion_description' => 'Demolish one stand and rebuild it bigger. The new seats are permanent, unlike supplementary bleachers.',
-            'stand_expansion_disruption_note' => 'The rest of the stadium stays open during construction. The new seats go live on the completion date.',
             'modal_rebuild_title' => 'Rebuild the stadium',
             'modal_rebuild_description' => 'Knock down the existing ground and build a new one. Per-seat cost rises in brackets: the bigger the stadium, the more each additional seat costs. The new stadium ships at the highest UEFA category its size qualifies for, at no extra cost.',
             'rebuild_marginal_rate_prefix' => 'Per seat at this size:',
@@ -123,7 +122,6 @@ return [
             'modal_uefa_title' => 'Upgrade to UEFA Category :to',
             'modal_uefa_description' => 'Facility refit to meet the next UEFA category requirements (floodlights, dressing rooms, media areas, hospitality and accessibility). Stadium capacity is not affected during construction: the new category is registered at the start of next season.',
             'uefa_transition_label' => 'Category',
-            'uefa_no_capacity_change_note' => 'The stadium remains fully operational during construction. The new UEFA category is registered at the start of next season.',
         ],
 
         'history' => [
