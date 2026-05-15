@@ -20,6 +20,7 @@ class CommitStandExpansion
     public function __invoke(Request $request, string $gameId)
     {
         $game = Game::with('team')->findOrFail($gameId);
+        abort_if($game->isTournamentMode(), 404);
         $validated = $request->validate([
             'seats' => 'required|integer|min:1',
             'financing' => ['required', Rule::enum(StadiumProjectFinancing::class)],

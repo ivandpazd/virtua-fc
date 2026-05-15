@@ -18,6 +18,7 @@ class CommitSupplementaryStands
     public function __invoke(Request $request, string $gameId)
     {
         $game = Game::with('team')->findOrFail($gameId);
+        abort_if($game->isTournamentMode(), 404);
         $validated = $request->validate(['seats' => 'required|integer|min:1']);
 
         if ($redirect = $this->safeCommit($gameId, fn () => $this->stadiumUpgradeService->commitSupplementary($game, (int) $validated['seats']))) {

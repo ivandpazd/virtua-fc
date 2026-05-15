@@ -66,13 +66,16 @@ class GameCreationService
         // Snapshot the user team's stadium capacity. Team.stadium_seats
         // lives on the control plane and is immutable per-game; this row
         // becomes the per-game source of truth for capacity once the user
-        // starts upgrading.
-        GameStadium::create([
-            'game_id' => $gameId,
-            'team_id' => $teamId,
-            'base_capacity' => $team->stadium_seats,
-            'base_uefa_level' => $team->uefa_stadium_category,
-        ]);
+        // starts upgrading. Skipped for tournament mode, which has no
+        // stadium upgrade flow.
+        if ($gameMode !== Game::MODE_TOURNAMENT) {
+            GameStadium::create([
+                'game_id' => $gameId,
+                'team_id' => $teamId,
+                'base_capacity' => $team->stadium_seats,
+                'base_uefa_level' => $team->uefa_stadium_category,
+            ]);
+        }
 
         // Dispatch heavy initialization to a queued job
         SetupNewGame::dispatch(

@@ -35,9 +35,17 @@ class StadiumUpgradeService
     /**
      * Resolve the per-game stadium row, falling back to a freshly seeded
      * row if a long-running save predates the backfill migration.
+     *
+     * Tournament games have no stadium upgrade flow; the HTTP layer already
+     * 404s, so reaching this method for one is a programming error rather
+     * than a user path.
      */
     public function stadiumFor(Game $game): GameStadium
     {
+        if ($game->isTournamentMode()) {
+            throw new InvalidArgumentException('Tournament games do not have a stadium overlay.');
+        }
+
         $stadium = GameStadium::query()
             ->where('game_id', $game->id)
             ->where('team_id', $game->team_id)
