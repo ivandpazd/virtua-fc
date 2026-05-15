@@ -181,6 +181,7 @@ return [
     'category_loan' => 'Cesión',
     'category_severance' => 'Indemnización',
     'category_infrastructure' => 'Infraestructura',
+    'category_stadium' => 'Estadio',
     'category_budget_loan' => 'Préstamo Presupuestario',
     'category_loan_repayment' => 'Devolución de Préstamo',
 
@@ -200,6 +201,14 @@ return [
     'tx_league_phase_qualification' => ':competition - Fase de liga superada (:positionº)',
     'tx_infrastructure_upgrade' => ':area mejorada de Nivel :from a Nivel :to',
     'tx_budget_loan_received' => 'Préstamo presupuestario recibido: :amount',
+    'tx_stadium_supplementary_payment' => 'Gradas supletorias (:seats asientos)',
+    'tx_stadium_stand_expansion_payment' => 'Ampliación de grada (:seats asientos)',
+    'tx_stadium_rebuild_payment' => 'Reforma del estadio (:capacity asientos)',
+    'tx_stadium_uefa_upgrade_payment' => 'Mejora a Categoría UEFA :level',
+    'tx_stadium_loan_instalment' => 'Cuota anual del préstamo del estadio: :amount',
+
+    'stadium_debt_service' => 'Servicio de Deuda del Estadio',
+    'tooltip_stadium_debt_service' => 'Cuota anual del préstamo de reforma del estadio (capital + intereses sobre el saldo). Se descuenta del superávit disponible.',
 
     // Budget loan
     'budget_loan' => 'Préstamo Presupuestario',

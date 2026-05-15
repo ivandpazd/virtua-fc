@@ -1,37 +1,5 @@
-@php
-/** @var App\Models\Game $game */
-/** @var array $summary */
-
-use App\Support\Money;
-
-$capacity = $summary['capacity'];
-$stadiumName = $summary['stadium_name'];
-$lastHomeMatch = $summary['last_home_match'];
-$finances = $summary['finances'];
-
-$projectedMatchday = (int) ($finances?->projected_matchday_revenue ?? 0);
-$actualMatchday = (int) ($finances?->actual_matchday_revenue ?? 0);
-$hasActualMatchday = $actualMatchday > 0;
-
-$seasonTickets = $summary['season_tickets'];
-$canEditTickets = $seasonTickets['can_edit'];
-$ticketAreas = $seasonTickets['areas'];
-$baselineAreas = $seasonTickets['baseline_areas'];
-$overallFill = $seasonTickets['overall_fill_rate'];
-$pricing = $seasonTickets['pricing'];
-
-// Initial Alpine seed: per-area current price + baseline. The component
-// re-fetches predictions from the server so this seed only needs to cover
-// the first render.
-$alpinePrices = [];
-$alpineBaselines = [];
-$minMultiplier = $seasonTickets['min_price_multiplier'];
-$maxMultiplier = $seasonTickets['max_price_multiplier'];
-foreach ($ticketAreas as $i => $area) {
-    $alpinePrices[$i] = (int) ($area['price_cents'] ?? $area['baseline_price_cents']);
-    $alpineBaselines[$i] = (int) ($area['baseline_price_cents'] ?? $alpinePrices[$i]);
-}
-@endphp
+@use(App\Support\Money)
+@use(Illuminate\Support\Number)
 
 <x-app-layout>
     <x-slot name="header">
@@ -46,26 +14,61 @@ foreach ($ticketAreas as $i => $area) {
         </div>
         <x-club-section-nav :game="$game" active="stadium" />
 
+        <x-flash-message type="success" :message="session('success')" class="mt-4" />
+        <x-flash-message type="error" :message="session('error')" class="mt-4" />
+
+        {{-- Stadium identity hero — single prominent header row with the stadium name
+             leading and capacity / UEFA as supporting chips. Sits above the grid so
+             it reads as a true hero for the page, not just another card in the column.
+             The decorative SVG silhouette is hero-only by design (one image, behind
+             the name) and must not be repeated on other cards. --}}
+        <div class="relative overflow-hidden bg-surface-800 border border-border-default rounded-xl mt-6">
+
+            <div class="relative px-5 py-6 md:px-7 md:py-8 flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+                <div class="min-w-0">
+                    <div class="text-[10px] text-text-muted uppercase tracking-widest mb-2">{{ __('club.stadium.home_ground') }}</div>
+                    <h3 class="font-heading text-2xl md:text-2xl lg:text-3xl font-bold uppercase text-text-primary">
+                        {{ $stadiumName ?? '—' }}
+                    </h3>
+                </div>
+
+                {{-- Stacked label-on-top metrics, separated by a middot.
+                     Numbers carry the visual weight; labels are small uppercase
+                     eyebrows above each value. --}}
+                <div class="flex flex-wrap items-end gap-x-5 gap-y-3 shrink-0">
+                    <div class="flex flex-col items-end text-right">
+                        <span class="text-[10px] text-text-muted uppercase tracking-widest mb-1">{{ __('club.stadium.capacity') }}</span>
+                        <span class="font-heading text-2xl md:text-3xl font-bold text-text-primary tabular-nums leading-none">{{ Number::format($capacity) }}</span>
+                    </div>
+
+                    <span class="text-text-faint pb-2 hidden sm:inline" aria-hidden="true">·</span>
+
+                    <div class="flex flex-col items-end text-right">
+                        <span class="inline-flex items-center gap-1 text-[10px] text-text-muted uppercase tracking-widest mb-1">
+                            {{ __('club.stadium.uefa_category') }}
+                            <x-info-icon :tooltip="__('club.stadium.uefa_category_tooltip')" />
+                        </span>
+                        @if($uefaLevel)
+                            <span class="inline-flex items-center justify-center self-end min-w-[2rem] px-2 rounded-md bg-accent-blue/15 text-accent-blue font-heading text-2xl md:text-3xl font-bold tabular-nums leading-none py-0.5">{{ $uefaLevel }}</span>
+                        @else
+                            <span class="font-heading text-2xl md:text-3xl font-bold text-text-faint leading-none">—</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
 
-            {{-- LEFT column (2/3): Stadium identity + season tickets + last attendance --}}
+            {{-- LEFT column (2/3): upgrades + history + season tickets --}}
             <div class="lg:col-span-2 space-y-6">
 
-                {{-- Stadium identity card --}}
-                <x-section-card :title="__('club.stadium.home_ground')">
-                    <div class="px-5 py-4">
-                        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-                            <div>
-                                <div class="text-[10px] text-text-muted uppercase tracking-widest mb-1">{{ __('club.stadium.stadium_name') }}</div>
-                                <div class="font-heading text-2xl font-bold text-text-primary">{{ $stadiumName ?? '—' }}</div>
-                            </div>
-                            <div class="md:text-right">
-                                <div class="text-[10px] text-text-muted uppercase tracking-widest mb-1">{{ __('club.stadium.capacity') }}</div>
-                                <div class="font-heading text-2xl font-bold text-text-primary">{{ number_format($capacity) }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </x-section-card>
+                {{-- Capacity upgrades (gradas supletorias + rebuild) --}}
+                @include('club.partials.stadium-upgrades')
+
+                {{-- Renovation history — single source of truth for past
+                     and in-flight projects. --}}
+                @include('club.partials.stadium-history')
 
                 {{-- Season tickets — editable or locked. Hidden for pre-feature in-flight
                      saves where SeasonTicketDefaultsProcessor never ran, so no pricing row
@@ -97,24 +100,19 @@ foreach ($ticketAreas as $i => $area) {
                             {{-- Per-area pricing rows --}}
                             <div class="mt-6 space-y-2">
                                 @foreach($ticketAreas as $i => $area)
-                                    @php
-                                        $baselineCents = (int) ($baselineAreas[$i]['baseline_price_cents'] ?? $area['baseline_price_cents']);
-                                        $minPrice = (int) round($baselineCents * $minMultiplier);
-                                        $maxPrice = (int) round($baselineCents * $maxMultiplier);
-                                    @endphp
                                     <div class="px-3.5 py-2.5 bg-surface-700/50 border border-border-default rounded-lg space-y-2">
                                         <div class="flex items-baseline justify-between gap-4">
                                             <div class="min-w-0">
                                                 <span class="text-xs font-semibold text-text-primary uppercase tracking-wide">{{ __('club.stadium.season_tickets.area.' . $area['slug']) }}</span>
-                                                <span class="text-[11px] text-text-muted ml-1.5">{{ number_format($area['capacity']) }}</span>
+                                                <span class="text-[11px] text-text-muted ml-1.5">{{ Number::format($area['capacity']) }}</span>
                                             </div>
-                                            <span class="font-heading text-2xl font-bold text-text-primary tabular-nums leading-none shrink-0"
+                                            <span class="font-heading text-base font-bold text-text-primary tabular-nums leading-none shrink-0"
                                                   x-text="formatPrice(prices[{{ $i }}])"></span>
                                         </div>
 
                                         <input type="range"
-                                               min="{{ $minPrice }}"
-                                               max="{{ $maxPrice }}"
+                                               min="{{ $area['min_price_cents'] }}"
+                                               max="{{ $area['max_price_cents'] }}"
                                                step="500"
                                                :value="prices[{{ $i }}]"
                                                :style="`--fill: ${sliderFill({{ $i }})}`"
@@ -125,7 +123,7 @@ foreach ($ticketAreas as $i => $area) {
                                             <span class="text-text-body font-semibold"><span x-text="Math.round((areas[{{ $i }}]?.fill_rate ?? 0) * 100)"></span>%</span>
                                             <span class="text-text-muted">{{ __('club.stadium.season_tickets.predicted_fill') }}</span>
                                             <span class="text-text-faint">·</span>
-                                            <span class="text-text-muted"><span x-text="(areas[{{ $i }}]?.sold ?? 0).toLocaleString('es-ES')"></span> / {{ number_format($area['capacity']) }}</span>
+                                            <span class="text-text-muted"><span x-text="$fmt(areas[{{ $i }}]?.sold ?? 0)"></span> / {{ Number::format($area['capacity']) }}</span>
                                         </div>
                                     </div>
                                 @endforeach
@@ -145,7 +143,7 @@ foreach ($ticketAreas as $i => $area) {
                                         <div class="h-full bg-accent-blue rounded-full" :style="`width: ${overallFill}%`"></div>
                                     </div>
                                     <div class="text-[11px] text-text-muted mt-1">
-                                        <span x-text="totalSold.toLocaleString('es-ES')"></span> / {{ number_format($capacity) }}
+                                        <span x-text="$fmt(totalSold)"></span> / {{ Number::format($capacity) }}
                                     </div>
                                 </div>
                                 <div class="bg-surface-700/50 border border-border-default rounded-lg px-4 py-3">
@@ -194,15 +192,10 @@ foreach ($ticketAreas as $i => $area) {
                         <div class="px-5 py-4">
                             <p class="text-xs text-accent-gold leading-relaxed mb-4">{{ __('club.stadium.season_tickets.locked_notice') }}</p>
 
-                            @php
-                                $lockedSeasonTicketRevenue = (int) ($pricing->total_revenue ?? 0);
-                                $lockedTaquilla = $hasActualMatchday ? $actualMatchday : $projectedMatchday;
-                                $lockedTotalRevenue = $lockedSeasonTicketRevenue + $lockedTaquilla;
-                            @endphp
                             <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div class="bg-surface-700/50 border border-border-default rounded-lg px-4 py-3">
                                     <div class="text-[10px] text-text-muted uppercase tracking-widest">{{ __('club.stadium.season_tickets.tickets_sold') }}</div>
-                                    <div class="font-heading text-2xl font-bold text-text-primary">{{ number_format((int) ($pricing->total_sold ?? 0)) }}</div>
+                                    <div class="font-heading text-2xl font-bold text-text-primary">{{ Number::format((int) ($pricing->total_sold ?? 0)) }}</div>
                                     <div class="text-[11px] text-text-muted mt-1">{{ $overallFill }}% {{ __('club.stadium.season_tickets.predicted_fill') }}</div>
                                 </div>
                                 <div class="bg-surface-700/50 border border-border-default rounded-lg px-4 py-3">
@@ -215,7 +208,7 @@ foreach ($ticketAreas as $i => $area) {
                                         </div>
                                         <div class="flex justify-between gap-2">
                                             <span class="text-text-muted">{{ __('club.stadium.stadium_revenue.matchday') }}</span>
-                                            <span class="text-text-body font-semibold">{{ Money::format($lockedTaquilla) }}</span>
+                                            <span class="text-text-body font-semibold">{{ Money::format($lockedMatchdayRevenue) }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -234,39 +227,33 @@ foreach ($ticketAreas as $i => $area) {
                 <x-section-card :title="__('club.stadium.last_attendance')">
                     <div class="px-5 py-4">
                         @if($lastHomeMatch)
-                            @php
-                                /** @var App\Models\GameMatch $lastMatch */
-                                $lastMatch = $lastHomeMatch['match'];
-                                $fillRate = $lastHomeMatch['fill_rate'];
-                                $fillColor = $fillRate >= 90 ? 'bg-accent-green' : ($fillRate >= 70 ? 'bg-accent-blue' : ($fillRate >= 50 ? 'bg-accent-gold' : 'bg-accent-red'));
-                            @endphp
                             <div class="flex flex-col gap-4">
                                 <div class="flex items-center gap-3">
                                     <x-team-crest :team="$game->team" class="w-10 h-10 shrink-0" />
                                     <div class="flex-1 min-w-0">
                                         <div class="text-[10px] text-text-muted uppercase tracking-widest">{{ __('game.vs') }}</div>
                                         <div class="flex items-center gap-2">
-                                            <x-team-crest :team="$lastMatch->awayTeam" class="w-5 h-5" />
-                                            <span class="text-sm font-semibold text-text-primary truncate">{{ $lastMatch->awayTeam->name }}</span>
+                                            <x-team-crest :team="$lastHomeMatch['match']->awayTeam" class="w-5 h-5" />
+                                            <span class="text-sm font-semibold text-text-primary truncate">{{ $lastHomeMatch['match']->awayTeam->name }}</span>
                                         </div>
                                     </div>
                                     <div class="text-right shrink-0">
-                                        <div class="text-[10px] text-text-muted uppercase tracking-widest">{{ __($lastMatch->competition->name ?? '') }}</div>
-                                        <div class="text-xs text-text-body">{{ $lastMatch->scheduled_date->format('d M Y') }}</div>
+                                        <div class="text-[10px] text-text-muted uppercase tracking-widest">{{ __($lastHomeMatch['match']->competition->name ?? '') }}</div>
+                                        <div class="text-xs text-text-body">{{ $lastHomeMatch['match']->scheduled_date->format('d M Y') }}</div>
                                     </div>
                                 </div>
 
                                 <div>
                                     <div class="flex items-baseline justify-between gap-3 mb-2">
-                                        <span class="font-heading text-3xl font-bold text-text-primary">{{ number_format($lastHomeMatch['attendance']) }}</span>
-                                        <span class="text-sm text-text-muted">/ {{ number_format($lastHomeMatch['capacity_at_match']) }}</span>
+                                        <span class="font-heading text-3xl font-bold text-text-primary">{{ Number::format($lastHomeMatch['attendance']) }}</span>
+                                        <span class="text-sm text-text-muted">/ {{ Number::format($lastHomeMatch['capacity_at_match']) }}</span>
                                     </div>
                                     <div class="w-full h-2 bg-surface-600 rounded-full overflow-hidden">
-                                        <div class="h-full rounded-full {{ $fillColor }}" style="width: {{ min($fillRate, 100) }}%"></div>
+                                        <div class="h-full rounded-full {{ $lastHomeMatch['fill_color'] }}" style="width: {{ min($lastHomeMatch['fill_rate'], 100) }}%"></div>
                                     </div>
                                     <div class="flex items-center justify-between mt-1">
                                         <span class="text-[10px] text-text-muted uppercase tracking-widest">{{ __('club.stadium.fill_rate') }}</span>
-                                        <span class="text-xs font-semibold text-text-body">{{ $fillRate }}%</span>
+                                        <span class="text-xs font-semibold text-text-body">{{ $lastHomeMatch['fill_rate'] }}%</span>
                                     </div>
                                 </div>
                             </div>

@@ -153,6 +153,28 @@ return [
     'budget_loan_repaid_message' => 'The budget loan has been repaid (:repayment with interest).',
     'budget_loan_repaid_with_debt' => 'The budget loan repayment of :repayment exceeded available surplus. The shortfall has been carried as debt.',
 
+    // Stadium
+    'stadium_supplementary_committed_title' => 'Stadium expansion started',
+    'stadium_supplementary_committed_message' => ':capacity temporary seats have been ordered. Construction completes on :completion.',
+    'stadium_stand_expansion_committed_title' => 'Stand expansion approved',
+    'stadium_stand_expansion_committed_message' => 'A stand expansion of :capacity new permanent seats has been approved. The new seats go live on :completion.',
+    'stadium_rebuild_committed_title' => 'Stadium rebuild approved',
+    'stadium_rebuild_committed_message' => 'Rebuild started for a capacity of :capacity seats. The new stadium opens on :completion.',
+    'stadium_supplementary_completed_title' => 'Temporary stands ready',
+    'stadium_supplementary_completed_message' => 'The new stands are now in use. Total capacity: :capacity seats.',
+    'stadium_stand_expansion_completed_title' => 'New stand opened',
+    'stadium_stand_expansion_completed_message' => 'The expanded stand is now in use. Total capacity: :capacity seats.',
+    'stadium_rebuild_completed_title' => 'Stadium opened',
+    'stadium_rebuild_completed_message' => 'The new stadium has opened with a capacity of :capacity seats.',
+    'stadium_uefa_upgrade_committed_title' => 'UEFA upgrade approved',
+    'stadium_uefa_upgrade_committed_message' => 'Refit started to reach UEFA Category :capacity. The new category takes effect on :completion.',
+    'stadium_uefa_upgrade_completed_title' => 'New UEFA category',
+    'stadium_uefa_upgrade_completed_message' => 'Your stadium has reached UEFA Category :capacity.',
+    'stadium_loan_drawn_title' => 'Stadium loan finalised',
+    'stadium_loan_drawn_message' => 'The bank has financed the project with :amount, repayable over :years annual instalments.',
+    'stadium_loan_repaid_title' => 'Stadium loan repaid',
+    'stadium_loan_repaid_message' => 'The :amount stadium loan has been fully repaid.',
+
     // Squad registration
     'squad_registration_required_title' => 'Squad registration required',
     'squad_registration_required_message' => 'You have :count unenrolled players. Register your squad before the season begins — unenrolled players cannot be selected for matches.',

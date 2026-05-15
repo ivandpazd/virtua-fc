@@ -70,6 +70,7 @@ class GameNotification extends Model
     public const TYPE_EMERGENCY_SIGNING = 'emergency_signing';
     public const TYPE_MATCH_FORFEIT = 'match_forfeit';
     public const TYPE_BUDGET_LOAN = 'budget_loan';
+    public const TYPE_STADIUM = 'stadium';
     public const TYPE_TRANSFER_WINDOW_CLOSING = 'transfer_window_closing';
     public const TYPE_TRANSFER_WINDOW_CLOSED = 'transfer_window_closed';
     public const TYPE_SQUAD_REGISTRATION_REQUIRED = 'squad_registration_required';
@@ -110,6 +111,7 @@ class GameNotification extends Model
         self::TYPE_TRANSFER_WINDOW_CLOSING => 'transfers',
         self::TYPE_TRANSFER_WINDOW_CLOSED => 'transfers',
         self::TYPE_SQUAD_REGISTRATION_REQUIRED => 'registration',
+        self::TYPE_STADIUM => 'stadium',
     ];
 
     protected $fillable = [
@@ -231,6 +233,7 @@ class GameNotification extends Model
             'academy' => 'game.squad.academy',
             'transfer-activity' => 'game.transfer-activity',
             'finances' => 'game.club.finances',
+            'stadium' => 'game.club.stadium',
             'registration' => 'game.squad.registration',
             default => 'game.squad.academy',
         };

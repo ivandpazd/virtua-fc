@@ -45,6 +45,7 @@ use App\Modules\Transfer\Listeners\CompleteAgreedTransfersOnWindowOpen;
 use App\Modules\Transfer\Listeners\ProcessTransferWindowClose;
 use App\Modules\Transfer\Listeners\RollAIContractRenewals;
 use App\Modules\Transfer\Listeners\RollSalaryUnhappiness;
+use App\Modules\Finance\Listeners\ActivateCompletedStadiumProjects;
 use App\Modules\Season\Listeners\RecordSeasonCompleted;
 use App\Modules\Season\Listeners\SimulateOtherLeagues;
 use App\Modules\Competition\Services\CompetitionHandlerResolver;
@@ -101,6 +102,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewPulse', function ($user) {
             return $user->is_admin;
         });
+
+        \Illuminate\Support\Number::useLocale(config('app.locale'));
 
         // Runtime guard: fail loudly in dev/staging when a query crosses
         // the control/tenant plane boundary. Currently opt-in via
@@ -188,6 +191,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(GameDateAdvanced::class, RollSalaryUnhappiness::class);
         Event::listen(GameDateAdvanced::class, ApplyWageGapMoraleDrip::class);
         Event::listen(GameDateAdvanced::class, RollAIContractRenewals::class);
+        Event::listen(GameDateAdvanced::class, ActivateCompletedStadiumProjects::class);
 
         Queue::failing(function (JobFailed $event) {
             try {
