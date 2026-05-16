@@ -112,7 +112,9 @@ use App\Http\Views\ExploreTeams;
 use App\Http\Views\ExplorePoolTeams;
 use App\Http\Views\ExploreFreeAgents;
 use App\Http\Views\ExploreSquad;
+use App\Http\Views\ShowManagerCareer;
 use App\Http\Views\ShowSeasonEnd;
+use App\Http\Views\ShowSeasonOffers;
 use App\Http\Views\ShowTournamentEnd;
 use App\Http\Actions\DismissAcademyPlayer;
 use App\Http\Actions\LoanAcademyPlayer;
@@ -163,6 +165,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/new-game', SelectTeam::class)->name('select-team');
     Route::post('/new-game', InitGame::class)->middleware('throttle:game-creation')->name('init-game');
+
     Route::get('/tournament-summary/{summaryId}', ShowTournamentSummary::class)->name('tournament-summary.show');
 
     // All game routes require ownership verification
@@ -278,6 +281,24 @@ Route::middleware('auth')->group(function () {
         // Season End
         Route::get('/game/{gameId}/season-end', ShowSeasonEnd::class)->name('game.season-end');
         Route::post('/game/{gameId}/start-new-season', StartNewSeason::class)->name('game.start-new-season');
+
+        // Pro-manager between-seasons decision screen. Continue on
+        // /season-end routes here when the user has unresolved offers; the
+        // Accept/Decline actions below re-enter StartNewSeason to kick off
+        // the closing pipeline.
+        Route::get('/game/{gameId}/season-offers', ShowSeasonOffers::class)->name('game.season-offers');
+
+        // Accepting stages the team-switch (applied by
+        // ApplyPendingTeamSwitchProcessor on the next SeasonSetupPipeline
+        // run); declining is blocked when fired.
+        Route::post('/game/{gameId}/job-offers/{offerId}/accept', \App\Http\Actions\AcceptSeasonOffer::class)
+            ->name('game.job-offers.accept');
+        Route::post('/game/{gameId}/job-offers/decline', \App\Http\Actions\DeclineSeasonOffers::class)
+            ->name('game.job-offers.decline');
+
+        // Pro-manager career history (season-by-season summary). 404s in
+        // non-pro-manager modes — gated inside the view class.
+        Route::get('/game/{gameId}/career', ShowManagerCareer::class)->name('game.manager.career');
 
         // Tournament End
         Route::get('/game/{gameId}/tournament-end', ShowTournamentEnd::class)->name('game.tournament-end');

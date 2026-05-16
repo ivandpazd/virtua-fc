@@ -651,6 +651,10 @@ $getZoneClass = function($position) use ($standingsZones, $borderColorMap) {
         {{-- ============================================================ --}}
         {{-- CTA: Start New Season                                         --}}
         {{-- ============================================================ --}}
+        {{-- For Pro Manager games, Continue routes to /season-offers      --}}
+        {{-- where the user picks a team (or stays); the closing pipeline  --}}
+        {{-- only kicks in after that decision. Non-pro games dispatch the --}}
+        {{-- pipeline immediately from StartNewSeason.                     --}}
 
         <div class="flex flex-col sm:flex-row items-center justify-center gap-3 py-6 md:py-10">
             <x-secondary-button

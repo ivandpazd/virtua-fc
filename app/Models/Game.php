@@ -94,6 +94,7 @@ class Game extends Model
 
     // Game modes
     public const MODE_CAREER = 'career';
+    public const MODE_CAREER_PRO = 'career_pro';
     public const MODE_TOURNAMENT = 'tournament';
 
     // Season goals
@@ -133,6 +134,8 @@ class Game extends Model
         'matchday_advancing_at',
         'matchday_advance_result',
         'deleting_at',
+        'pending_team_switch',
+        'season_offers_generated_for',
     ];
 
     protected $casts = [
@@ -160,7 +163,18 @@ class Game extends Model
 
     public function isCareerMode(): bool
     {
-        return ($this->game_mode ?? self::MODE_CAREER) === self::MODE_CAREER;
+        $mode = $this->game_mode ?? self::MODE_CAREER;
+
+        // Pro-manager mode is a flavour of career mode: every career-mode
+        // pipeline (full SeasonSetupPipeline, finances, cups, transfers, etc.)
+        // runs for it. The only difference is end-of-season team switching,
+        // gated by isProManagerMode() below.
+        return $mode === self::MODE_CAREER || $mode === self::MODE_CAREER_PRO;
+    }
+
+    public function isProManagerMode(): bool
+    {
+        return $this->game_mode === self::MODE_CAREER_PRO;
     }
 
     public function isTournamentMode(): bool
@@ -332,6 +346,44 @@ class Game extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * Team to render in user-facing chrome (loading screens, etc.). When a
+     * pro-manager has accepted an end-of-season offer but the setup pipeline
+     * hasn't applied the switch yet, team_id still points at the outgoing
+     * club — preview the destination club instead so the crest matches the
+     * user's just-made choice.
+     */
+    public function displayTeam(): ?Team
+    {
+        if ($this->pending_team_switch) {
+            $offer = ManagerJobOffer::with('team')->find($this->pending_team_switch);
+            if ($offer?->team) {
+                return $offer->team;
+            }
+        }
+
+        return $this->team;
+    }
+
+    /**
+     * Was the manager fired at the end of the current $game->season? Derived
+     * from the existence of a post-firing offer row for this season: the only
+     * code path that creates such offers is JobOfferService for grade=disaster.
+     *
+     * Must be called while $game->season still points at the season whose
+     * firing outcome we care about — the closing pipeline runs first (so
+     * SnapshotManagerSeasonRecordProcessor sees the old season), then the
+     * season is advanced, then the setup pipeline runs. Setup-time callers
+     * should read offer_type off the accepted offer instead.
+     */
+    public function wasFiredThisSeason(): bool
+    {
+        return ManagerJobOffer::where('game_id', $this->id)
+            ->where('season', $this->season)
+            ->where('offer_type', ManagerJobOffer::TYPE_POST_FIRING)
+            ->exists();
     }
 
     public function reserveTeam(): BelongsTo

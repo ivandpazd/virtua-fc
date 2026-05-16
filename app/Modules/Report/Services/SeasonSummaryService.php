@@ -10,6 +10,7 @@ use App\Models\Game;
 use App\Models\GameMatch;
 use App\Models\GamePlayer;
 use App\Models\GameStanding;
+use App\Models\ManagerJobOffer;
 use App\Models\SimulatedSeason;
 use App\Models\Team;
 use App\Models\TeamReputation;
@@ -122,6 +123,94 @@ class SeasonSummaryService
             'simulatedResults' => $simulatedResults,
             'reputationData' => $reputationData,
         ];
+    }
+
+    /**
+     * Load the pro-manager offers the user needs to act on between seasons.
+     * Returns a [pending list, accepted-pending-switch] tuple; the accepted
+     * offer is broken out so the UI can present a "you've agreed to move to
+     * X" confirmation card. Consumed by ShowSeasonOffers.
+     *
+     * @return array{0: \Illuminate\Support\Collection, 1: ?ManagerJobOffer}
+     */
+    public function buildProManagerOffers(Game $game): array
+    {
+        if (!$game->isProManagerMode()) {
+            return [collect(), null];
+        }
+
+        $offers = ManagerJobOffer::with(['team.clubProfile', 'competition'])
+            ->where('game_id', $game->id)
+            ->where('season', $game->season)
+            ->whereIn('status', [
+                ManagerJobOffer::STATUS_PENDING,
+                ManagerJobOffer::STATUS_ACCEPTED,
+            ])
+            ->whereIn('offer_type', [
+                ManagerJobOffer::TYPE_END_OF_SEASON,
+                ManagerJobOffer::TYPE_POST_FIRING,
+            ])
+            ->get();
+
+        $accepted = $offers->firstWhere('id', $game->pending_team_switch);
+        $pending = $offers->where('status', ManagerJobOffer::STATUS_PENDING)->values();
+
+        return [$pending, $accepted];
+    }
+
+    /**
+     * Each offer's "last season finishing position" from the GameStanding
+     * rows still holding the just-ended season's values. Returns a map
+     * keyed by offer.id; null entries mean we have no published position
+     * to show (e.g. foreign league not finalized yet because the closing
+     * pipeline runs after Accept/Decline).
+     *
+     * @return array<string, int|null>
+     */
+    public function lastSeasonPositionsByOfferId(Game $game, \Illuminate\Support\Collection $offers): array
+    {
+        $teamIds = $offers->pluck('team_id')->unique()->values()->all();
+        $competitionIds = $offers->pluck('competition_id')->filter()->unique()->values()->all();
+
+        if (empty($teamIds) || empty($competitionIds)) {
+            return [];
+        }
+
+        $standings = GameStanding::where('game_id', $game->id)
+            ->whereIn('team_id', $teamIds)
+            ->whereIn('competition_id', $competitionIds)
+            ->where('played', '>', 0)
+            ->get(['team_id', 'competition_id', 'position'])
+            ->keyBy(fn ($s) => $s->team_id . ':' . $s->competition_id);
+
+        $result = [];
+        foreach ($offers as $offer) {
+            $result[$offer->id] = $standings->get($offer->team_id . ':' . $offer->competition_id)?->position;
+        }
+        return $result;
+    }
+
+    /**
+     * Translated season-goal label each offering club would set if the
+     * manager accepts. Null for competitions without a HasSeasonGoals
+     * config (cups etc.) so the offer card can hide the line.
+     *
+     * @return array<string, string|null>
+     */
+    public function seasonGoalLabelsByOfferId(\Illuminate\Support\Collection $offers): array
+    {
+        $result = [];
+        foreach ($offers as $offer) {
+            $team = $offer->team;
+            $competition = $offer->competition;
+            if (!$team || !$competition) {
+                $result[$offer->id] = null;
+                continue;
+            }
+            $goal = $this->seasonGoalService->determineGoalForTeam($team, $competition);
+            $result[$offer->id] = __($this->seasonGoalService->getGoalLabel($goal, $competition));
+        }
+        return $result;
     }
 
     public function buildPromotionData(Game $game, Competition $competition): ?array

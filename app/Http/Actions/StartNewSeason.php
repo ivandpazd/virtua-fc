@@ -4,6 +4,7 @@ namespace App\Http\Actions;
 
 use App\Modules\Competition\Enums\PlayoffState;
 use App\Modules\Competition\Playoffs\PlayoffGeneratorFactory;
+use App\Modules\Manager\Services\JobOfferService;
 use App\Modules\Match\Services\MatchFinalizationService;
 use App\Modules\Season\Jobs\ProcessSeasonTransition;
 use App\Models\Game;
@@ -13,6 +14,7 @@ class StartNewSeason
     public function __construct(
         private readonly PlayoffGeneratorFactory $playoffFactory,
         private readonly MatchFinalizationService $finalizationService,
+        private readonly JobOfferService $jobOfferService,
     ) {}
 
     public function __invoke(string $gameId)
@@ -43,6 +45,17 @@ class StartNewSeason
                 return redirect()->route('show-game', $gameId)
                     ->with('error', __('messages.season_not_complete'));
             }
+        }
+
+        // Pro-manager router: between seasons the user picks a team (or
+        // stays) on /season-offers, and that choice is what triggers the
+        // closing pipeline. Generate the offers on first visit; once the
+        // user has resolved them (accepted one or declined all), fall
+        // through to the pipeline-dispatch block below — Accept and Decline
+        // both re-enter this action.
+        if ($game->isProManagerMode() && !$this->jobOfferService->hasResolvedOffersFor($game)) {
+            $this->jobOfferService->ensureEndOfSeasonOffersGenerated($game);
+            return redirect()->route('game.season-offers', $gameId);
         }
 
         // Atomic check-and-set: only one request can win the race
