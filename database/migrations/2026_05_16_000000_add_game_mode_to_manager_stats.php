@@ -15,40 +15,12 @@ return new class extends Migration
             $table->index('game_mode');
         });
 
-        // Backfill from games. manager_stats lives on the control plane and games
-        // on the tenant plane — issue two separate queries so we never JOIN
-        // across planes (see CLAUDE.md → "Control plane / tenant plane").
-        $gameIds = ManagerStats::query()
-            ->whereNotNull('game_id')
-            ->distinct()
-            ->pluck('game_id');
-
-        if ($gameIds->isEmpty()) {
-            return;
-        }
-
-        // Group game ids by mode so we issue one UPDATE per mode instead of
-        // one per game. Only ~3 modes exist, so this collapses N round-trips
-        // into a small constant.
-        $idsByMode = [];
-        foreach ($gameIds->chunk(5000) as $chunk) {
-            Game::query()
-                ->whereIn('id', $chunk)
-                ->select(['id', 'game_mode'])
-                ->toBase()
-                ->orderBy('id')
-                ->each(function ($row) use (&$idsByMode) {
-                    $idsByMode[$row->game_mode][] = $row->id;
-                });
-        }
-
-        foreach ($idsByMode as $mode => $ids) {
-            foreach (array_chunk($ids, 5000) as $idChunk) {
-                ManagerStats::query()
-                    ->whereIn('game_id', $idChunk)
-                    ->update(['game_mode' => $mode]);
-            }
-        }
+        // Pro Manager mode is introduced in this deployment, so every existing
+        // manager_stats row predates it and is a regular career. One UPDATE,
+        // no cross-plane lookup.
+        ManagerStats::query()
+            ->whereNull('game_mode')
+            ->update(['game_mode' => Game::MODE_CAREER]);
     }
 
     public function down(): void
