@@ -53,20 +53,20 @@
     {{-- Impersonate by Game --}}
     <x-section-card :title="__('admin.impersonate_by_game')" class="mb-6">
         <div class="p-4" x-data="{
-            gameId: '',
+            query: '',
             loading: false,
-            result: null,
+            results: [],
             error: false,
             async lookup() {
-                if (!this.gameId.trim()) return;
+                if (!this.query.trim()) return;
                 this.loading = true;
                 this.error = false;
-                this.result = null;
+                this.results = [];
                 try {
-                    const res = await fetch(`{{ route('admin.lookup-game') }}?game_id=${encodeURIComponent(this.gameId.trim())}`);
+                    const res = await fetch(`{{ route('admin.lookup-game') }}?query=${encodeURIComponent(this.query.trim())}`);
                     const data = await res.json();
                     if (data.found) {
-                        this.result = data;
+                        this.results = data.results;
                     } else {
                         this.error = true;
                     }
@@ -79,14 +79,14 @@
             <div class="flex flex-col sm:flex-row gap-3">
                 <input
                     type="text"
-                    x-model="gameId"
+                    x-model="query"
                     @keydown.enter.prevent="lookup()"
-                    placeholder="{{ __('admin.game_id_placeholder') }}"
-                    class="flex-1 bg-surface-700 border border-border-default rounded-lg text-sm text-text-primary placeholder-text-faint px-4 py-2.5 font-mono min-h-[44px] focus:outline-hidden focus:border-accent-blue/50"
+                    placeholder="{{ __('admin.game_lookup_placeholder') }}"
+                    class="flex-1 bg-surface-700 border border-border-default rounded-lg text-sm text-text-primary placeholder-text-faint px-4 py-2.5 min-h-[44px] focus:outline-hidden focus:border-accent-blue/50"
                 />
                 <button
                     @click="lookup()"
-                    :disabled="loading || !gameId.trim()"
+                    :disabled="loading || !query.trim()"
                     class="px-5 py-2.5 bg-accent-blue text-white text-sm font-semibold rounded-lg min-h-[44px] hover:bg-accent-blue/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 >
                     <span x-show="!loading">{{ __('admin.lookup') }}</span>
@@ -99,57 +99,59 @@
                 {{ __('admin.game_not_found') }}
             </div>
 
-            {{-- Result --}}
-            <div x-show="result" x-cloak class="mt-4">
-                <div class="bg-surface-700 border border-border-default rounded-lg overflow-hidden">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border-default">
-                        <div class="p-3 space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.game_user') }}</span>
-                                <span class="text-sm text-text-primary" x-text="result?.user_name"></span>
+            {{-- Results --}}
+            <div x-show="results.length > 0" x-cloak class="mt-4 space-y-3">
+                <template x-for="result in results" :key="result.game_id">
+                    <div class="bg-surface-700 border border-border-default rounded-lg overflow-hidden">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border-default">
+                            <div class="p-3 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.game_user') }}</span>
+                                    <span class="text-sm text-text-primary" x-text="result.user_name"></span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.email') }}</span>
+                                    <span class="text-sm text-text-secondary" x-text="result.user_email"></span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.game_team') }}</span>
+                                    <span class="text-sm text-text-primary" x-text="result.team_name ?? '—'"></span>
+                                </div>
                             </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.email') }}</span>
-                                <span class="text-sm text-text-secondary" x-text="result?.user_email"></span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.game_team') }}</span>
-                                <span class="text-sm text-text-primary" x-text="result?.team_name ?? '—'"></span>
+                            <div class="p-3 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.game_mode_label') }}</span>
+                                    <span class="text-sm text-text-primary" x-text="result.game_mode"></span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.game_season') }}</span>
+                                    <span class="text-sm text-text-primary" x-text="result.season"></span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.game_current_date') }}</span>
+                                    <span class="text-sm text-text-primary" x-text="result.current_date ?? '—'"></span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-text-muted uppercase tracking-wider">Status</span>
+                                    <span class="text-sm" :class="result.setup_completed ? 'text-accent-green' : 'text-accent-gold'"
+                                          x-text="result.setup_completed ? '{{ __('admin.game_setup_complete') }}' : '{{ __('admin.game_setup_incomplete') }}'">
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                        <div class="p-3 space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.game_mode_label') }}</span>
-                                <span class="text-sm text-text-primary" x-text="result?.game_mode"></span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.game_season') }}</span>
-                                <span class="text-sm text-text-primary" x-text="result?.season"></span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-text-muted uppercase tracking-wider">{{ __('admin.game_current_date') }}</span>
-                                <span class="text-sm text-text-primary" x-text="result?.current_date ?? '—'"></span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-text-muted uppercase tracking-wider">Status</span>
-                                <span class="text-sm" :class="result?.setup_completed ? 'text-accent-green' : 'text-accent-gold'"
-                                      x-text="result?.setup_completed ? '{{ __('admin.game_setup_complete') }}' : '{{ __('admin.game_setup_incomplete') }}'">
-                                </span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="px-3 py-3 border-t border-border-default">
-                        <form method="POST" action="{{ route('admin.impersonate-by-game') }}">
-                            @csrf
-                            <input type="hidden" name="game_id" :value="result?.game_id" />
-                            <button type="submit"
-                                    class="w-full px-4 py-2.5 bg-accent-blue text-white text-sm font-semibold rounded-lg min-h-[44px] hover:bg-accent-blue/80 transition-colors">
-                                {{ __('admin.impersonate') }}
-                            </button>
-                        </form>
+                        <div class="px-3 py-3 border-t border-border-default">
+                            <form method="POST" action="{{ route('admin.impersonate-by-game') }}">
+                                @csrf
+                                <input type="hidden" name="game_id" :value="result.game_id" />
+                                <button type="submit"
+                                        class="w-full px-4 py-2.5 bg-accent-blue text-white text-sm font-semibold rounded-lg min-h-[44px] hover:bg-accent-blue/80 transition-colors">
+                                    {{ __('admin.impersonate') }}
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                </div>
+                </template>
             </div>
         </div>
     </x-section-card>
