@@ -64,7 +64,8 @@ export default function negotiationChat() {
             if (this.mode === 'transfer_fee' || this.phase === 'counter_offer') {
                 if (this.offerWage >= 10000000) return 1000000;  // >= €10M: €1M steps
                 if (this.offerWage >= 1000000) return 100000;    // >= €1M: €100K steps
-                return 50000;                                     // < €1M: €50K steps
+                if (this.offerWage >= 100000) return 10000;      // >= €100K: €10K steps
+                return 5000;                                      // < €100K: €5K steps
             }
             if (this.offerWage >= 1000000) return 100000;
             if (this.offerWage >= 100000) return 10000;
@@ -285,11 +286,27 @@ export default function negotiationChat() {
                     }
                 }
             } else {
-                // Renewal mode
-                const data = await this.sendAction('accept_counter');
-                if (data) {
-                    this.negotiationStatus = data.negotiation_status;
-                    this.appendMessages(data.messages);
+                // Renewal mode. On round 0 the user is accepting the player's
+                // opening demand — no negotiation row exists yet, so submit a
+                // normal offer at the demand wage/years rather than calling
+                // accept_counter (which only resolves an existing counter).
+                if (this.round === 0) {
+                    const data = await this.sendAction('offer', {
+                        wage: this.offerWage,
+                        years: this.offerYears,
+                    });
+                    if (data) {
+                        this.negotiationStatus = data.negotiation_status;
+                        this.round = data.round || this.round;
+                        this.appendMessages(data.messages);
+                        this.prefillFromOptions();
+                    }
+                } else {
+                    const data = await this.sendAction('accept_counter');
+                    if (data) {
+                        this.negotiationStatus = data.negotiation_status;
+                        this.appendMessages(data.messages);
+                    }
                 }
             }
             this.loading = false;
