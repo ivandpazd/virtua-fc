@@ -2,6 +2,7 @@
 
 namespace App\Modules\Manager\Services;
 
+use App\Models\Game;
 use App\Models\ManagerStats;
 
 /**
@@ -13,18 +14,22 @@ use App\Models\ManagerStats;
  * deleted), so the merge is additive for cumulative columns and "max" for
  * peak/streak columns. Win percentage is recomputed from the summed totals.
  *
- * Matching is by (`user_id`, `team_id`). Anything ambiguous on either side
- * is skipped and reported — the operator resolves manually.
+ * Matching is by (`user_id`, `team_id`, `game_mode`). Several OLD rows or
+ * several NEW orphans sharing a key are all legit non-overlapping career
+ * runs (uniqueness on `manager_stats` is only on `game_id`, and deleting a
+ * career nulls `game_id` rather than removing the row — see migration
+ * `2026_04_02_000000_preserve_manager_data_on_game_deletion`). All N rows on
+ * each side are folded into a single canonical orphan with the additive/max
+ * rules; duplicate orphans are deleted afterwards. OLD-export rows predate
+ * the `game_mode` column so they are treated as career mode.
  */
 class OrphanManagerStatsMerger
 {
     /**
      * @param iterable<array<string,mixed>> $oldRows
      * @return array{
-     *     merged: list<array{user_id:int,team_id:string,before:array<string,int|float>,after:array<string,int|float>}>,
-     *     no_old_match: list<array{user_id:int,team_id:string}>,
-     *     ambiguous_old: list<array{user_id:int,team_id:string,count:int}>,
-     *     ambiguous_orphan: list<array{user_id:int,team_id:string,count:int}>,
+     *     merged: list<array{user_id:int,team_id:string,game_mode:string,old_rows:int,duplicate_orphans:int,before:array<string,int|float>,after:array<string,int|float>}>,
+     *     no_old_match: list<array{user_id:int,team_id:string,game_mode:string}>,
      * }
      */
     public function merge(iterable $oldRows, bool $dryRun = false): array
@@ -36,59 +41,61 @@ class OrphanManagerStatsMerger
             ->whereNotNull('team_id')
             ->get();
         foreach ($orphans as $orphan) {
-            $orphansByKey[$this->key($orphan->user_id, $orphan->team_id)][] = $orphan;
+            $mode = $orphan->game_mode ?: Game::MODE_CAREER;
+            $orphansByKey[$this->key($orphan->user_id, $orphan->team_id, $mode)][] = $orphan;
         }
 
         $summary = [
             'merged' => [],
             'no_old_match' => [],
-            'ambiguous_old' => [],
-            'ambiguous_orphan' => [],
         ];
 
         foreach ($orphansByKey as $key => $matching) {
-            [$userId, $teamId] = $this->splitKey($key);
-
-            if (count($matching) > 1) {
-                $summary['ambiguous_orphan'][] = [
-                    'user_id' => $userId,
-                    'team_id' => $teamId,
-                    'count' => count($matching),
-                ];
-                continue;
-            }
-
-            $orphan = $matching[0];
+            [$userId, $teamId, $gameMode] = $this->splitKey($key);
             $oldMatches = $oldByKey[$key] ?? [];
 
-            if (count($oldMatches) === 0) {
+            // Pick the orphan with the most matches as canonical so the report
+            // line shows the meaningful "before". Tie-break by id for stable
+            // ordering across runs.
+            usort($matching, fn (ManagerStats $a, ManagerStats $b) =>
+                ($b->matches_played <=> $a->matches_played)
+                ?: strcmp((string) $a->id, (string) $b->id),
+            );
+            $canonical = array_shift($matching);
+            $duplicates = $matching;
+
+            if (count($duplicates) === 0 && count($oldMatches) === 0) {
                 $summary['no_old_match'][] = [
                     'user_id' => $userId,
                     'team_id' => $teamId,
+                    'game_mode' => $gameMode,
                 ];
                 continue;
             }
 
-            if (count($oldMatches) > 1) {
-                $summary['ambiguous_old'][] = [
-                    'user_id' => $userId,
-                    'team_id' => $teamId,
-                    'count' => count($oldMatches),
-                ];
-                continue;
+            $before = $this->snapshot($canonical);
+            foreach ($duplicates as $duplicate) {
+                $this->applyMerge($canonical, $this->modelToRow($duplicate));
             }
-
-            $before = $this->snapshot($orphan);
-            $this->applyMerge($orphan, $oldMatches[0]);
-            $after = $this->snapshot($orphan);
+            foreach ($oldMatches as $old) {
+                $this->applyMerge($canonical, $old);
+            }
+            $canonical->recalculateWinPercentage();
+            $after = $this->snapshot($canonical);
 
             if (! $dryRun) {
-                $orphan->save();
+                $canonical->save();
+                foreach ($duplicates as $duplicate) {
+                    $duplicate->delete();
+                }
             }
 
             $summary['merged'][] = [
                 'user_id' => $userId,
                 'team_id' => $teamId,
+                'game_mode' => $gameMode,
+                'old_rows' => count($oldMatches),
+                'duplicate_orphans' => count($duplicates),
                 'before' => $before,
                 'after' => $after,
             ];
@@ -110,10 +117,28 @@ class OrphanManagerStatsMerger
             if ($userId === null || $teamId === null) {
                 continue;
             }
-            $byKey[$this->key((int) $userId, (string) $teamId)][] = $row;
+            // OLD-server export predates the `game_mode` column, so all OLD
+            // rows are implicitly Career mode.
+            $byKey[$this->key((int) $userId, (string) $teamId, Game::MODE_CAREER)][] = $row;
         }
 
         return $byKey;
+    }
+
+    /**
+     * @return array<string,int>
+     */
+    private function modelToRow(ManagerStats $stats): array
+    {
+        return [
+            'matches_played' => (int) $stats->matches_played,
+            'matches_won' => (int) $stats->matches_won,
+            'matches_drawn' => (int) $stats->matches_drawn,
+            'matches_lost' => (int) $stats->matches_lost,
+            'seasons_completed' => (int) $stats->seasons_completed,
+            'longest_unbeaten_streak' => (int) $stats->longest_unbeaten_streak,
+            'current_unbeaten_streak' => (int) $stats->current_unbeaten_streak,
+        ];
     }
 
     private function applyMerge(ManagerStats $orphan, array $old): void
@@ -132,8 +157,6 @@ class OrphanManagerStatsMerger
             (int) $orphan->current_unbeaten_streak,
             (int) ($old['current_unbeaten_streak'] ?? 0),
         );
-
-        $orphan->recalculateWinPercentage();
     }
 
     /**
@@ -153,18 +176,18 @@ class OrphanManagerStatsMerger
         ];
     }
 
-    private function key(int $userId, string $teamId): string
+    private function key(int $userId, string $teamId, string $gameMode): string
     {
-        return $userId . '|' . $teamId;
+        return $userId . '|' . $teamId . '|' . $gameMode;
     }
 
     /**
-     * @return array{0:int,1:string}
+     * @return array{0:int,1:string,2:string}
      */
     private function splitKey(string $key): array
     {
-        [$userId, $teamId] = explode('|', $key, 2);
+        [$userId, $teamId, $gameMode] = explode('|', $key, 3);
 
-        return [(int) $userId, $teamId];
+        return [(int) $userId, $teamId, $gameMode];
     }
 }

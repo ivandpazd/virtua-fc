@@ -69,9 +69,12 @@ class MergeOrphanManagerStats extends Command
 
         foreach ($summary['merged'] as $entry) {
             $this->line(sprintf(
-                '  user=%d team=%s  matches:%d→%d  seasons:%d→%d  longest_streak:%d→%d',
+                '  user=%d team=%s mode=%s  old_rows=%d dup_orphans=%d  matches:%d→%d  seasons:%d→%d  longest_streak:%d→%d',
                 $entry['user_id'],
                 $entry['team_id'],
+                $entry['game_mode'],
+                $entry['old_rows'],
+                $entry['duplicate_orphans'],
                 $entry['before']['matches_played'],
                 $entry['after']['matches_played'],
                 $entry['before']['seasons_completed'],
@@ -84,19 +87,7 @@ class MergeOrphanManagerStats extends Command
         $this->reportSkipped(
             'orphan(s) had no OLD-server match',
             $summary['no_old_match'],
-            fn (array $e) => "  user={$e['user_id']} team={$e['team_id']}",
-        );
-
-        $this->reportSkipped(
-            'orphan(s) matched multiple OLD rows (skipped — resolve manually)',
-            $summary['ambiguous_old'],
-            fn (array $e) => "  user={$e['user_id']} team={$e['team_id']}  old_rows={$e['count']}",
-        );
-
-        $this->reportSkipped(
-            '(user, team) pair(s) had multiple NEW orphans (skipped — resolve manually)',
-            $summary['ambiguous_orphan'],
-            fn (array $e) => "  user={$e['user_id']} team={$e['team_id']}  orphans={$e['count']}",
+            fn (array $e) => "  user={$e['user_id']} team={$e['team_id']} mode={$e['game_mode']}",
         );
 
         return self::SUCCESS;

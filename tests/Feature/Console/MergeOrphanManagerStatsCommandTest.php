@@ -130,7 +130,7 @@ class MergeOrphanManagerStatsCommandTest extends TestCase
         $this->assertSame(7, $orphan->matches_played);
     }
 
-    public function test_skips_when_multiple_old_rows_match_same_user_team(): void
+    public function test_sums_all_old_rows_when_multiple_match_same_user_team(): void
     {
         $user = User::factory()->create();
         $team = Team::factory()->create();
@@ -177,14 +177,20 @@ class MergeOrphanManagerStatsCommandTest extends TestCase
         ]);
 
         $this->artisan('app:merge-orphan-manager-stats', ['--from' => $path])
-            ->expectsOutputToContain('matched multiple OLD rows')
             ->assertSuccessful();
 
         $orphan->refresh();
-        $this->assertSame(5, $orphan->matches_played);
+        $this->assertSame(255, $orphan->matches_played);
+        $this->assertSame(157, $orphan->matches_won);
+        $this->assertSame(56, $orphan->matches_drawn);
+        $this->assertSame(42, $orphan->matches_lost);
+        $this->assertSame(5, $orphan->seasons_completed);
+        $this->assertSame(15, $orphan->longest_unbeaten_streak);
+        $this->assertSame(1, $orphan->current_unbeaten_streak);
+        $this->assertSame('61.57', (string) $orphan->win_percentage);
     }
 
-    public function test_skips_when_multiple_orphans_share_user_and_team(): void
+    public function test_consolidates_multiple_orphans_for_same_user_team_into_one(): void
     {
         $user = User::factory()->create();
         $team = Team::factory()->create();
@@ -230,16 +236,62 @@ class MergeOrphanManagerStatsCommandTest extends TestCase
         ]]);
 
         $this->artisan('app:merge-orphan-manager-stats', ['--from' => $path])
-            ->expectsOutputToContain('multiple NEW orphans')
             ->assertSuccessful();
 
-        $this->assertSame(
-            [5, 9],
-            ManagerStats::where('user_id', $user->id)
-                ->orderBy('matches_played')
-                ->pluck('matches_played')
-                ->all(),
-        );
+        $remaining = ManagerStats::where('user_id', $user->id)->get();
+        $this->assertCount(1, $remaining);
+
+        $consolidated = $remaining->first();
+        $this->assertSame(514, $consolidated->matches_played);
+        $this->assertSame(306, $consolidated->matches_won);
+        $this->assertSame(103, $consolidated->matches_drawn);
+        $this->assertSame(105, $consolidated->matches_lost);
+        $this->assertSame(8, $consolidated->seasons_completed);
+        $this->assertSame(20, $consolidated->longest_unbeaten_streak);
+        $this->assertSame(1, $consolidated->current_unbeaten_streak);
+        $this->assertSame('59.53', (string) $consolidated->win_percentage);
+    }
+
+    public function test_keeps_orphans_of_different_game_modes_separate(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create();
+
+        ManagerStats::create([
+            'user_id' => $user->id,
+            'game_id' => null,
+            'team_id' => $team->id,
+            'game_mode' => 'career',
+            'matches_played' => 10,
+            'matches_won' => 5,
+            'matches_drawn' => 2,
+            'matches_lost' => 3,
+            'win_percentage' => 50.00,
+            'current_unbeaten_streak' => 0,
+            'longest_unbeaten_streak' => 3,
+            'seasons_completed' => 0,
+        ]);
+        ManagerStats::create([
+            'user_id' => $user->id,
+            'game_id' => null,
+            'team_id' => $team->id,
+            'game_mode' => 'career_pro',
+            'matches_played' => 7,
+            'matches_won' => 3,
+            'matches_drawn' => 2,
+            'matches_lost' => 2,
+            'win_percentage' => 42.86,
+            'current_unbeaten_streak' => 0,
+            'longest_unbeaten_streak' => 2,
+            'seasons_completed' => 0,
+        ]);
+
+        $path = $this->writeOldExport([]);
+
+        $this->artisan('app:merge-orphan-manager-stats', ['--from' => $path])
+            ->assertSuccessful();
+
+        $this->assertSame(2, ManagerStats::where('user_id', $user->id)->count());
     }
 
     /**
