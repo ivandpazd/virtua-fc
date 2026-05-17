@@ -198,7 +198,7 @@ return [
     'game_id_placeholder' => 'Pegar UUID de partida...',
     'game_lookup_placeholder' => 'UUID de partida, email o nombre de usuario...',
     'lookup' => 'Buscar',
-    'game_not_found' => 'No se encontraron partidas',
+    'game_not_found' => 'Partida no encontrada',
     'environment' => 'Entorno',
     'env_app' => 'Entorno',
     'env_php' => 'Versión de PHP',

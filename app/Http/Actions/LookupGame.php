@@ -17,44 +17,33 @@ class LookupGame
 
         $query = trim($request->input('query'));
 
+        $gameQuery = Game::with(['user:id,name,email', 'team:id,name']);
+
         if (Str::isUuid($query)) {
-            $games = Game::with(['user:id,name,email', 'team:id,name'])
-                ->where('id', $query)
-                ->get();
+            $game = $gameQuery->find($query);
         } else {
-            $userIds = User::query()
-                ->where('email', 'like', '%'.$query.'%')
-                ->orWhere('name', 'like', '%'.$query.'%')
-                ->limit(20)
-                ->pluck('id');
+            $userId = User::query()
+                ->where('email', $query)
+                ->orWhere('name', $query)
+                ->value('id');
 
-            if ($userIds->isEmpty()) {
-                return response()->json(['found' => false, 'results' => []]);
-            }
-
-            $games = Game::with(['user:id,name,email', 'team:id,name'])
-                ->whereIn('user_id', $userIds)
-                ->orderByDesc('current_date')
-                ->limit(50)
-                ->get();
+            $game = $userId ? $gameQuery->where('user_id', $userId)->first() : null;
         }
 
-        if ($games->isEmpty()) {
-            return response()->json(['found' => false, 'results' => []]);
+        if (! $game) {
+            return response()->json(['found' => false]);
         }
 
         return response()->json([
             'found' => true,
-            'results' => $games->map(fn (Game $game) => [
-                'game_id' => $game->id,
-                'game_mode' => $game->game_mode,
-                'season' => $game->season,
-                'current_date' => $game->current_date?->format('Y-m-d'),
-                'user_name' => $game->user->name,
-                'user_email' => $game->user->email,
-                'team_name' => $game->team?->name,
-                'setup_completed' => $game->setup_completed_at !== null,
-            ])->values(),
+            'game_id' => $game->id,
+            'game_mode' => $game->game_mode,
+            'season' => $game->season,
+            'current_date' => $game->current_date?->format('Y-m-d'),
+            'user_name' => $game->user->name,
+            'user_email' => $game->user->email,
+            'team_name' => $game->team?->name,
+            'setup_completed' => $game->setup_completed_at !== null,
         ]);
     }
 }

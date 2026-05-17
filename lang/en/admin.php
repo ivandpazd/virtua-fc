@@ -198,7 +198,7 @@ return [
     'game_id_placeholder' => 'Paste game UUID...',
     'game_lookup_placeholder' => 'Game UUID, email or username...',
     'lookup' => 'Lookup',
-    'game_not_found' => 'No games found',
+    'game_not_found' => 'Game not found',
     'environment' => 'Environment',
     'env_app' => 'Environment',
     'env_php' => 'PHP Version',
