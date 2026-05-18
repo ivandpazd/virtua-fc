@@ -39,6 +39,15 @@ return [
         ],
 
         'ai_rotation_threshold' => 70,          // AI benches players below this energy
+
+        // Injury layoff: sidelined players lose match sharpness instead of
+        // recovering toward 100. Applied per matchday tick, scaled by days
+        // elapsed (weekly cadence ≈ -weekly_decay; busy weeks decay less).
+        'weekly_decay_when_injured' => 8,
+
+        // Injured players are allowed below the regular floor (40) so long
+        // absences (ACL, Achilles) register as deeper rust on the squad page.
+        'injured_floor' => 30,
     ],
 
 ];

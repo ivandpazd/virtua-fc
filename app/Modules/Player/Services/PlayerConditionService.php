@@ -45,6 +45,7 @@ class PlayerConditionService
     public function batchUpdateAfterMatchday($matches, array $matchResults, $allPlayersByTeam, array $recoveryDaysByTeam, Carbon $currentDate): void
     {
         $updates = [];
+        $injuredFloor = (int) config('player.condition.injured_floor', 30);
 
         // Index by matchId for O(1) lookups instead of O(n) per match
         $resultsByMatchId = [];
@@ -83,8 +84,13 @@ class PlayerConditionService
                     $eventsByPlayer[$player->id] ?? []
                 );
 
+                // Sidelined players are allowed below MIN_FITNESS so a long
+                // layoff registers visibly. Everyone else clamps at the
+                // regular floor.
+                $fitnessFloor = $player->isInjured($currentDate) ? $injuredFloor : self::MIN_FITNESS;
+
                 $updates[$player->id] = [
-                    'fitness' => max(self::MIN_FITNESS, min(self::MAX_FITNESS, $player->fitness + $fitnessChange)),
+                    'fitness' => max($fitnessFloor, min(self::MAX_FITNESS, $player->fitness + $fitnessChange)),
                     'morale' => max(self::MIN_MORALE, min(self::MAX_MORALE, $player->morale + $moraleChange)),
                 ];
             }
@@ -121,13 +127,21 @@ class PlayerConditionService
     {
         $config = config('player.condition');
         $currentFitness = $player->fitness;
+        $maxRecoveryDays = $config['max_recovery_days'];
+        $recoveryDays = min($daysSinceLastMatch, $maxRecoveryDays);
+
+        // Sidelined players don't play and don't recover — they lose match
+        // sharpness over the layoff. Scaled by elapsed days so a weekly
+        // cadence ≈ -weekly_decay, congested weeks decay proportionally less.
+        if ($player->isInjured($currentDate)) {
+            $weeklyDecay = (float) ($config['weekly_decay_when_injured'] ?? 8);
+
+            return -(int) round($weeklyDecay * $recoveryDays / 7);
+        }
 
         // Nonlinear recovery: faster when far below 100, slow near the top
         $baseRecovery = $config['base_recovery_per_day'];
         $scaling = $config['recovery_scaling'];
-        $maxRecoveryDays = $config['max_recovery_days'];
-
-        $recoveryDays = min($daysSinceLastMatch, $maxRecoveryDays);
 
         if ($playedMatch) {
             // Energy-drain-based loss: use EnergyCalculator to determine
