@@ -5,9 +5,11 @@
     $staying = $projection['staying'];
     $outgoing = $projection['outgoing'];
     $incoming = $projection['incoming'];
+    $incomingAcademy = $projection['incoming_academy'] ?? collect();
     $counts = $projection['counts'];
 
     $incomingByGroup = $incoming->groupBy('position_group');
+    $incomingAcademyByGroup = $incomingAcademy->groupBy('position_group');
 
     $mergeGroup = fn (\Illuminate\Support\Collection $stayingGroup, string $group) =>
         $stayingGroup
@@ -16,10 +18,10 @@
             ->values();
 
     $positionGroups = [
-        ['key' => 'goalkeepers', 'label' => __('planner.goalkeepers'), 'group' => 'Goalkeeper', 'players' => $mergeGroup($staying['goalkeepers'], 'Goalkeeper')],
-        ['key' => 'defenders', 'label' => __('planner.defenders'), 'group' => 'Defender', 'players' => $mergeGroup($staying['defenders'], 'Defender')],
-        ['key' => 'midfielders', 'label' => __('planner.midfielders'), 'group' => 'Midfielder', 'players' => $mergeGroup($staying['midfielders'], 'Midfielder')],
-        ['key' => 'forwards', 'label' => __('planner.forwards'), 'group' => 'Forward', 'players' => $mergeGroup($staying['forwards'], 'Forward')],
+        ['key' => 'goalkeepers', 'label' => __('planner.goalkeepers'), 'group' => 'Goalkeeper', 'players' => $mergeGroup($staying['goalkeepers'], 'Goalkeeper'), 'academy' => $incomingAcademyByGroup->get('Goalkeeper', collect())],
+        ['key' => 'defenders', 'label' => __('planner.defenders'), 'group' => 'Defender', 'players' => $mergeGroup($staying['defenders'], 'Defender'), 'academy' => $incomingAcademyByGroup->get('Defender', collect())],
+        ['key' => 'midfielders', 'label' => __('planner.midfielders'), 'group' => 'Midfielder', 'players' => $mergeGroup($staying['midfielders'], 'Midfielder'), 'academy' => $incomingAcademyByGroup->get('Midfielder', collect())],
+        ['key' => 'forwards', 'label' => __('planner.forwards'), 'group' => 'Forward', 'players' => $mergeGroup($staying['forwards'], 'Forward'), 'academy' => $incomingAcademyByGroup->get('Forward', collect())],
     ];
 
     $nextSeasonCount = $counts['staying'] + $counts['incoming'];
@@ -138,16 +140,23 @@
                         <div class="bg-surface-800 border border-border-default rounded-xl overflow-hidden">
                             @include('partials.squad-planner.column-header')
                             @foreach($positionGroups as $group)
-                                @if($group['players']->isNotEmpty())
+                                @php
+                                    $groupTotal = $group['players']->count() + $group['academy']->count();
+                                @endphp
+                                @if($groupTotal > 0)
                                     <div class="px-4 py-2 bg-surface-700/30 border-b border-border-default">
                                         <div class="flex items-center justify-between">
                                             <span class="font-heading text-[11px] font-semibold uppercase tracking-widest text-text-muted">{{ $group['label'] }}</span>
-                                            <span class="text-[10px] text-text-faint">{{ $group['players']->count() }}</span>
+                                            <span class="text-[10px] text-text-faint">{{ $groupTotal }}</span>
                                         </div>
                                     </div>
 
                                     @foreach($group['players'] as $gp)
                                         @include('partials.squad-planner.player-row', ['gp' => $gp, 'group' => $group['group'], 'game' => $game])
+                                    @endforeach
+
+                                    @foreach($group['academy'] as $prospect)
+                                        @include('partials.squad-planner.academy-player-row', ['prospect' => $prospect, 'game' => $game])
                                     @endforeach
                                 @endif
                             @endforeach

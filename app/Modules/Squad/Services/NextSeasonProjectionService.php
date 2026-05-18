@@ -2,9 +2,11 @@
 
 namespace App\Modules\Squad\Services;
 
+use App\Models\AcademyPlayer;
 use App\Models\Game;
 use App\Models\GamePlayer;
 use App\Models\TransferOffer;
+use App\Modules\Player\PlayerAge;
 use App\Modules\Player\Services\PlayerDevelopmentService;
 use App\Modules\Squad\Enums\PositionGroup;
 use Illuminate\Support\Collection;
@@ -40,6 +42,7 @@ class NextSeasonProjectionService
     public const REASON_LOAN_ENDING = 'loan_ending';
 
     public const REASON_PRE_CONTRACT_JOINING = 'pre_contract_joining';
+    public const REASON_RESERVE_PROMOTED = 'reserve_promoted';
 
     public function __construct(
         private readonly PlayerDevelopmentService $developmentService,
@@ -51,10 +54,16 @@ class NextSeasonProjectionService
      * squad into staying / outgoing / incoming based on contracts, retirements,
      * transfers, and loan return dates.
      *
+     * incoming_academy is a sidecar collection of AcademyPlayer rows for
+     * non-filial games — academy prospects who age out and auto-promote into
+     * the first team at next season's setup. They're surfaced as INCOMING in
+     * the planner but skip the GamePlayer-only role / action pipeline.
+     *
      * @return array{
      *     staying: array{goalkeepers: Collection, defenders: Collection, midfielders: Collection, forwards: Collection},
      *     outgoing: Collection,
      *     incoming: Collection,
+     *     incoming_academy: Collection,
      *     counts: array{staying: int, outgoing: int, incoming: int},
      *     seasonEndDate: \Carbon\Carbon,
      *     nextSeasonStartYear: int,
@@ -68,6 +77,8 @@ class NextSeasonProjectionService
         $owned = $this->loadOwnedPlayers($game);
         $loanedIn = $this->loadLoanedInPlayers($game);
         $incomingPreContracts = $this->loadIncomingPreContracts($game);
+        $incomingReservePromotions = $this->loadIncomingReservePromotions($game);
+        $incomingAcademyPromotions = $this->loadIncomingAcademyPromotions($game, $referenceDate);
 
         $staying = collect();
         $outgoing = collect();
@@ -103,16 +114,22 @@ class NextSeasonProjectionService
             $incoming->push($player);
         }
 
+        foreach ($incomingReservePromotions as $player) {
+            $this->enrich($player, $referenceDate, self::STATUS_INCOMING, self::REASON_RESERVE_PROMOTED);
+            $incoming->push($player);
+        }
+
         $stayingByPosition = $this->groupByPosition($staying);
 
         return [
             'staying' => $stayingByPosition,
             'outgoing' => $outgoing->sortByDesc('overall_score')->values(),
             'incoming' => $incoming->sortByDesc('overall_score')->values(),
+            'incoming_academy' => $incomingAcademyPromotions->sortByDesc('overall_score')->values(),
             'counts' => [
                 'staying' => $staying->count(),
                 'outgoing' => $outgoing->count(),
-                'incoming' => $incoming->count(),
+                'incoming' => $incoming->count() + $incomingAcademyPromotions->count(),
             ],
             'seasonEndDate' => $seasonEndDate,
             'nextSeasonStartYear' => $seasonEndDate->copy()->addDay()->year,
@@ -180,6 +197,64 @@ class NextSeasonProjectionService
             ->get();
 
         return $offers->map(fn (TransferOffer $offer) => $offer->gamePlayer)->filter()->values();
+    }
+
+    /**
+     * Non-filial only: AcademyPlayer rows that will auto-promote into the
+     * first team at the start of next season because they age past the
+     * academy cutoff. Mirrors the eligibility rule in
+     * YouthAcademyPromotionProcessor: any prospect whose date_of_birth makes
+     * them ACADEMY_END or older at the next-season reference date must move
+     * up. Filial games handle the equivalent via the reserve squad and do
+     * not maintain an AcademyPlayer pool.
+     *
+     * @return Collection<int, AcademyPlayer>
+     */
+    private function loadIncomingAcademyPromotions(Game $game, \Carbon\Carbon $referenceDate): Collection
+    {
+        if ($game->reserve_team_id !== null) {
+            return collect();
+        }
+
+        $cutoff = PlayerAge::dateOfBirthCutoff(PlayerAge::ACADEMY_END, $referenceDate);
+
+        return AcademyPlayer::where('game_id', $game->id)
+            ->where('team_id', $game->team_id)
+            ->where('date_of_birth', '<=', $cutoff)
+            ->get();
+    }
+
+    /**
+     * Filial-only: reserve players who will auto-promote to the first team
+     * at season close because they age past the reserve cutoff. Mirrors the
+     * eligibility rule in ReserveOveragePromotionProcessor — a player must
+     * move up if their date_of_birth predates next season's U-23 cutoff.
+     *
+     * Excludes anyone currently on a call-up loan to the first team: those
+     * players are already physically on the first-team roster and surface
+     * through loadLoanedInPlayers() as STAYING via isCalledUpFromReserve().
+     */
+    private function loadIncomingReservePromotions(Game $game): Collection
+    {
+        if ($game->reserve_team_id === null) {
+            return collect();
+        }
+
+        $nextSeasonU23Cutoff = $game->getU23BirthCutoff((int) $game->season + 1);
+
+        return GamePlayer::with([
+            'team',
+            'matchState',
+            'activeLoan',
+            'transferOffers',
+            'activeRenewalNegotiation',
+            'latestRenewalNegotiation',
+        ])
+            ->where('game_id', $game->id)
+            ->where('team_id', $game->reserve_team_id)
+            ->where('date_of_birth', '<', $nextSeasonU23Cutoff)
+            ->whereDoesntHave('activeLoan', fn ($q) => $q->where('loan_team_id', $game->team_id))
+            ->get();
     }
 
     /**

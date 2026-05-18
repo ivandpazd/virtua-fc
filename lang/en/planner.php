@@ -38,6 +38,8 @@ return [
 
     // Reasons — INCOMING
     'reason_pre_contract_joining' => 'Pre-contract signed',
+    'reason_reserve_promoted' => 'Promoted from reserves',
+    'reason_academy_promoted' => 'Promoted from academy',
 
     // Empty states
     'empty_staying' => 'No projected staying players.',

@@ -38,6 +38,8 @@ return [
 
     // Reasons — INCOMING
     'reason_pre_contract_joining' => 'Precontrato firmado',
+    'reason_reserve_promoted' => 'Sube del filial',
+    'reason_academy_promoted' => 'Sube de la cantera',
 
     // Empty states
     'empty_staying' => 'No hay jugadores previstos que se queden.',
