@@ -4,6 +4,7 @@ namespace App\Http\Views;
 
 use App\Modules\Finance\Services\BudgetAllocationService;
 use App\Modules\Season\Services\SeasonGoalService;
+use App\Modules\Stadium\Services\StadiumCapacityResolver;
 use App\Models\Competition;
 use App\Models\Game;
 use App\Models\GamePlayer;
@@ -15,6 +16,7 @@ class ShowNewSeason
     public function __construct(
         private readonly BudgetAllocationService $budgetService,
         private readonly SeasonGoalService $seasonGoalService,
+        private readonly StadiumCapacityResolver $stadiumCapacityResolver,
     ) {}
 
     public function __invoke(string $gameId)
@@ -69,6 +71,15 @@ class ShowNewSeason
             $offseasonRecap = $this->buildOffseasonRecap($game, $squad, $reputationLevel);
         }
 
+        // Per-game stadium capacity (overlays Team.stadium_seats once the user
+        // has expanded or rebuilt the ground); falls back to the team baseline
+        // when no overlay row exists.
+        $stadiumCapacity = $this->stadiumCapacityResolver->effectiveCapacity(
+            $game->id,
+            $game->team_id,
+            (int) ($game->team?->stadium_seats ?? 0),
+        );
+
         return view('new-season', [
             ...$budgetData,
             'game' => $game,
@@ -77,6 +88,7 @@ class ShowNewSeason
             'seasonGoalTarget' => $seasonGoalTarget,
             'squadSnapshot' => $squadSnapshot,
             'offseasonRecap' => $offseasonRecap,
+            'stadiumCapacity' => $stadiumCapacity,
         ]);
     }
 
