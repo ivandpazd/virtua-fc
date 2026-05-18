@@ -20,6 +20,10 @@ use App\Models\TeamReputation;
  *    clubs so a marquee brand with crashed loyalty still draws walk-ups.
  *  - Context modifier (opponent reputation, competition weight)
  *    multiplies on top, clamped to [0.85, 1.20].
+ *  - Big-game sellout: when the combined context bonus reaches
+ *    SELLOUT_BONUS_THRESHOLD, attendance jumps to full capacity. Marquee
+ *    visitors and European knockout nights pack the ground regardless of
+ *    the home side's day-to-day loyalty level.
  *
  * Calibrated against real La Liga / La Liga 2 occupancy data. With
  * average modifiers (~1.0 for mid-table), the formula produces:
@@ -39,12 +43,25 @@ class DemandCurveService
     private const ATTENDANCE_FLOOR_RATIO = 0.10;
     private const ATTENDANCE_FLOOR_ABSOLUTE = 500;
 
-    // Opponent-reputation floors. Hosting a marquee visitor draws near-full
-    // stadiums regardless of home-side loyalty or form.
+    // Visitor-reputation floors. The visiting club's brand alone draws a
+    // baseline crowd regardless of home-side loyalty: elite/continental
+    // names pack stadiums, but even an established or modest opponent in
+    // the top flight pulls more than a deserted ground would imply. Floor
+    // ladder descends 10 points per tier; a local-tier visitor falls back
+    // to the loyalty curve's own 50% floor.
     private const OPPONENT_FLOOR_RATIO = [
         ClubProfile::REPUTATION_ELITE => 0.90,
         ClubProfile::REPUTATION_CONTINENTAL => 0.80,
+        ClubProfile::REPUTATION_ESTABLISHED => 0.70,
+        ClubProfile::REPUTATION_MODEST => 0.60,
     ];
+
+    // Combined context-bonus (opponentDelta + competitionWeight) at which a
+    // match is treated as a guaranteed sellout. 0.10 fires for: any elite
+    // visitor against a local/modest tier club in any competition, any
+    // European knockout fixture, and strong visitors in European group
+    // stage. Routine same-tier league matches stay under the threshold.
+    private const SELLOUT_BONUS_THRESHOLD = 0.10;
 
     /**
      * Season-average attendance for a home team, ignoring per-fixture
@@ -82,11 +99,14 @@ class DemandCurveService
 
         $baseFill = $this->baseFillRate($homeRep);
 
-        $modifier = 1.0
-            + $this->opponentDelta($homeRep, $awayRep)
+        $contextBonus = $this->opponentDelta($homeRep, $awayRep)
             + $this->competitionWeight($competition);
 
-        $modifier = max(self::MODIFIER_MIN, min(self::MODIFIER_MAX, $modifier));
+        if ($contextBonus >= self::SELLOUT_BONUS_THRESHOLD) {
+            return $capacity;
+        }
+
+        $modifier = max(self::MODIFIER_MIN, min(self::MODIFIER_MAX, 1.0 + $contextBonus));
 
         $attendance = (int) round($capacity * $baseFill * $modifier);
 
@@ -97,10 +117,10 @@ class DemandCurveService
     }
 
     /**
-     * Minimum attendance when hosting a top-tier visitor. Elite visitors
-     * (Real/Barça/etc.) floor the gate at 90% capacity, continental visitors
-     * at 80%. Lower-tier visitors don't trigger a floor — the normal
-     * loyalty-driven demand curve applies.
+     * Visitor-reputation floor on the gate. Each tier sets a minimum fill
+     * regardless of home-side loyalty: elite 90%, continental 80%,
+     * established 70%, modest 60%. Local-tier visitors fall back to the
+     * loyalty curve's own 50% floor.
      */
     private function opponentFloor(TeamReputation $awayRep, int $capacity): int
     {
