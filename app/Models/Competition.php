@@ -73,7 +73,7 @@ class Competition extends Model
         'ESP2'    => 'Liga 2',
         'ESP3A'   => 'Primera Fed. - I',
         'ESP3B'   => 'Primera Fed. - II',
-        'ESP3PO'  => 'Primera Fed. - Playoffs',
+        'ESP3PO'  => 'Playoff ascenso',
         'ESPCUP'  => 'Copa del Rey',
         'ESPSUP'  => 'Supercopa',
         'ENG1'    => 'Premier League',

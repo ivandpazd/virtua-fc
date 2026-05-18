@@ -156,6 +156,7 @@ class SeedReferenceData extends Command
                     $playoffConfig['handler'] ?? 'knockout_cup',
                     $countryCode,
                     $flag,
+                    $playoffConfig['name'] ?? null,
                 );
             }
             $this->line("  Step 1c: Done.");
@@ -317,6 +318,7 @@ class SeedReferenceData extends Command
                     $playoffConfig['handler'] ?? 'knockout_cup',
                     $countryCode,
                     $flag,
+                    $playoffConfig['name'] ?? null,
                 );
                 continue;
             }
@@ -599,7 +601,7 @@ class SeedReferenceData extends Command
      * competition row itself needs to exist so cup ties / matches can point
      * at it.
      */
-    protected function seedPromotionPlayoff(string $code, int $tier, string $handler, string $country, string $flag): void
+    protected function seedPromotionPlayoff(string $code, int $tier, string $handler, string $country, string $flag, ?string $name = null): void
     {
         if (isset($this->seededCompetitions[$code])) {
             $this->line("  Skipping {$code} (already seeded)");
@@ -610,7 +612,7 @@ class SeedReferenceData extends Command
         DB::connection('pgsql_control')->table('competitions')->updateOrInsert(
             ['id' => $code],
             [
-                'name' => $code,
+                'name' => $name ?? $code,
                 'country' => $country,
                 'flag' => $flag,
                 'tier' => $tier,

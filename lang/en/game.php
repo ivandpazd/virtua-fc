@@ -72,7 +72,7 @@ return [
     'primera_rfef' => 'Primera RFEF',
     'primera_rfef_group_a' => 'Primera RFEF — Group 1',
     'primera_rfef_group_b' => 'Primera RFEF — Group 2',
-    'primera_rfef_playoff' => 'Primera RFEF Playoff',
+    'primera_rfef_playoff' => 'Promotion Playoff',
     'top_scorers' => 'Top Scorers',
     'no_goals_yet' => 'No goals scored yet',
 

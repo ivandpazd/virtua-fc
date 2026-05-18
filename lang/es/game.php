@@ -72,7 +72,7 @@ return [
     'primera_rfef' => 'Primera RFEF',
     'primera_rfef_group_a' => 'Primera RFEF — Grupo 1',
     'primera_rfef_group_b' => 'Primera RFEF — Grupo 2',
-    'primera_rfef_playoff' => 'Playoff Primera RFEF',
+    'primera_rfef_playoff' => 'Playoff ascenso',
     'top_scorers' => 'Máximos Goleadores',
     'no_goals_yet' => 'Aún no se han marcado goles',
 

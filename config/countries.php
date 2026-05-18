@@ -70,6 +70,7 @@ return [
         // two groups into a shared 8-team bracket.
         'promotion_playoffs' => [
             'ESP3PO' => [
+                'name' => 'game.primera_rfef_playoff',
                 'handler' => 'knockout_cup',
                 'config_class' => \App\Modules\Competition\Configs\PrimeraRFEFPlayoffConfig::class,
                 'parent_tier' => 3,
