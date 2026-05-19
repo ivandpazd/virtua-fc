@@ -155,6 +155,118 @@ class CompetitionViewService
         })->filter()->sortByDesc('goals')->values();
     }
 
+    /**
+     * Best goalkeepers (Zamora-style) for a competition: ranked by goals
+     * conceded per appearance, ascending. Per-competition stats are derived
+     * from match lineups because game_player_match_state totals are
+     * season-wide across all competitions.
+     *
+     * A minimum-appearances threshold (proportional to the real Zamora
+     * trophy's 28/38 La Liga rule) filters out keepers with too few games
+     * to be meaningful.
+     */
+    public function getBestGoalkeepers(string $gameId, string $competitionId): Collection
+    {
+        $matches = GameMatch::where('game_id', $gameId)
+            ->where('competition_id', $competitionId)
+            ->where('played', true)
+            ->get(['id', 'round_number', 'cup_tie_id', 'home_lineup', 'away_lineup', 'home_score', 'away_score']);
+
+        if ($matches->isEmpty()) {
+            return collect();
+        }
+
+        $allLineupIds = collect();
+        foreach ($matches as $match) {
+            if (is_array($match->home_lineup)) {
+                $allLineupIds = $allLineupIds->merge($match->home_lineup);
+            }
+            if (is_array($match->away_lineup)) {
+                $allLineupIds = $allLineupIds->merge($match->away_lineup);
+            }
+        }
+        $allLineupIds = $allLineupIds->unique()->values();
+
+        if ($allLineupIds->isEmpty()) {
+            return collect();
+        }
+
+        $goalkeepers = GamePlayer::with('team')
+            ->whereIn('id', $allLineupIds)
+            ->where('position', 'Goalkeeper')
+            ->get()
+            ->keyBy('id');
+
+        if ($goalkeepers->isEmpty()) {
+            return collect();
+        }
+
+        $stats = [];
+        foreach ($matches as $match) {
+            $homeLineup = is_array($match->home_lineup) ? $match->home_lineup : [];
+            $awayLineup = is_array($match->away_lineup) ? $match->away_lineup : [];
+
+            foreach ($homeLineup as $playerId) {
+                if (!$goalkeepers->has($playerId)) {
+                    continue;
+                }
+                $stats[$playerId] ??= ['appearances' => 0, 'goals_conceded' => 0, 'clean_sheets' => 0];
+                $stats[$playerId]['appearances']++;
+                $stats[$playerId]['goals_conceded'] += (int) $match->away_score;
+                if ((int) $match->away_score === 0) {
+                    $stats[$playerId]['clean_sheets']++;
+                }
+            }
+
+            foreach ($awayLineup as $playerId) {
+                if (!$goalkeepers->has($playerId)) {
+                    continue;
+                }
+                $stats[$playerId] ??= ['appearances' => 0, 'goals_conceded' => 0, 'clean_sheets' => 0];
+                $stats[$playerId]['appearances']++;
+                $stats[$playerId]['goals_conceded'] += (int) $match->home_score;
+                if ((int) $match->home_score === 0) {
+                    $stats[$playerId]['clean_sheets']++;
+                }
+            }
+        }
+
+        // Real Zamora trophy: 28 appearances of a 38-matchday La Liga season.
+        // Scale proportionally to matchdays played so far so the rule applies
+        // sensibly mid-season and to non-La-Liga competitions (Swiss, groups).
+        $playedMatchdays = $matches->whereNull('cup_tie_id')->max('round_number')
+            ?? $matches->max('round_number')
+            ?? 0;
+        $minAppearances = max(1, (int) floor($playedMatchdays * 28 / 38));
+
+        return collect($stats)
+            ->filter(fn ($s) => $s['appearances'] >= $minAppearances)
+            ->map(function ($s, $gkId) use ($goalkeepers) {
+                $gk = clone $goalkeepers[$gkId];
+                $gk->appearances_in_competition = $s['appearances'];
+                $gk->goals_conceded_in_competition = $s['goals_conceded'];
+                $gk->clean_sheets_in_competition = $s['clean_sheets'];
+                $gk->goals_per_match = number_format($s['goals_conceded'] / $s['appearances'], 2);
+                $gk->scorer_team = $gk->team;
+
+                return $gk;
+            })
+            ->sort(function ($a, $b) {
+                $ratioA = $a->goals_conceded_in_competition / $a->appearances_in_competition;
+                $ratioB = $b->goals_conceded_in_competition / $b->appearances_in_competition;
+                if ($ratioA !== $ratioB) {
+                    return $ratioA <=> $ratioB;
+                }
+                if ($a->clean_sheets_in_competition !== $b->clean_sheets_in_competition) {
+                    return $b->clean_sheets_in_competition <=> $a->clean_sheets_in_competition;
+                }
+
+                return $b->appearances_in_competition <=> $a->appearances_in_competition;
+            })
+            ->take(10)
+            ->values();
+    }
+
     public function getKnockoutRounds(Competition $competition, int $gameSeason): Collection
     {
         return collect(LeagueFixtureGenerator::loadKnockoutRounds(

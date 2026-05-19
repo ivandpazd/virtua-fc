@@ -75,6 +75,8 @@ return [
     'primera_rfef_playoff' => 'Promotion Playoff',
     'top_scorers' => 'Top Scorers',
     'no_goals_yet' => 'No goals scored yet',
+    'best_goalkeepers' => 'Best Goalkeepers',
+    'no_goalkeepers_qualified_yet' => 'No goalkeepers have met the minimum appearances yet',
 
     // Mentality
     'mentality_defensive' => 'Defensive',

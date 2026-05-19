@@ -66,7 +66,10 @@ $defaultTab = $knockoutStarted ? 'knockout' : 'league';
                     ])
                 </div>
 
-                <x-top-scorers :top-scorers="$topScorers" :player-team-id="$game->team_id" />
+                <div class="space-y-4 self-start">
+                    <x-top-scorers :top-scorers="$topScorers" :player-team-id="$game->team_id" />
+                    <x-best-goalkeepers :best-goalkeepers="$bestGoalkeepers" :player-team-id="$game->team_id" />
+                </div>
             </div>
         </div>
     </div>

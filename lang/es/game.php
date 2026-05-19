@@ -75,6 +75,8 @@ return [
     'primera_rfef_playoff' => 'Playoff ascenso',
     'top_scorers' => 'Máximos Goleadores',
     'no_goals_yet' => 'Aún no se han marcado goles',
+    'best_goalkeepers' => 'Mejores Porteros',
+    'no_goalkeepers_qualified_yet' => 'Ningún portero alcanza el mínimo de partidos todavía',
 
     // Mentality
     'mentality_defensive' => 'Defensiva',
