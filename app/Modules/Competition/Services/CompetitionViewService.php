@@ -25,26 +25,6 @@ class CompetitionViewService
     }
 
     /**
-     * Standings for the user's primary competition, abridged for dashboard
-     * widgets: top 3 plus a 5-team window centered on the player's position.
-     * For tournament mode, returns the player's full table (group or flat)
-     * instead of abridging.
-     */
-    public function getAbridgedLeagueStandings(Game $game): Collection
-    {
-        if ($game->isTournamentMode()) {
-            $standings = $this->getStandings($game, $game->competition);
-            $playerGroup = $standings->firstWhere('team_id', $game->team_id)?->group_label;
-
-            return $playerGroup
-                ? $standings->where('group_label', $playerGroup)->values()
-                : $standings;
-        }
-
-        return $this->getAbridgedStandings($game, $game->competition);
-    }
-
-    /**
      * Abridged standings for any competition the player participates in.
      * Returns the player's group when standings are grouped (e.g.
      * group-stage cups); otherwise top 3 + a 5-team window centered on the
@@ -232,5 +212,144 @@ class CompetitionViewService
         }
 
         return 'eliminated';
+    }
+
+    /**
+     * Tournament mode wants the full table (or the player's full group when
+     * grouped); career mode dashboards get the abridged window.
+     */
+    private function getDashboardStandings(Game $game, Competition $competition): Collection
+    {
+        if (!$game->isTournamentMode()) {
+            return $this->getAbridgedStandings($game, $competition);
+        }
+
+        $standings = $this->getStandings($game, $competition);
+        $playerGroup = $standings->firstWhere('team_id', $game->team_id)?->group_label;
+
+        return $playerGroup
+            ? $standings->where('group_label', $playerGroup)->values()
+            : $standings;
+    }
+
+    /**
+     * Decide what the dashboard's standings/path card should render based on
+     * the next match the user will play. Driving off the next match (rather
+     * than the primary competition) lets the dashboard switch to the Swiss
+     * table on a Champions League matchday or to a cup-path view when the
+     * next fixture is a knockout tie.
+     *
+     * @return array{
+     *   mode: 'league'|'knockout'|'none',
+     *   competition: ?Competition,
+     *   standings: ?Collection,
+     *   playerTie: ?CupTie,
+     *   roundsRemaining: ?Collection,
+     *   finalVenue: ?string,
+     * }
+     */
+    public function resolveDashboardContext(Game $game, ?GameMatch $nextMatch): array
+    {
+        $empty = [
+            'mode' => 'none',
+            'competition' => null,
+            'standings' => null,
+            'title' => null,
+            'playerTie' => null,
+            'roundsRemaining' => null,
+            'finalVenue' => null,
+        ];
+
+        if (!$nextMatch) {
+            return $empty;
+        }
+
+        $competition = $nextMatch->relationLoaded('competition')
+            ? $nextMatch->competition
+            : Competition::find($nextMatch->competition_id);
+
+        if (!$competition) {
+            return $empty;
+        }
+
+        if ($nextMatch->cup_tie_id === null) {
+            $standings = $this->getDashboardStandings($game, $competition);
+            $playerGroup = $standings->firstWhere('team_id', $game->team_id)?->group_label;
+
+            $title = ($game->isTournamentMode() && $playerGroup)
+                ? __('game.group') . ' ' . $playerGroup
+                : $competition->name;
+
+            return [
+                'mode' => 'league',
+                'competition' => $competition,
+                'standings' => $standings,
+                'title' => $title,
+                'playerTie' => null,
+                'roundsRemaining' => null,
+                'finalVenue' => null,
+            ];
+        }
+
+        return $this->resolveKnockoutContext($game, $competition);
+    }
+
+    /**
+     * @return array{
+     *   mode: 'knockout',
+     *   competition: Competition,
+     *   standings: null,
+     *   playerTie: ?CupTie,
+     *   roundsRemaining: Collection,
+     *   finalVenue: ?string,
+     * }
+     */
+    private function resolveKnockoutContext(Game $game, Competition $competition): array
+    {
+        $rounds = $this->getKnockoutRounds($competition, (int) $game->season);
+        $ties = $this->getKnockoutTies($game, $competition);
+        $playerTie = $this->findPlayerTie($rounds, $ties, $game->team_id);
+
+        $currentRound = $playerTie?->round_number;
+        $finalRound = $rounds->max('round');
+
+        $roundsRemaining = $rounds
+            ->filter(fn ($round) => $currentRound !== null && $round->round >= $currentRound)
+            ->map(fn ($round) => [
+                'round' => $round->round,
+                'label' => __($round->name),
+                'isCurrent' => $round->round === $currentRound,
+                'isFinal' => $round->round === $finalRound,
+            ])
+            ->values();
+
+        return [
+            'mode' => 'knockout',
+            'competition' => $competition,
+            'standings' => null,
+            'title' => $competition->name,
+            'playerTie' => $playerTie,
+            'roundsRemaining' => $roundsRemaining,
+            'finalVenue' => $this->resolveFinalVenue($competition, $ties, $finalRound),
+        ];
+    }
+
+    /**
+     * For Copa del Rey the final venue is fixed; for European competitions
+     * the venue is only known once the final tie has been drawn and its
+     * GameMatch carries a `neutral_venue_name`. Otherwise return null and
+     * let the view render "TBD".
+     */
+    private function resolveFinalVenue(Competition $competition, Collection $tiesByRound, ?int $finalRound): ?string
+    {
+        if ($competition->id === 'ESPCUP') {
+            return 'La Cartuja';
+        }
+
+        if ($finalRound === null) {
+            return null;
+        }
+
+        return $tiesByRound->get($finalRound, collect())->first()?->firstLegMatch?->neutral_venue_name;
     }
 }

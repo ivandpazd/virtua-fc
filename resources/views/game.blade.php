@@ -137,44 +137,51 @@
 
                 <hr class="border-border-strong md:hidden" />
 
-                {{-- Abridged League Standings (hidden during pre-season) --}}
-                @if($leagueStandings->isNotEmpty() && empty($isPreSeason))
-                @php
-                    $standingsTitle = ($game->isTournamentMode() && $leagueStandings->first()?->group_label)
-                        ? __('game.group') . ' ' . $leagueStandings->first()->group_label
-                        : __('game.standings');
-                @endphp
-                <x-section-card :title="$standingsTitle">
-                    <x-slot name="badge">
-                        <a href="{{ route('game.competition', [$game->id, $game->competition_id]) }}" class="text-[10px] text-accent-blue hover:text-blue-400 transition-colors">
-                            {{ __('game.full_table') }} &rarr;
-                        </a>
-                    </x-slot>
+                {{-- Contextual standings or cup-path card (hidden during pre-season).
+                     The card follows the competition of the *next* match, not the
+                     primary league, so European/cup matchdays surface the right table. --}}
+                @if(empty($isPreSeason))
+                    @if($dashboardContext['mode'] === 'league' && $dashboardContext['standings']->isNotEmpty())
+                    <x-section-card :title="$dashboardContext['title']">
+                        <x-slot name="badge">
+                            <a href="{{ route('game.competition', [$game->id, $dashboardContext['competition']->id]) }}" class="text-[10px] text-accent-blue hover:text-blue-400 transition-colors">
+                                {{ __('game.full_table') }} &rarr;
+                            </a>
+                        </x-slot>
 
-                    {{-- Column headers --}}
-                    <div class="grid grid-cols-[24px_1fr_28px_28px_28px_32px_36px] gap-1 px-4 py-2 text-[9px] text-text-faint uppercase tracking-wider border-b border-border-default">
-                        <span>#</span>
-                        <span>{{ __('game.team') }}</span>
-                        <span class="text-center">{{ __('game.won_abbr') }}</span>
-                        <span class="text-center">{{ __('game.drawn_abbr') }}</span>
-                        <span class="text-center">{{ __('game.lost_abbr') }}</span>
-                        <span class="text-center">{{ __('game.goal_diff_abbr') }}</span>
-                        <span class="text-right">{{ __('game.pts_abbr') }}</span>
-                    </div>
+                        {{-- Column headers --}}
+                        <div class="grid grid-cols-[24px_1fr_28px_28px_28px_32px_36px] gap-1 px-4 py-2 text-[9px] text-text-faint uppercase tracking-wider border-b border-border-default">
+                            <span>#</span>
+                            <span>{{ __('game.team') }}</span>
+                            <span class="text-center">{{ __('game.won_abbr') }}</span>
+                            <span class="text-center">{{ __('game.drawn_abbr') }}</span>
+                            <span class="text-center">{{ __('game.lost_abbr') }}</span>
+                            <span class="text-center">{{ __('game.goal_diff_abbr') }}</span>
+                            <span class="text-right">{{ __('game.pts_abbr') }}</span>
+                        </div>
 
-                    {{-- Rows --}}
-                    <div class="divide-y divide-border-default">
-                        @php $prevPosition = 0; @endphp
-                        @foreach($leagueStandings as $standing)
-                            <x-standing-row
-                                :standing="$standing"
-                                :is-player="$standing->team_id === $game->team_id"
-                                :show-gap="$standing->position > $prevPosition + 1"
-                            />
-                            @php $prevPosition = $standing->position; @endphp
-                        @endforeach
-                    </div>
-                </x-section-card>
+                        {{-- Rows --}}
+                        <div class="divide-y divide-border-default">
+                            @php $prevPosition = 0; @endphp
+                            @foreach($dashboardContext['standings'] as $standing)
+                                <x-standing-row
+                                    :standing="$standing"
+                                    :is-player="$standing->team_id === $game->team_id"
+                                    :show-gap="$standing->position > $prevPosition + 1"
+                                />
+                                @php $prevPosition = $standing->position; @endphp
+                            @endforeach
+                        </div>
+                    </x-section-card>
+                    @elseif($dashboardContext['mode'] === 'knockout' && $dashboardContext['playerTie'])
+                    <x-cup-path-card
+                        :game="$game"
+                        :competition="$dashboardContext['competition']"
+                        :player-tie="$dashboardContext['playerTie']"
+                        :rounds-remaining="$dashboardContext['roundsRemaining']"
+                        :final-venue="$dashboardContext['finalVenue']"
+                    />
+                    @endif
                 @endif
             </div>
         </div>

@@ -11,6 +11,9 @@ return [
     // Bracket
     'bracket' => 'Cuadro',
 
+    // Dashboard cup-path card
+    'tbd' => 'Por determinar',
+
     // Data
     'cup_data_not_available' => 'Datos de la copa no disponibles.',
 

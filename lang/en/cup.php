@@ -11,6 +11,9 @@ return [
     // Bracket
     'bracket' => 'Bracket',
 
+    // Dashboard cup-path card
+    'tbd' => 'TBD',
+
     // Data
     'cup_data_not_available' => 'Cup data not available.',
 

@@ -438,6 +438,7 @@ return [
 
     'standings' => 'Clasificación',
     'full_table' => 'Ver tabla completa',
+    'full_bracket' => 'Cuadro completo',
 
     // No data
     'no_standings_yet' => 'Aún no hay clasificación disponible.',

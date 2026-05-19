@@ -438,6 +438,7 @@ return [
 
     'standings' => 'Standings',
     'full_table' => 'View full table',
+    'full_bracket' => 'Full bracket',
 
     // No data
     'no_standings_yet' => 'No standings available yet.',

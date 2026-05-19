@@ -151,7 +151,7 @@ class ShowGame
         $notifications = $this->notificationService->getNotifications($game->id, true, 15);
         $groupedNotifications = $notifications->groupBy(fn ($n) => $n->game_date?->format('Y-m-d') ?? 'unknown');
 
-        $leagueStandings = $this->competitionViewService->getAbridgedLeagueStandings($game);
+        $dashboardContext = $this->competitionViewService->resolveDashboardContext($game, $nextMatch);
 
         $viewData = [
             'game' => $game,
@@ -164,7 +164,7 @@ class ShowGame
             'upcomingFixtures' => $this->calendarService->getUpcomingFixtures($game),
             'groupedNotifications' => $groupedNotifications,
             'unreadNotificationCount' => $this->notificationService->getUnreadCount($game->id),
-            'leagueStandings' => $leagueStandings,
+            'dashboardContext' => $dashboardContext,
         ];
 
         // Generate pre-match narrative snippets (tournament mode only for now)
