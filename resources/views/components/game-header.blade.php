@@ -24,11 +24,16 @@
                         <x-team-crest :team="$game->team" class="w-8 h-8 shrink-0" />
                         <div class="min-w-0">
                             <h1 class="font-heading font-semibold text-base text-text-primary leading-none tracking-wide uppercase truncate">{{ $game->team->name }}</h1>
-                            <p class="text-[10px] text-text-muted uppercase tracking-widest mt-0.5">
-                                @if($game->game_mode === \App\Models\Game::MODE_CAREER)
-                                    {{ __('game.season') }} {{ $game->formatted_season }}
-                                @elseif($game->game_mode === \App\Models\Game::MODE_TOURNAMENT)
-                                    {{ __($teamCompetitions[0]->name ?? '') }}
+                            <p class="text-[10px] text-text-muted tracking-widest mt-0.5">
+                                @if($game->isCareerMode() && $game->current_date)
+                                    <span class="inline-flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3">
+                                            <path fill-rule="evenodd" d="M4 1.75a.75.75 0 0 1 1.5 0V3h5V1.75a.75.75 0 0 1 1.5 0V3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2V1.75ZM4.5 6a1 1 0 0 0-1 1v4.5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-7Z" clip-rule="evenodd" />
+                                        </svg>
+                                        {{ Str::upper($game->current_date->locale(app()->getLocale())->translatedFormat('j F Y')) }}
+                                    </span>
+                                @elseif($game->isTournamentMode())
+                                    <span class="uppercase">{{ __($teamCompetitions[0]->name ?? '') }}</span>
                                 @endif
                             </p>
                         </div>
