@@ -498,6 +498,19 @@
     },
     {
       "club": {
+        "image": "https://assets.virtuafc.com/crests/621.png",
+        "name": "Athletic Club"
+      },
+      "dateOfBirth": "Jul 12, 2002",
+      "foot": "right",
+      "height": "1,81m",
+      "id": "709187",
+      "marketValue": "€50.00m",
+      "name": "Nico Williams",
+      "position": "Left Winger"
+    },
+    {
+      "club": {
         "image": "https://assets.virtuafc.com/crests/131.png",
         "name": "FC Barcelona"
       },
