@@ -81,6 +81,7 @@ class PlayerGeneratorService
         $identity = $this->pickRandomIdentity(
             excludedNames: $excludedNames,
             region: $region,
+            position: $data->position,
         );
         $name = $data->name ?? $identity['name'];
         $nationality = $data->nationality ?? $identity['nationality'];
@@ -202,6 +203,7 @@ class PlayerGeneratorService
             $identity = $this->pickRandomIdentity(
                 excludedNames: $data->name === null ? $excludedSet : [],
                 region: $region,
+                position: $data->position,
             );
             $name = $data->name ?? $identity['name'];
             $nationality = $data->nationality ?? $identity['nationality'];
@@ -493,6 +495,7 @@ class PlayerGeneratorService
         ?string $teamCountry = null,
         array $excludedNames = [],
         ?string $region = null,
+        ?string $position = null,
     ): array {
         // A Basque/Catalan club always produces Spanish-nationality players —
         // the region flag only overrides the *name* source, not the passport.
@@ -506,7 +509,7 @@ class PlayerGeneratorService
         return [
             'name' => $name,
             'nationality' => [$chosenNationality],
-            'height' => $this->generateHeight(),
+            'height' => $this->generateHeight($position),
             'foot' => $this->generateFoot(),
         ];
     }
@@ -601,11 +604,13 @@ class PlayerGeneratorService
 
     /**
      * Generate a realistic height string (e.g. "1,78m").
-     * Distribution centered around 180cm (range 168–196).
+     * Outfield players range 168–196cm; goalkeepers are taller (185–200cm).
      */
-    private function generateHeight(): string
+    private function generateHeight(?string $position = null): string
     {
-        $cm = rand(168, 196);
+        $cm = $position === 'GK'
+            ? rand(185, 200)
+            : rand(168, 196);
         $meters = intdiv($cm, 100);
         $remainder = $cm % 100;
 
