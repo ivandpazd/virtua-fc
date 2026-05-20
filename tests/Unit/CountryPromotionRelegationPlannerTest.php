@@ -107,6 +107,72 @@ class CountryPromotionRelegationPlannerTest extends TestCase
         }
     }
 
+    public function test_inherited_coexistence_in_intermediate_tier_cascades_reserve_down(): void
+    {
+        $esp1 = $this->ids(20, 'a1');
+        $esp2 = $this->ids(22, 'a2');
+        $esp3a = $this->ids(20, 'a3');
+        $esp3b = $this->ids(20, 'b3');
+
+        // Parent and reserve already coexist mid-table in ESP2 — data
+        // carried in from earlier seasons when the planner wasn't strict.
+        // The parent isn't being relegated this season (mid-table) and
+        // the reserve isn't being promoted (also mid-table after filter).
+        // The planner must repair the coexistence on its own rather than
+        // throwing in validatePlan.
+        $parent = $esp2[10];
+        $reserve = $esp2[15];
+
+        $snapshot = new CountrySeasonSnapshot(
+            countryCode: 'ES',
+            standingsByCompetition: [
+                'ESP1' => $esp1,
+                'ESP2' => $esp2,
+                'ESP3A' => $esp3a,
+                'ESP3B' => $esp3b,
+            ],
+            reserveToParent: [$reserve => $parent],
+            playoffStates: [
+                'ESP2' => PlayoffState::NotStarted,
+                'ESP3PO' => PlayoffState::NotStarted,
+            ],
+        );
+
+        $plan = $this->planner->planFromSnapshot($snapshot, $this->spainConfig);
+
+        // Reserve cascaded out of ESP2 into ESP3A or ESP3B.
+        $cascade = null;
+        foreach ($plan->moves as $move) {
+            if ($move->teamId === $reserve
+                && $move->reason === PromotionMove::REASON_RESERVE_CASCADE
+            ) {
+                $cascade = $move;
+                break;
+            }
+        }
+        $this->assertNotNull($cascade, 'Reserve should be cascaded down');
+        $this->assertSame('ESP2', $cascade->fromCompetitionId);
+        $this->assertContains($cascade->toCompetitionId, ['ESP3A', 'ESP3B']);
+
+        // A compensation team from the cascade destination backfills ESP2.
+        $compensation = null;
+        foreach ($plan->moves as $move) {
+            if ($move->reason === PromotionMove::REASON_CASCADE_COMPENSATION
+                && $move->fromCompetitionId === $cascade->toCompetitionId
+                && $move->toCompetitionId === 'ESP2'
+            ) {
+                $compensation = $move;
+                break;
+            }
+        }
+        $this->assertNotNull($compensation, 'ESP2 should be backfilled by a team from the cascade destination');
+
+        // Parent left untouched.
+        foreach ($plan->moves as $move) {
+            $this->assertNotSame($parent, $move->teamId, 'Parent should not be moved');
+        }
+    }
+
     public function test_legacy_game_cancels_relegation_when_reserve_in_destination_and_no_deeper_tier_in_snapshot(): void
     {
         $esp1 = $this->ids(20, 'a1');

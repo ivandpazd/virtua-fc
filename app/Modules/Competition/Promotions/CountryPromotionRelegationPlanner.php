@@ -722,6 +722,96 @@ class CountryPromotionRelegationPlanner
         // don't pick the same group as their parent for the same rule.
         $relegationDestByTeam = [];
 
+        // Pre-pass: inherited coexistence in the snapshot. Pairs where the
+        // reserve and parent already share a competition before the planner
+        // runs (data carried over from earlier seasons before the planner
+        // became strict). validatePlan trips on these even when no rule
+        // would move either team, so resolve them up front with the same
+        // cascade-down repair the relegation case uses.
+        //
+        // Skip pairs the per-rule loop will resolve naturally:
+        //   - parent being relegated: it leaves the coexistence tier, so
+        //     coexistence ends without any reserve-side action.
+        //   - reserve being promoted: it leaves the coexistence tier
+        //     naturally too (the resulting inverted pair — reserve in
+        //     a higher tier than parent — is a separate concern; this
+        //     pass scopes to same-tier coexistence only).
+        $beingRelegated = [];
+        foreach ($relegatorsByRule as $teamIds) {
+            foreach ($teamIds as $tid) {
+                $beingRelegated[$tid] = true;
+            }
+        }
+        foreach ($snapshot->reserveToParent as $reserve => $parent) {
+            if (isset($beingRelegated[$parent])) {
+                continue;
+            }
+            if (isset($alreadyPromoted[$reserve])) {
+                continue;
+            }
+
+            $reserveCurrentComp = $snapshot->competitionOf($reserve);
+            $parentCurrentComp = $snapshot->competitionOf($parent);
+            if ($reserveCurrentComp === null || $parentCurrentComp === null) {
+                continue;
+            }
+            if ($reserveCurrentComp !== $parentCurrentComp) {
+                continue;
+            }
+
+            $reserveTier = $tierStructure['tierByCompetition'][$reserveCurrentComp] ?? null;
+            if ($reserveTier === null) {
+                continue;
+            }
+
+            $deeperTier = $reserveTier + 1;
+            $deeperComps = array_values(array_filter(
+                $tierStructure['competitionsByTier'][$deeperTier] ?? [],
+                fn ($comp) => array_key_exists($comp, $snapshot->standingsByCompetition),
+            ));
+            if (empty($deeperComps)) {
+                // Coexistence at the deepest tier present in the snapshot
+                // (e.g. both teams in ESP3A on a Spanish game). Cannot
+                // cascade the reserve down. Promoting the parent up would
+                // work but isn't implemented here yet; for now leave the
+                // pair untouched and let validatePlan throw the existing
+                // coexistence error so the operator runs the one-off
+                // repair command. The error message will name this pair.
+                continue;
+            }
+
+            $cascadeDest = $this->chooseCascadeDestination(
+                $deeperComps,
+                $snapshot,
+                $parent,
+            );
+
+            $cascadeMoves[] = new PromotionMove(
+                teamId: $reserve,
+                fromCompetitionId: $reserveCurrentComp,
+                toCompetitionId: $cascadeDest,
+                reason: PromotionMove::REASON_RESERVE_CASCADE,
+            );
+
+            $compTeam = $this->pickCompensation(
+                $snapshot,
+                $cascadeDest,
+                $reserveCurrentComp,
+                $usedAsCompensation,
+                $alreadyPromoted,
+                $reserve,
+            );
+            if ($compTeam !== null) {
+                $compensationMoves[] = new PromotionMove(
+                    teamId: $compTeam,
+                    fromCompetitionId: $cascadeDest,
+                    toCompetitionId: $reserveCurrentComp,
+                    reason: PromotionMove::REASON_CASCADE_COMPENSATION,
+                );
+                $usedAsCompensation[$compTeam] = true;
+            }
+        }
+
         foreach ($promotionRules as $i => $rule) {
             $isSplit = !empty($rule['playoff_source_divisions']);
             $destinations = $this->relegationDestinations($rule);
