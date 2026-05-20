@@ -19,19 +19,32 @@ use Illuminate\Support\Facades\Log;
  * is fixed going forward, but games that accumulated the violation over
  * many seasons need a one-off correction.
  *
- * Per affected game: for each (reserve, parent, competition) triplet,
- * find the next-most-eligible non-reserve team in a lower tier that
- * doesn't include the reserve's parent, and swap places. The vacated
- * top-tier slot is filled with that lower-tier team; the reserve drops
- * down into the slot the swapped team left behind. This preserves
- * division sizes — every league keeps its team count.
+ * Two repair strategies are attempted per violation, in order:
+ *
+ *   1. Move the reserve DOWN. Find the next-most-eligible non-reserve
+ *      team in a lower tier that doesn't include the reserve's parent
+ *      and swap places. Preferred because it leaves the parent's tier
+ *      placement (and the league strength of the upper divisions)
+ *      untouched.
+ *
+ *   2. Move the parent UP. Used as a fallback when the reserve has no
+ *      tier to move down into (e.g. the violation sits at ESP3A, the
+ *      deepest playable tier in Spain). The parent is swapped with the
+ *      worst non-reserve in the closest tier above its current one,
+ *      restoring the invariant "parent strictly above reserve" by
+ *      pushing the parent upward instead of the reserve downward.
+ *
+ * Both strategies preserve division sizes (direct swap) and run inside
+ * the same per-game transaction so a partial failure rolls back cleanly.
  *
  * Side-effects per affected game:
- *   - Clear ESPSUP entries so SupercupQualificationProcessor will re-derive
- *     the field with the corrected ESP1 roster on the next pipeline run.
- *   - Reset `season_transition_step` to NULL if the game is mid-transition
- *     so the pipeline restarts cleanly from the beginning of the closing
- *     phase (idempotent processors will short-circuit the already-done work).
+ *   - Clear the country's supercup entries so SupercupQualificationProcessor
+ *     will re-derive the field with the corrected top-tier roster on the
+ *     next pipeline run.
+ *   - Leave `season_transition_step` alone. A previous version cleared it
+ *     and that caused the closing pipeline to re-run for the already-
+ *     advanced new season, crashing SupercupQualificationProcessor with
+ *     "expected 4 qualifiers, got 0".
  *
  * Safe to re-run: each step is idempotent. Default mode is dry-run; pass
  * --fix to apply.
@@ -187,32 +200,55 @@ class FixReserveCoexistence extends Command
             $repaired = 0;
 
             foreach ($violations as $v) {
+                // Strategy 1: move the reserve DOWN.
                 $replacement = $this->findReplacement($game->id, $country, $v, $countryConfig);
 
-                if ($replacement === null) {
-                    Log::warning('[ReserveCoexistenceFix] No replacement found — skipping', [
+                if ($replacement !== null) {
+                    $this->swapTeams(
+                        $game->id,
+                        teamAId: $v['reserve_id'],
+                        teamBId: $replacement['team_id'],
+                        teamACompetition: $v['competition_id'],
+                        teamBCompetition: $replacement['competition_id'],
+                    );
+
+                    Log::info('[ReserveCoexistenceFix] Swapped (reserve-down)', [
                         'game_id' => $game->id,
                         'violation' => $v,
+                        'replacement' => $replacement,
                     ]);
-                    $this->warn("    no replacement found for {$v['reserve_name']} — skipped");
+
+                    $repaired++;
                     continue;
                 }
 
-                $this->swapTeams(
-                    $game->id,
-                    reserveId: $v['reserve_id'],
-                    replacementId: $replacement['team_id'],
-                    reserveCompetition: $v['competition_id'],
-                    replacementCompetition: $replacement['competition_id'],
-                );
+                // Strategy 2: move the parent UP.
+                $promotion = $this->findParentPromotion($game->id, $country, $v, $countryConfig);
 
-                Log::info('[ReserveCoexistenceFix] Swapped', [
+                if ($promotion !== null) {
+                    $this->swapTeams(
+                        $game->id,
+                        teamAId: $v['parent_id'],
+                        teamBId: $promotion['team_id'],
+                        teamACompetition: $promotion['parent_competition_id'],
+                        teamBCompetition: $promotion['competition_id'],
+                    );
+
+                    Log::info('[ReserveCoexistenceFix] Swapped (parent-up)', [
+                        'game_id' => $game->id,
+                        'violation' => $v,
+                        'promotion' => $promotion,
+                    ]);
+
+                    $repaired++;
+                    continue;
+                }
+
+                Log::warning('[ReserveCoexistenceFix] No replacement found — skipping', [
                     'game_id' => $game->id,
-                    'reserve' => $v,
-                    'replacement' => $replacement,
+                    'violation' => $v,
                 ]);
-
-                $repaired++;
+                $this->warn("    no replacement found for {$v['reserve_name']} — skipped");
             }
 
             if ($repaired > 0) {
@@ -295,6 +331,89 @@ class FixReserveCoexistence extends Command
         return null;
     }
 
+    /**
+     * Fallback strategy: move the PARENT up one tier (or more, if the
+     * closest tier above can't absorb the swap). Used when
+     * findReplacement() returns null because the violation sits at the
+     * deepest tier (e.g. ESP3A in Spain) so the reserve has nowhere to
+     * descend to.
+     *
+     * Walks tiers strictly above the parent's current tier from closest
+     * (one tier up) outward. For each candidate competition at that tier,
+     * picks the worst non-reserve team and returns it as the swap partner.
+     * Skips any candidate competition that already hosts the reserve
+     * (defense-in-depth — a team only sits in one league, but this avoids
+     * a no-op swap if upstream state is inconsistent).
+     *
+     * Returned tuple includes `parent_competition_id` (the parent's
+     * current competition) so the caller can issue a precise swap without
+     * re-querying.
+     *
+     * @param  array{reserve_id: string, parent_id: string, competition_id: string}  $violation
+     * @return array{team_id: string, competition_id: string, parent_competition_id: string}|null
+     */
+    private function findParentPromotion(string $gameId, string $country, array $violation, CountryConfig $countryConfig): ?array
+    {
+        $tierMap = $countryConfig->tiers($country);
+
+        $parentCompetitions = CompetitionEntry::where('game_id', $gameId)
+            ->where('team_id', $violation['parent_id'])
+            ->pluck('competition_id')
+            ->all();
+
+        if (empty($parentCompetitions)) {
+            return null;
+        }
+
+        // Anchor on the parent's deepest current tier — if the parent
+        // is somehow in multiple competitions, promoting from the lowest
+        // is the least disruptive choice that still restores the invariant.
+        $parentTier = null;
+        $parentCompetitionId = null;
+        foreach ($parentCompetitions as $comp) {
+            $tier = $this->resolveTier($comp, $tierMap, $countryConfig, $country);
+            if ($tier !== null && ($parentTier === null || $tier > $parentTier)) {
+                $parentTier = $tier;
+                $parentCompetitionId = $comp;
+            }
+        }
+
+        if ($parentTier === null || $parentCompetitionId === null) {
+            return null;
+        }
+
+        // Tier numbering: lower tier number = higher division. "One tier
+        // above" the parent means $parentTier - 1. Walk closest-first by
+        // taking tier numbers strictly less than parent's and rsort'ing
+        // (so the highest tier_number below parent's — i.e. the closest
+        // division above — is tried first).
+        $tiersAbove = array_values(array_filter(array_keys($tierMap), fn ($t) => $t < $parentTier));
+        rsort($tiersAbove);
+
+        foreach ($tiersAbove as $tier) {
+            foreach ($countryConfig->tierCompetitionIds($country, $tier) as $candidateCompetition) {
+                $hostingReserve = CompetitionEntry::where('game_id', $gameId)
+                    ->where('competition_id', $candidateCompetition)
+                    ->where('team_id', $violation['reserve_id'])
+                    ->exists();
+                if ($hostingReserve) {
+                    continue;
+                }
+
+                $candidate = $this->worstNonReserveIn($gameId, $candidateCompetition);
+                if ($candidate !== null) {
+                    return [
+                        'team_id' => $candidate,
+                        'competition_id' => $candidateCompetition,
+                        'parent_competition_id' => $parentCompetitionId,
+                    ];
+                }
+            }
+        }
+
+        return null;
+    }
+
     private function resolveTier(string $competitionId, array $tierMap, CountryConfig $countryConfig, string $country): ?int
     {
         foreach (array_keys($tierMap) as $tier) {
@@ -336,19 +455,22 @@ class FixReserveCoexistence extends Command
     }
 
     /**
-     * Swap a reserve with its non-reserve replacement: each moves into the
-     * other's competition. Mirrors the move semantics in
-     * PromotionRelegationProcessor::moveTeam but as a direct swap.
+     * Swap two teams between two competitions: each moves into the other's
+     * competition. Mirrors the move semantics in
+     * PromotionRelegationProcessor::moveTeam but as a direct swap. The
+     * helper is symmetric — the A/B labels are positional, not semantic,
+     * so the same method serves both repair strategies (reserve-down and
+     * parent-up).
      */
     private function swapTeams(
         string $gameId,
-        string $reserveId,
-        string $replacementId,
-        string $reserveCompetition,
-        string $replacementCompetition,
+        string $teamAId,
+        string $teamBId,
+        string $teamACompetition,
+        string $teamBCompetition,
     ): void {
-        $this->moveTeam($gameId, $reserveId, $reserveCompetition, $replacementCompetition);
-        $this->moveTeam($gameId, $replacementId, $replacementCompetition, $reserveCompetition);
+        $this->moveTeam($gameId, $teamAId, $teamACompetition, $teamBCompetition);
+        $this->moveTeam($gameId, $teamBId, $teamBCompetition, $teamACompetition);
     }
 
     private function moveTeam(string $gameId, string $teamId, string $fromDivision, string $toDivision): void
