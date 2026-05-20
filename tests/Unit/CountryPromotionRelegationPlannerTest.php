@@ -107,6 +107,55 @@ class CountryPromotionRelegationPlannerTest extends TestCase
         }
     }
 
+    public function test_legacy_game_cancels_relegation_when_reserve_in_destination_and_no_deeper_tier_in_snapshot(): void
+    {
+        $esp1 = $this->ids(20, 'a1');
+        $esp2 = $this->ids(22, 'a2');
+
+        // ESP1 position 18 (relegating) is the parent of a reserve sitting
+        // in ESP2. In a full snapshot the cascade would push the reserve
+        // down to ESP3A; here ESP3A/B are absent from the snapshot (legacy
+        // game), so the cascade must escape-hatch instead of emitting a
+        // phantom move into a non-existent league (which would leave ESP2
+        // one team short and trip validatePlan's per-tier count check).
+        $parent = $esp1[17];
+        $reserve = $esp2[5];
+
+        $snapshot = new CountrySeasonSnapshot(
+            countryCode: 'ES',
+            standingsByCompetition: [
+                'ESP1' => $esp1,
+                'ESP2' => $esp2,
+            ],
+            reserveToParent: [$reserve => $parent],
+            playoffStates: [
+                'ESP2' => PlayoffState::NotStarted,
+                'ESP3PO' => PlayoffState::NotStarted,
+            ],
+        );
+
+        $plan = $this->planner->planFromSnapshot($snapshot, $this->spainConfig);
+
+        // Cancellation: the parent stays in ESP1 and one promotion is
+        // dropped to keep tier counts balanced. So 2 promotions instead of
+        // 3, and 2 relegations instead of 3.
+        $this->assertCount(2, $plan->promotionsInto('ESP1'));
+        $this->assertCount(2, $plan->relegationsInto('ESP2'));
+
+        $this->assertCount(1, $plan->skippedRelegations);
+        $this->assertSame($parent, $plan->skippedRelegations[0]->parentTeamId);
+        $this->assertSame(
+            SkippedRelegation::REASON_RESERVE_AT_FLOOR,
+            $plan->skippedRelegations[0]->reason,
+        );
+
+        // No cascade move emitted into the absent tiers.
+        foreach ($plan->moves as $move) {
+            $this->assertNotContains($move->fromCompetitionId, ['ESP3A', 'ESP3B']);
+            $this->assertNotContains($move->toCompetitionId, ['ESP3A', 'ESP3B']);
+        }
+    }
+
     // ──────────────────────────────────────────────────
     // Happy path
     // ──────────────────────────────────────────────────

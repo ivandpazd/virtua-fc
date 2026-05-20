@@ -759,8 +759,21 @@ class CountryPromotionRelegationPlanner
                 }
 
                 $deeperTier = $reserveTier + 1;
-                if (!isset($tierStructure['competitionsByTier'][$deeperTier])) {
-                    // Escape hatch: reserve at deepest tier, cannot cascade.
+                // Restrict the cascade target to deeper-tier competitions
+                // that actually exist in the snapshot. The config-declared
+                // deeper tier may be absent for this game (legacy game
+                // predating that tier's addition — see filterApplicableRules).
+                // Cascading into an absent league would emit a phantom move
+                // that pulls the reserve out of its current tier with no
+                // compensating backfill, leaving the donor tier short and
+                // tripping validatePlan's per-tier count check.
+                $deeperComps = array_values(array_filter(
+                    $tierStructure['competitionsByTier'][$deeperTier] ?? [],
+                    fn ($comp) => array_key_exists($comp, $snapshot->standingsByCompetition),
+                ));
+                if (empty($deeperComps)) {
+                    // Escape hatch: reserve at deepest tier (or no deeper tier
+                    // exists for this game), cannot cascade.
                     $cancellations['relegations'][$i][] = $parentCandidate;
                     $cancellations['promotionsCount'][$i] = ($cancellations['promotionsCount'][$i] ?? 0) + 1;
                     $cancellations['skipped'][] = new SkippedRelegation(
@@ -776,7 +789,7 @@ class CountryPromotionRelegationPlanner
                 // doesn't already host the parent (which won't happen for tier 3,
                 // but defensive).
                 $cascadeDest = $this->chooseCascadeDestination(
-                    $tierStructure['competitionsByTier'][$deeperTier],
+                    $deeperComps,
                     $snapshot,
                     $parentCandidate,
                 );
