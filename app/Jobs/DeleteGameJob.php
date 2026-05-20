@@ -25,6 +25,11 @@ class DeleteGameJob implements ShouldQueue
         $this->onQueue('cleanup');
     }
 
+    public function tags(): array
+    {
+        return ['game:' . $this->gameId];
+    }
+
     public function handle(): void
     {
         $game = Game::find($this->gameId);

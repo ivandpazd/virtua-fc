@@ -41,6 +41,11 @@ class ProcessSeasonTransition implements ShouldQueue, ShouldBeUnique
         return $this->gameId;
     }
 
+    public function tags(): array
+    {
+        return ['game:' . $this->gameId];
+    }
+
     public function handle(
         SeasonClosingPipeline $closingPipeline,
         SeasonSetupPipeline $setupPipeline,

@@ -55,6 +55,11 @@ class SetupNewGame implements ShouldQueue, ShouldBeUnique
         return $this->gameId;
     }
 
+    public function tags(): array
+    {
+        return ['game:' . $this->gameId];
+    }
+
     private Carbon $currentDate;
 
     public function __construct(

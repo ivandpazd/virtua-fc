@@ -38,6 +38,11 @@ class SetupTournamentGame implements ShouldQueue
         $this->onQueue('setup');
     }
 
+    public function tags(): array
+    {
+        return ['game:' . $this->gameId];
+    }
+
     public function handle(
         NotificationService $notificationService,
         FormationRecommender $formationRecommender,

@@ -43,6 +43,11 @@ class ProcessMatchdayAdvance implements ShouldQueue, ShouldBeUnique
         return $this->gameId;
     }
 
+    public function tags(): array
+    {
+        return ['game:' . $this->gameId];
+    }
+
     public function handle(MatchdayOrchestrator $orchestrator, ActivationTracker $activationTracker): ?MatchdayAdvanceResult
     {
         $game = Game::find($this->gameId);

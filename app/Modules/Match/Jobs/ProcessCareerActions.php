@@ -34,6 +34,11 @@ class ProcessCareerActions implements ShouldQueue, ShouldBeUnique
         return $this->gameId;
     }
 
+    public function tags(): array
+    {
+        return ['game:' . $this->gameId];
+    }
+
     public function handle(CareerActionProcessor $processor): void
     {
         // Each tick runs inside its own transaction holding the game row lock.
