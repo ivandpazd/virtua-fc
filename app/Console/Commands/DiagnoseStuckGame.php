@@ -106,6 +106,26 @@ class DiagnoseStuckGame extends Command
             }
         }
 
+        $this->line('');
+        $this->line('=== Teams with entries in multiple leagues ===');
+        $leagueIds = ['ESP1', 'ESP2', 'ESP3A', 'ESP3B'];
+        $multi = CompetitionEntry::where('game_id', $gameId)
+            ->whereIn('competition_id', $leagueIds)
+            ->select('team_id')
+            ->selectRaw('count(*) as n')
+            ->selectRaw("string_agg(competition_id, ',' ORDER BY competition_id) as comps")
+            ->groupBy('team_id')
+            ->having('n', '>', 1)
+            ->get();
+        if ($multi->isEmpty()) {
+            $this->line('  (none)');
+        } else {
+            foreach ($multi as $row) {
+                $name = Team::where('id', $row->team_id)->value('name');
+                $this->line("  {$row->team_id}  {$name}  [{$row->comps}]");
+            }
+        }
+
         return self::SUCCESS;
     }
 }
