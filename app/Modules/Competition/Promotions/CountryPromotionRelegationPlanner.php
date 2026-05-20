@@ -45,6 +45,17 @@ class CountryPromotionRelegationPlanner
             return new PromotionRelegationPlan($snapshot->countryCode, []);
         }
 
+        // Drop rules whose tiers aren't all present in the snapshot. The
+        // snapshot builder skips tiers that are structurally absent for a
+        // given game (legacy games predating a tier addition), and a rule
+        // that references a missing tier has no work to do — running it
+        // would just produce empty/unbalanced moves. This is the general
+        // case of "no division below to relegate to".
+        $promotionRules = array_values($this->filterApplicableRules($promotionRules, $snapshot));
+        if (empty($promotionRules)) {
+            return new PromotionRelegationPlan($snapshot->countryCode, []);
+        }
+
         $tierStructure = $this->buildTierStructure($config);
 
         // Step 1: Reject any promotion rule whose playoff is mid-flight. Doing
@@ -171,6 +182,43 @@ class CountryPromotionRelegationPlanner
             $total += count($ids);
         }
         return $total + 1;
+    }
+
+    /**
+     * Drop promotion rules whose top, bottom, or sibling tier isn't in the
+     * snapshot. The snapshot builder omits tiers that have no entries for
+     * the game (a legacy game predating that tier's addition), so a rule
+     * referencing one of them has nowhere to move teams to or from. This is
+     * the general "no division below" case — a rule whose bottom_division
+     * doesn't exist for this game (e.g. ESP2↔ESP3 in a pre-Primera-RFEF
+     * Spanish game) can't relegate anyone, so it's skipped.
+     *
+     * playoff_competition is intentionally not validated: it's a cup
+     * (e.g. ESP3PO), not a league tier, and lives outside standingsByCompetition.
+     *
+     * @param  list<array<string, mixed>>  $rules
+     * @return list<array<string, mixed>>
+     */
+    private function filterApplicableRules(array $rules, CountrySeasonSnapshot $snapshot): array
+    {
+        $applicable = [];
+        foreach ($rules as $rule) {
+            $required = [$rule['top_division'], $rule['bottom_division']];
+            if (!empty($rule['playoff_source_divisions'])) {
+                $required = array_merge($required, $rule['playoff_source_divisions']);
+            }
+            $allPresent = true;
+            foreach ($required as $comp) {
+                if (!array_key_exists($comp, $snapshot->standingsByCompetition)) {
+                    $allPresent = false;
+                    break;
+                }
+            }
+            if ($allPresent) {
+                $applicable[] = $rule;
+            }
+        }
+        return $applicable;
     }
 
     // ──────────────────────────────────────────────────

@@ -58,6 +58,56 @@ class CountryPromotionRelegationPlannerTest extends TestCase
     }
 
     // ──────────────────────────────────────────────────
+    // Legacy game: tier(s) referenced by a rule are absent from the snapshot
+    // (e.g. ESP3A/ESP3B never existed for a 140-season-old game predating
+    // Primera RFEF). The rule is dropped; rules whose tiers all exist still
+    // run.
+    // ──────────────────────────────────────────────────
+
+    public function test_rule_skipped_when_bottom_division_absent_from_snapshot(): void
+    {
+        $esp1 = $this->ids(20, 'a1');
+        $esp2 = $this->ids(22, 'a2');
+
+        // ESP3A and ESP3B intentionally omitted — the snapshot builder
+        // skipped them because the game has no CompetitionEntry rows for
+        // them.
+        $snapshot = new CountrySeasonSnapshot(
+            countryCode: 'ES',
+            standingsByCompetition: [
+                'ESP1' => $esp1,
+                'ESP2' => $esp2,
+            ],
+            reserveToParent: [],
+            playoffStates: [
+                'ESP2' => PlayoffState::NotStarted,
+                'ESP3PO' => PlayoffState::NotStarted,
+            ],
+        );
+
+        $plan = $this->planner->planFromSnapshot($snapshot, $this->spainConfig);
+
+        // Rule #1 (ESP1↔ESP2) still runs: 3 down, 3 up (2 direct + 1 playoff
+        // stand-in). Rule #2 (ESP2↔ESP3A/ESP3B) is dropped entirely because
+        // ESP3A and ESP3B aren't in the snapshot.
+        $this->assertCount(3, $plan->promotionsInto('ESP1'));
+        $this->assertCount(3, $plan->relegationsInto('ESP2'));
+
+        foreach ($plan->moves as $move) {
+            $this->assertNotContains(
+                $move->fromCompetitionId,
+                ['ESP3A', 'ESP3B'],
+                'No move should originate from an absent tier',
+            );
+            $this->assertNotContains(
+                $move->toCompetitionId,
+                ['ESP3A', 'ESP3B'],
+                'No move should land in an absent tier',
+            );
+        }
+    }
+
+    // ──────────────────────────────────────────────────
     // Happy path
     // ──────────────────────────────────────────────────
 

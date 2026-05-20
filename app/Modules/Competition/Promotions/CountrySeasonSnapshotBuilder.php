@@ -2,6 +2,7 @@
 
 namespace App\Modules\Competition\Promotions;
 
+use App\Models\CompetitionEntry;
 use App\Models\CupTie;
 use App\Models\Game;
 use App\Models\Team;
@@ -9,6 +10,7 @@ use App\Modules\Competition\Enums\PlayoffState;
 use App\Modules\Competition\Exceptions\TierStandingsMissingException;
 use App\Modules\Competition\Playoffs\PlayoffGeneratorFactory;
 use App\Modules\Competition\Services\CountryConfig;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Reads everything {@see CountryPromotionRelegationPlanner} needs to plan a
@@ -36,10 +38,27 @@ class CountrySeasonSnapshotBuilder
         $standingsByCompetition = [];
         foreach ($this->tierCompetitionIds($config) as $competitionId) {
             $entries = $this->standingsReader->read($game, $competitionId);
-            $standingsByCompetition[$competitionId] = array_column($entries, 'teamId');
-            if (empty($standingsByCompetition[$competitionId])) {
+
+            if (empty($entries)) {
+                // Distinguish two "empty" cases:
+                //  - No CompetitionEntry rows at all: the tier is structurally
+                //    absent from this game (e.g. a legacy game that predates a
+                //    later tier addition like Primera RFEF). Skip it — the
+                //    planner skips rules referencing tiers that aren't in the
+                //    snapshot.
+                //  - Entries exist but standings don't: real data drift, throw
+                //    so the operator can repair the standings before retrying.
+                if (!$this->hasAnyEntries($game, $competitionId)) {
+                    Log::info('[CountrySeasonSnapshotBuilder] Tier absent for game; skipping', [
+                        'game_id' => $game->id,
+                        'competition_id' => $competitionId,
+                    ]);
+                    continue;
+                }
                 throw TierStandingsMissingException::forCompetition($competitionId);
             }
+
+            $standingsByCompetition[$competitionId] = array_column($entries, 'teamId');
         }
 
         $this->assertTierStandingsMatchConfig($config, $standingsByCompetition);
@@ -114,10 +133,22 @@ class CountrySeasonSnapshotBuilder
         if ($expectedSize === null) {
             return;
         }
-        $actual = count($standingsByCompetition[$competitionId] ?? []);
+        // Tier absent for this game (legacy game predating the tier addition)
+        // was already skipped at read time — no size to compare.
+        if (!array_key_exists($competitionId, $standingsByCompetition)) {
+            return;
+        }
+        $actual = count($standingsByCompetition[$competitionId]);
         if ($actual !== $expectedSize) {
             throw TierStandingsMissingException::sizeMismatch($competitionId, $actual, $expectedSize);
         }
+    }
+
+    private function hasAnyEntries(Game $game, string $competitionId): bool
+    {
+        return CompetitionEntry::where('game_id', $game->id)
+            ->where('competition_id', $competitionId)
+            ->exists();
     }
 
     /**
