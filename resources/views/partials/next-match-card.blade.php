@@ -22,13 +22,6 @@
         <x-match-card-header :match="$nextMatch" :tournament-mode="$game->isTournamentMode()" />
     </div>
 
-    {{-- First Leg Score (cup ties) --}}
-    @if($firstLegScore)
-        <div class="px-4 pt-3 md:px-6 text-center">
-            <span class="text-xs text-text-muted font-medium">1st leg: {{ $firstLegScore }}</span>
-        </div>
-    @endif
-
     {{-- Team Face-Off --}}
     <div class="px-4 py-5 md:px-6 md:py-6">
         <div class="flex items-start justify-center gap-3 md:gap-6">
@@ -42,6 +35,12 @@
 
             <div class="flex flex-col items-center justify-center pt-4 md:pt-6 shrink-0">
                 <span class="text-lg md:text-2xl font-black text-text-body tracking-tight">{{ __('game.vs') }}</span>
+                @if($firstLegScore)
+                    <div class="mt-2 md:mt-3 text-center">
+                        <div class="text-[10px] font-semibold text-text-muted uppercase tracking-wider">{{ __('cup.first_leg') }}</div>
+                        <div class="text-sm md:text-base font-heading font-bold text-text-secondary tabular-nums whitespace-nowrap leading-none mt-1">{{ $firstLegScore }}</div>
+                    </div>
+                @endif
             </div>
 
             @include('partials.next-match-team-block', [

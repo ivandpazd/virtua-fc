@@ -31,6 +31,7 @@ return [
     'pens' => 'Pen:',
     'aet' => 'Prórroga',
     'agg' => 'Agg:',
+    'first_leg' => 'Ida',
     'higher_seed' => 'Mejor clasificación liguera',
 
     // Legend

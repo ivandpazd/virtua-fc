@@ -31,6 +31,7 @@ return [
     'pens' => 'Pens:',
     'aet' => 'AET',
     'agg' => 'Agg:',
+    'first_leg' => '1st leg',
     'higher_seed' => 'Higher league finish',
 
     // Legend

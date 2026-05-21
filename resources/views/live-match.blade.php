@@ -215,6 +215,16 @@
                                     (<span x-text="penaltyHomeScore"></span> - <span x-text="penaltyAwayScore"></span> {{ __('game.live_pen_abbr') }})
                                 </div>
                             </template>
+                            {{-- Two-legged tie: first leg result + live aggregate --}}
+                            <template x-if="twoLeggedInfo">
+                                <div class="text-center text-xs font-semibold text-text-muted mt-1.5 tabular-nums">
+                                    <span>{{ __('cup.first_leg') }}</span>
+                                    <span x-text="twoLeggedInfo.firstLegHomeScore + '–' + twoLeggedInfo.firstLegAwayScore"></span>
+                                    <span class="mx-1">·</span>
+                                    <span>{{ __('cup.agg') }}</span>
+                                    <span x-text="(twoLeggedInfo.firstLegHomeScore + awayScore) + '–' + (twoLeggedInfo.firstLegAwayScore + homeScore)"></span>
+                                </div>
+                            </template>
                         </div>
 
                         <div class="flex items-center gap-2 md:gap-3 flex-1">
