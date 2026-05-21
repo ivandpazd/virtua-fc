@@ -351,10 +351,12 @@ export function generateContextualNarratives(config) {
         homeArticle, awayArticle,
         venueName, narrativeTemplates, allEvents,
         isKnockout, isTwoLeggedTie,
+        isNeutralVenue,
     } = config;
 
     const venue = venueName || '';
     const noVenue = !venueName;
+    const hasHomeAdvantage = !isNeutralVenue;
     const homeForms = buildTeamForms(homeTeamName, homeArticle);
     const awayForms = buildTeamForms(awayTeamName, awayArticle);
     const events = [];
@@ -472,14 +474,28 @@ export function generateContextualNarratives(config) {
                 templateKey = 'contextualAwayLeading';
             }
 
-            // Occasionally inject fan/crowd narrative instead (~25% chance)
-            if (Math.random() < 0.25) {
+            // Occasionally inject fan/crowd narrative instead (~25% chance).
+            // Skip at neutral venues — the home/away fans pools assume a
+            // home crowd and travelling support, which doesn't apply when
+            // neither team has home-field advantage (World Cup, neutral cup
+            // finals, etc.).
+            if (hasHomeAdvantage && Math.random() < 0.25) {
                 templateKey = Math.random() < 0.5 ? 'contextualHomeFans' : 'contextualAwayFans';
             }
         }
 
-        const templates = narrativeTemplates[templateKey];
-        if (!templates || !templates.length) continue;
+        // Combine base pool with the home-advantage-only variant when the
+        // home team actually plays at their own ground. At neutral venues,
+        // only the base (venue-agnostic) lines are eligible.
+        const baseTemplates = narrativeTemplates[templateKey] || [];
+        const homeOnlyKey = templateKey + 'HomeOnly';
+        const homeOnlyTemplates = hasHomeAdvantage
+            ? (narrativeTemplates[homeOnlyKey] || [])
+            : [];
+        const templates = homeOnlyTemplates.length
+            ? [...baseTemplates, ...homeOnlyTemplates]
+            : baseTemplates;
+        if (!templates.length) continue;
 
         const narrative = pickNarrative(templates, extraReplacements, { excludeVenue: noVenue });
         if (!narrative) continue;

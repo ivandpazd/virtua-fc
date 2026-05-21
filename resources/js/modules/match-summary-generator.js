@@ -167,7 +167,10 @@ export function generateMatchSummary(config) {
         competitionName,
         homeForm, awayForm,
         homePosition, awayPosition,
+        isNeutralVenue,
     } = config;
+
+    const hasHomeAdvantage = !isNeutralVenue;
 
     const homeForms = buildTeamForms(homeTeamName, homeArticle);
     const awayForms = buildTeamForms(awayTeamName, awayArticle);
@@ -379,10 +382,19 @@ function buildOpening(t, replacements, ctx) {
         return pickTemplate(t.summaryOpeningNarrowWin, replacements);
     }
 
+    // Combine base pool with the home-advantage-only variant when the home
+    // team actually plays at their own ground. At neutral venues (World Cup,
+    // neutral cup finals, etc.) only the venue-agnostic base lines are
+    // eligible — phrases like "fans celebrate a home victory" or "win at
+    // :home's ground" don't apply when no team has home-field advantage.
     if (winnerId === homeTeamId) {
-        return pickTemplate(t.summaryOpeningHomeWin, replacements);
+        const homeOnly = hasHomeAdvantage ? (t.summaryOpeningHomeWinHomeOnly || []) : [];
+        const pool = homeOnly.length ? [...t.summaryOpeningHomeWin, ...homeOnly] : t.summaryOpeningHomeWin;
+        return pickTemplate(pool, replacements);
     }
-    return pickTemplate(t.summaryOpeningAwayWin, replacements);
+    const homeOnly = hasHomeAdvantage ? (t.summaryOpeningAwayWinHomeOnly || []) : [];
+    const pool = homeOnly.length ? [...t.summaryOpeningAwayWin, ...homeOnly] : t.summaryOpeningAwayWin;
+    return pickTemplate(pool, replacements);
 }
 
 function buildGoalNarrative(t, replacements, ctx) {

@@ -44,12 +44,18 @@ return [
         'Dominio claro :del_home, que maneja el partido a su antojo',
         'Buen partido :del_home que tiene el marcador a favor',
         ':el_home cómodo con la ventaja en el :venue',
+    ],
+    // Variantes con connotación de localía — solo se usan cuando hay ventaja de campo
+    'contextual_home_leading_home_only' => [
         'Los locales hacen todo bien hasta ahora, :el_home merece ir por delante',
     ],
     'contextual_away_leading' => [
         ':el_away está haciendo un gran partido en el :venue',
-        ':el_away sorprende :al_home en su propio estadio',
         'Difícil se le pone el partido :al_home, que va por detrás en el marcador',
+    ],
+    // Variantes con connotación de localía — solo se usan cuando hay ventaja de campo
+    'contextual_away_leading_home_only' => [
+        ':el_away sorprende :al_home en su propio estadio',
         ':el_away acallando al público del :venue con una gran actuación',
         'Exhibición visitante, :el_away lidera el encuentro fuera de casa',
     ],
@@ -58,6 +64,9 @@ return [
         'Presión :del_home, que busca el gol con mucha intensidad',
         'Mucho :home en estos minutos, con llegadas constantes al área rival',
         ':el_home asfixia :al_away en su propia área, oleadas de ataque',
+    ],
+    // Variantes con connotación de localía — solo se usan cuando hay ventaja de campo
+    'contextual_home_dominant_home_only' => [
         'Los visitantes no pueden salir de su campo, :el_home aprieta sin descanso',
     ],
     'contextual_away_dominant' => [

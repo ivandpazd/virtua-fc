@@ -79,6 +79,7 @@
                 homeLineupRoster: {{ Js::from($homeLineupDisplay) }},
                 awayLineupRoster: {{ Js::from($awayLineupDisplay) }},
                 venueName: {{ Js::from($match->venueName() ?? '') }},
+                isNeutralVenue: @js($match->isNeutralVenue()),
                 venueEnPhrase: {{ Js::from(\App\Support\StadiumGrammar::withEn($match->venueName() ?? '')) }},
                 venueElPhrase: {{ Js::from(\App\Support\StadiumGrammar::withEl($match->venueName() ?? '')) }},
                 venueDePhrase: {{ Js::from(\App\Support\StadiumGrammar::withDe($match->venueName() ?? '')) }},

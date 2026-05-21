@@ -146,6 +146,7 @@ export default function liveMatch(config) {
         homeLineupRoster: config.homeLineupRoster || [],
         awayLineupRoster: config.awayLineupRoster || [],
         venueName: config.venueName || '',
+        isNeutralVenue: config.isNeutralVenue ?? false,
         venueEnPhrase: config.venueEnPhrase || '',
         venueElPhrase: config.venueElPhrase || '',
         venueDePhrase: config.venueDePhrase || '',

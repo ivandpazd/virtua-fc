@@ -22,13 +22,19 @@ return [
         ':home win :en_venue against :away (:score).',
         'Victory for :home :en_venue against :away (:score).',
         ':home prevail :en_venue against :away (:score).',
-        ':home fans celebrate a victory against :away (:score).',
         'Victory for :home against :away (:score).',
+    ],
+    // Variants with home-field connotation — only used when home advantage applies
+    'opening_home_win_home_only' => [
+        ':home fans celebrate a victory against :away (:score).',
     ],
     'opening_away_win' => [
         ':away win :en_venue and take the match (:score).',
-        'Away victory for :away at :home\'s ground (:score).',
         ':away do the business :en_venue against :home (:score).',
+    ],
+    // Variants with home-field connotation — only used when home advantage applies
+    'opening_away_win_home_only' => [
+        'Away victory for :away at :home\'s ground (:score).',
     ],
     'opening_blowout' => [
         ':winner demolish :loser :en_venue (:score) with a great performance.',

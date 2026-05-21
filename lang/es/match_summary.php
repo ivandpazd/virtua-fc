@@ -22,13 +22,19 @@ return [
         ':el_home gana :en_venue frente :al_away (:score).',
         'Victoria :del_home :en_venue frente :al_away (:score).',
         ':el_home se impone :al_away :en_venue (:score).',
-        'Los aficionados :del_home celebran la victoria contra :el_away (:score)',
         'Victoria :del_home frente :al_away (:score).',
+    ],
+    // Variantes con connotación de localía — solo se usan cuando hay ventaja de campo
+    'opening_home_win_home_only' => [
+        'Los aficionados :del_home celebran la victoria contra :el_away (:score)',
     ],
     'opening_away_win' => [
         ':el_away gana :en_venue y se lleva el partido (:score).',
-        'Victoria :del_away en casa :del_home (:score).',
         ':el_away se lleva el gato al agua :en_venue ante :el_home (:score).',
+    ],
+    // Variantes con connotación de localía — solo se usan cuando hay ventaja de campo
+    'opening_away_win_home_only' => [
+        'Victoria :del_away en casa :del_home (:score).',
     ],
     'opening_blowout' => [
         ':el_winner arrolla :al_loser :en_venue (:score) haciendo un gran partido.',

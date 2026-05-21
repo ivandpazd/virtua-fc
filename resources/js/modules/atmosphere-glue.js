@@ -24,6 +24,7 @@ export function createAtmosphereGlue(ctx) {
             homeScore: c.finalHomeScore,
             awayScore: c.finalAwayScore,
             venueName: c.venueName,
+            isNeutralVenue: c.isNeutralVenue ?? false,
             venueEnPhrase: c.venueEnPhrase,
             venueElPhrase: c.venueElPhrase,
             venueDePhrase: c.venueDePhrase,

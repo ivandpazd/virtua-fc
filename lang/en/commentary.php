@@ -44,12 +44,18 @@ return [
         'Clear dominance from :home, who are running the show',
         'Good performance from :home who have the lead',
         ':home looking comfortable with the advantage at :venue',
+    ],
+    // Variants with home-field connotation — only used when home advantage applies
+    'contextual_home_leading_home_only' => [
         'The home side doing everything right so far, :home deservedly ahead',
     ],
     'contextual_away_leading' => [
         ':away are having a great game at :venue',
-        ':away have stunned :home at their own ground',
         'It\'s getting difficult for :home, who trail on the scoreboard',
+    ],
+    // Variants with home-field connotation — only used when home advantage applies
+    'contextual_away_leading_home_only' => [
+        ':away have stunned :home at their own ground',
         ':away silencing the home crowd with a strong display at :venue',
         'Impressive stuff from :away, who lead away from home',
     ],
@@ -58,6 +64,9 @@ return [
         ':home pushing hard for a goal, wave after wave of attacks',
         'All :home in these minutes, constant pressure on the opposition goal',
         ':home camped in the opposition half, relentless in their attacking',
+    ],
+    // Variants with home-field connotation — only used when home advantage applies
+    'contextual_home_dominant_home_only' => [
         'The visitors can barely get out of their own half, :home turning the screw',
     ],
     'contextual_away_dominant' => [
