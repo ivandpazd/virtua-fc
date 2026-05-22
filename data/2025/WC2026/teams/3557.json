@@ -1,289 +1,369 @@
 {
-  "image": "https://tmssl.akamaized.net/images/wappen/big/3557.png",
+  "image": "https://assets.virtuafc.com/crests/3557.png",
   "name": "Sweden",
   "players": [
     {
-      "contract": "Mar 26, 2026",
-      "dateOfBirth": "May 22, 2003",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/512.png",
+        "name": "Stoke City"
+      },
+      "dateOfBirth": "Sep 14, 1998",
       "foot": "right",
-      "height": "1,91m",
-      "id": "605426",
-      "marketValue": "€3.00m",
-      "name": "Melker Ellborg",
-      "number": "1",
+      "height": "1,87m",
+      "id": "273742",
+      "injured": false,
+      "marketValue": "€12.00m",
+      "name": "Viktor Johansson",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Mar 26, 2026",
-      "dateOfBirth": "Feb 1, 2002",
-      "foot": "left",
-      "height": "1,95m",
-      "id": "730531",
-      "marketValue": "€2.00m",
-      "name": "Noel Törnqvist",
-      "number": "12",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/22.png",
+        "name": "Derby County"
+      },
+      "dateOfBirth": "Jul 11, 1998",
+      "foot": "right",
+      "height": "1,97m",
+      "id": "549440",
+      "injured": false,
+      "marketValue": "€2.50m",
+      "name": "Jacob Widell Zetterström",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Jan 22, 2011",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/272.png",
+        "name": "AIK"
+      },
       "dateOfBirth": "Jun 23, 1989",
       "foot": "right",
       "height": "1,90m",
       "id": "75890",
+      "injured": false,
       "marketValue": "€175k",
       "name": "Kristoffer Nordfeldt",
-      "number": "23",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Sep 24, 2022",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/800.png",
+        "name": "Atalanta BC"
+      },
       "dateOfBirth": "Jan 13, 1999",
       "foot": "right",
       "height": "1,91m",
       "id": "503075",
+      "injured": false,
       "marketValue": "€22.00m",
       "name": "Isak Hien",
-      "number": "4",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 24, 2016",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/405.png",
+        "name": "Aston Villa"
+      },
       "dateOfBirth": "Jul 17, 1994",
       "foot": "right",
       "height": "1,87m",
       "id": "184573",
+      "injured": false,
       "marketValue": "€6.00m",
       "name": "Victor Lindelöf",
-      "number": "3",
       "position": "Centre-Back"
     },
     {
-      "contract": "Jan 12, 2023",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1132.png",
+        "name": "Burnley FC"
+      },
+      "dateOfBirth": "Oct 21, 1998",
+      "foot": "right",
+      "height": "1,87m",
+      "id": "392179",
+      "injured": false,
+      "marketValue": "€6.00m",
+      "name": "Hjalmar Ekdal",
+      "position": "Centre-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1075.png",
+        "name": "SC Braga"
+      },
       "dateOfBirth": "Apr 10, 2000",
       "foot": "right",
       "height": "1,93m",
       "id": "485395",
+      "injured": false,
       "marketValue": "€5.00m",
       "name": "Gustaf Lagerbielke",
-      "number": "2",
       "position": "Centre-Back"
     },
     {
-      "contract": "Oct 8, 2020",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/940.png",
+        "name": "Celta de Vigo"
+      },
       "dateOfBirth": "Jun 1, 1995",
       "foot": "right",
       "height": "1,87m",
       "id": "258987",
+      "injured": false,
       "marketValue": "€5.00m",
       "name": "Carl Starfelt",
-      "number": "6",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 26, 2026",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/35.png",
+        "name": "FC St. Pauli"
+      },
       "dateOfBirth": "Jan 8, 1997",
       "foot": "right",
       "height": "1,92m",
       "id": "292534",
+      "injured": false,
       "marketValue": "€5.00m",
       "name": "Eric Smith",
-      "number": "14",
       "position": "Centre-Back"
     },
     {
-      "contract": "Oct 14, 2024",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/16.png",
+        "name": "Borussia Dortmund"
+      },
       "dateOfBirth": "Feb 12, 2002",
       "foot": "left",
       "height": "1,83m",
       "id": "579287",
+      "injured": false,
       "marketValue": "€22.00m",
       "name": "Daniel Svensson",
-      "number": "8",
       "position": "Left-Back"
     },
     {
-      "contract": "Jun 9, 2022",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/399.png",
+        "name": "Leeds United"
+      },
       "dateOfBirth": "Apr 29, 1999",
       "foot": "left",
       "height": "1,80m",
       "id": "362108",
+      "injured": false,
       "marketValue": "€20.00m",
       "name": "Gabriel Gudmundsson",
-      "number": "5",
       "position": "Left-Back"
     },
     {
-      "contract": "Jan 11, 2018",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/45457.png",
+        "name": "Pafos FC"
+      },
+      "dateOfBirth": "Sep 30, 1993",
+      "foot": "left",
+      "height": "1,80m",
+      "id": "252345",
+      "injured": false,
+      "marketValue": "€1.00m",
+      "name": "Ken Sema",
+      "position": "Left-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/506.png",
+        "name": "Juventus FC"
+      },
+      "dateOfBirth": "May 13, 2000",
+      "foot": "right",
+      "height": "1,91m",
+      "id": "496745",
+      "injured": false,
+      "marketValue": "€13.00m",
+      "name": "Emil Holm",
+      "position": "Right-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/410.png",
+        "name": "Udinese Calcio"
+      },
       "dateOfBirth": "Jun 21, 1995",
       "foot": "right",
       "height": "1,85m",
       "id": "222855",
+      "injured": false,
       "marketValue": "€4.00m",
       "name": "Jesper Karlström",
-      "number": "16",
       "position": "Defensive Midfield"
     },
     {
-      "contract": "Jan 12, 2024",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/148.png",
+        "name": "Tottenham Hotspur"
+      },
       "dateOfBirth": "Feb 2, 2006",
       "foot": "right",
       "height": "1,87m",
       "id": "866246",
+      "injured": false,
       "marketValue": "€40.00m",
       "name": "Lucas Bergvall",
-      "number": "7",
       "position": "Central Midfield"
     },
     {
-      "contract": "Jan 9, 2023",
-      "dateOfBirth": "Jun 27, 2004",
-      "foot": "right",
-      "height": "1,87m",
-      "id": "931838",
-      "marketValue": "€32.00m",
-      "name": "Hugo Larsson",
-      "number": "20",
-      "position": "Central Midfield"
-    },
-    {
-      "contract": "Jan 9, 2023",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1237.png",
+        "name": "Brighton & Hove Albion"
+      },
       "dateOfBirth": "Oct 6, 2003",
       "foot": "right",
       "height": "1,72m",
       "id": "667287",
+      "injured": false,
       "marketValue": "€30.00m",
       "name": "Yasin Ayari",
-      "number": "18",
       "position": "Central Midfield"
     },
     {
-      "contract": "Nov 18, 2019",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/82.png",
+        "name": "VfL Wolfsburg"
+      },
       "dateOfBirth": "Jan 5, 1999",
       "foot": "right",
       "height": "1,85m",
       "id": "342405",
+      "injured": false,
       "marketValue": "€9.00m",
       "name": "Mattias Svanberg",
-      "number": "15",
       "position": "Central Midfield"
     },
     {
-      "contract": "Mar 22, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/3948.png",
+        "name": "Union Saint-Gilloise"
+      },
       "dateOfBirth": "Nov 21, 2002",
       "foot": "right",
       "height": "1,87m",
       "id": "715653",
+      "injured": false,
       "marketValue": "€4.50m",
       "name": "Besfort Zeneli",
-      "number": "21",
       "position": "Central Midfield"
     },
     {
-      "dateOfBirth": "Oct 16, 1997",
-      "foot": "right",
-      "height": "1,90m",
-      "id": "744853",
-      "marketValue": "€1.80m",
-      "name": "Herman Johansson",
-      "number": "26",
-      "position": "Right Midfield"
-    },
-    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/2719.png",
+        "name": "Mjällby AIF"
+      },
       "dateOfBirth": "Jun 22, 2002",
       "foot": "left",
       "height": "1,85m",
       "id": "687622",
+      "injured": false,
       "marketValue": "€3.00m",
       "name": "Elliot Stroud",
-      "number": "25",
       "position": "Left Midfield"
     },
     {
-      "contract": "Jun 8, 2024",
-      "dateOfBirth": "Feb 1, 2004",
-      "foot": "right",
-      "height": "1,87m",
-      "id": "764859",
-      "marketValue": "€15.00m",
-      "name": "Williot Swedberg",
-      "number": "22",
-      "position": "Left Winger"
-    },
-    {
-      "contract": "Jan 12, 2024",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/496.png",
+        "name": "Malmö FF"
+      },
       "dateOfBirth": "Jul 1, 1998",
       "foot": "right",
       "height": "1,74m",
       "id": "731771",
+      "injured": false,
       "marketValue": "€1.20m",
       "name": "Taha Ali",
-      "number": "24",
       "position": "Left Winger"
     },
     {
-      "contract": "Mar 24, 2022",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/762.png",
+        "name": "Newcastle United"
+      },
       "dateOfBirth": "Apr 27, 2002",
       "foot": "right",
       "height": "1,78m",
       "id": "583189",
+      "injured": false,
       "marketValue": "€40.00m",
       "name": "Anthony Elanga",
-      "number": "11",
       "position": "Right Winger"
     },
     {
-      "contract": "Oct 10, 2025",
-      "dateOfBirth": "Nov 15, 2005",
-      "foot": "left",
-      "height": "1,73m",
-      "id": "792331",
-      "marketValue": "€15.00m",
-      "name": "Roony Bardghji",
-      "number": "19",
-      "position": "Right Winger"
-    },
-    {
-      "contract": "Mar 22, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/371.png",
+        "name": "Celtic FC"
+      },
       "dateOfBirth": "Jul 8, 2001",
       "foot": "left",
       "height": "1,88m",
       "id": "475949",
-      "marketValue": "€10.00m",
+      "injured": false,
+      "marketValue": "€14.00m",
       "name": "Benjamin Nygren",
-      "number": "10",
       "position": "Right Winger"
     },
     {
-      "contract": "Nov 18, 2025",
-      "dateOfBirth": "Apr 18, 1995",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/269.png",
+        "name": "Holstein Kiel"
+      },
+      "dateOfBirth": "Sep 8, 1998",
       "foot": "left",
-      "height": "1,90m",
-      "id": "987325",
-      "marketValue": "€1.30m",
-      "name": "Gustav Lundgren",
-      "number": "13",
+      "height": "1,85m",
+      "id": "633454",
+      "injured": false,
+      "marketValue": "€3.00m",
+      "name": "Alexander Bernhardsson",
       "position": "Right Winger"
     },
     {
-      "contract": "Jan 8, 2019",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/31.png",
+        "name": "Liverpool FC"
+      },
+      "dateOfBirth": "Sep 21, 1999",
+      "foot": "right",
+      "height": "1,92m",
+      "id": "349066",
+      "injured": false,
+      "marketValue": "€100.00m",
+      "name": "Alexander Isak",
+      "position": "Centre-Forward"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/11.png",
+        "name": "Arsenal FC"
+      },
       "dateOfBirth": "Jun 4, 1998",
       "foot": "right",
       "height": "1,89m",
       "id": "325443",
+      "injured": false,
       "marketValue": "€65.00m",
       "name": "Viktor Gyökeres",
-      "number": "17",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Jan 7, 2018",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/2282.png",
+        "name": "Club Brugge KV"
+      },
       "dateOfBirth": "May 23, 1997",
       "foot": "right",
       "height": "1,96m",
       "id": "320440",
+      "injured": false,
       "marketValue": "€2.00m",
       "name": "Gustaf Nilsson",
-      "number": "9",
       "position": "Centre-Forward"
     }
   ],

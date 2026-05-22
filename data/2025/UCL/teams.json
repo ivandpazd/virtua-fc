@@ -14,7 +14,7 @@
         { "id": "131", "name": "Barcelona", "country": "ES", "pot": 1 },
 
         { "id": "11", "name": "Arsenal", "country": "EN", "pot": 2 },
-        { "id": "15", "name": "Bayer Leverkusen", "country": "DE", "pot": 2 },
+        { "id": "15", "name": "Bayer 04 Leverkusen", "country": "DE", "pot": 2 },
         { "id": "13", "name": "Atlético de Madrid", "country": "ES", "pot": 2 },
         { "id": "294", "name": "Benfica", "country": "PT", "pot": 2 },
         { "id": "800", "name": "Atalanta", "country": "IT", "pot": 2 },

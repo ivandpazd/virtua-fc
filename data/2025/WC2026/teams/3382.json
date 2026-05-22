@@ -1,266 +1,369 @@
 {
-  "image": "https://tmssl.akamaized.net/images/wappen/big/3382.png",
+  "image": "https://assets.virtuafc.com/crests/3382.png",
   "name": "Belgium",
   "players": [
     {
-      "contract": "Nov 18, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/985.png",
+        "name": "Manchester United"
+      },
       "dateOfBirth": "Jul 7, 2002",
       "foot": "right",
       "height": "1,93m",
       "id": "503883",
-      "marketValue": "€25.00m",
+      "injured": false,
+      "marketValue": "€30.00m",
       "name": "Senne Lammens",
-      "number": "1",
       "position": "Goalkeeper"
     },
     {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/667.png",
+        "name": "RC Strasbourg Alsace"
+      },
       "dateOfBirth": "Jul 31, 2005",
       "foot": "left",
       "height": "2,00m",
       "id": "834397",
-      "marketValue": "€15.00m",
+      "injured": false,
+      "marketValue": "€22.00m",
       "name": "Mike Penders",
-      "number": "12",
       "position": "Goalkeeper"
     },
     {
-      "dateOfBirth": "Feb 26, 2002",
-      "foot": "right",
-      "height": "1,92m",
-      "id": "486046",
-      "marketValue": "€8.00m",
-      "name": "Maarten Vandevoordt",
-      "position": "Goalkeeper"
-    },
-    {
-      "contract": "Jun 3, 2021",
-      "dateOfBirth": "Feb 26, 1992",
-      "foot": "right",
-      "height": "1,88m",
-      "id": "127202",
-      "marketValue": "€6.00m",
-      "name": "Matz Sels",
-      "number": "13",
-      "position": "Goalkeeper"
-    },
-    {
-      "contract": "Nov 16, 2021",
-      "dateOfBirth": "May 25, 2000",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/418.png",
+        "name": "Real Madrid"
+      },
+      "dateOfBirth": "May 11, 1992",
       "foot": "left",
-      "height": "1,85m",
-      "id": "368891",
-      "marketValue": "€24.00m",
-      "name": "Arthur Theate",
-      "number": "3",
+      "height": "2,00m",
+      "id": "108390",
+      "injured": false,
+      "marketValue": "€18.00m",
+      "name": "Thibaut Courtois",
+      "position": "Goalkeeper"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/336.png",
+        "name": "Sporting CP"
+      },
+      "dateOfBirth": "Oct 24, 2003",
+      "foot": "right",
+      "height": "1,91m",
+      "id": "548193",
+      "injured": false,
+      "marketValue": "€30.00m",
+      "name": "Zeno Debast",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 23, 2024",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/5.png",
+        "name": "AC Milan"
+      },
       "dateOfBirth": "Jun 12, 2002",
       "foot": "right",
       "height": "1,91m",
       "id": "490384",
-      "marketValue": "€20.00m",
+      "injured": false,
+      "marketValue": "€23.00m",
       "name": "Koni De Winter",
-      "number": "16",
       "position": "Centre-Back"
     },
     {
-      "contract": "Oct 13, 2019",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/24.png",
+        "name": "Eintracht Frankfurt"
+      },
+      "dateOfBirth": "May 25, 2000",
+      "foot": "left",
+      "height": "1,85m",
+      "id": "368891",
+      "injured": false,
+      "marketValue": "€20.00m",
+      "name": "Arthur Theate",
+      "position": "Centre-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1082.png",
+        "name": "LOSC Lille"
+      },
+      "dateOfBirth": "Jun 10, 2003",
+      "foot": "right",
+      "height": "1,83m",
+      "id": "548254",
+      "injured": false,
+      "marketValue": "€20.00m",
+      "name": "Nathan Ngoy",
+      "position": "Centre-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/2282.png",
+        "name": "Club Brugge KV"
+      },
       "dateOfBirth": "Jan 28, 1993",
       "foot": "right",
       "height": "1,90m",
       "id": "236168",
+      "injured": false,
       "marketValue": "€3.00m",
       "name": "Brandon Mechele",
-      "number": "4",
       "position": "Centre-Back"
     },
     {
-      "contract": "Jun 5, 2024",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1237.png",
+        "name": "Brighton & Hove Albion"
+      },
       "dateOfBirth": "Dec 22, 2000",
       "foot": "left",
       "height": "1,82m",
       "id": "429915",
+      "injured": false,
       "marketValue": "€22.00m",
       "name": "Maxim De Cuyper",
-      "number": "5",
       "position": "Left-Back"
     },
     {
-      "contract": "Oct 10, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/2282.png",
+        "name": "Club Brugge KV"
+      },
       "dateOfBirth": "Mar 28, 2005",
       "foot": "left",
       "height": "1,78m",
       "id": "981196",
-      "marketValue": "€15.00m",
+      "injured": false,
+      "marketValue": "€17.00m",
       "name": "Joaquin Seys",
-      "number": "2",
       "position": "Left-Back"
     },
     {
-      "contract": "Sep 7, 2018",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/931.png",
+        "name": "Fulham FC"
+      },
       "dateOfBirth": "Dec 5, 1995",
       "foot": "right",
       "height": "1,85m",
       "id": "262226",
+      "injured": false,
       "marketValue": "€10.00m",
       "name": "Timothy Castagne",
-      "number": "21",
       "position": "Right-Back"
     },
     {
-      "contract": "Nov 14, 2013",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1082.png",
+        "name": "LOSC Lille"
+      },
       "dateOfBirth": "Sep 12, 1991",
       "foot": "right",
       "height": "1,91m",
       "id": "100986",
+      "injured": false,
       "marketValue": "€1.80m",
       "name": "Thomas Meunier",
-      "number": "15",
       "position": "Right-Back"
     },
     {
-      "contract": "Mar 20, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/405.png",
+        "name": "Aston Villa"
+      },
+      "dateOfBirth": "Aug 16, 2001",
+      "foot": "right",
+      "height": "1,95m",
+      "id": "485706",
+      "injured": false,
+      "marketValue": "€45.00m",
+      "name": "Amadou Onana",
+      "position": "Defensive Midfield"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/124.png",
+        "name": "Rangers FC"
+      },
       "dateOfBirth": "Feb 23, 2001",
       "foot": "right",
       "height": "1,78m",
       "id": "422763",
+      "injured": false,
       "marketValue": "€12.00m",
       "name": "Nicolas Raskin",
-      "number": "23",
       "position": "Defensive Midfield"
     },
     {
-      "contract": "Sep 7, 2025",
-      "dateOfBirth": "Sep 16, 1998",
-      "foot": "right",
-      "height": "1,82m",
-      "id": "569845",
-      "marketValue": "€7.00m",
-      "name": "Charles Vanhoutte",
-      "number": "18",
-      "position": "Defensive Midfield"
-    },
-    {
-      "contract": "Mar 26, 2008",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/12321.png",
+        "name": "Girona FC"
+      },
       "dateOfBirth": "Jan 12, 1989",
       "foot": "right",
       "height": "1,86m",
       "id": "35047",
+      "injured": false,
       "marketValue": "€1.40m",
       "name": "Axel Witsel",
-      "number": "6",
       "position": "Defensive Midfield"
     },
     {
-      "contract": "Nov 9, 2016",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/405.png",
+        "name": "Aston Villa"
+      },
       "dateOfBirth": "May 7, 1997",
       "foot": "right",
       "height": "1,77m",
       "id": "249565",
+      "injured": false,
       "marketValue": "€35.00m",
       "name": "Youri Tielemans",
-      "number": "8",
       "position": "Central Midfield"
     },
     {
-      "contract": "Oct 8, 2020",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/5.png",
+        "name": "AC Milan"
+      },
       "dateOfBirth": "Jun 27, 1999",
       "foot": "right",
       "height": "1,80m",
       "id": "381950",
+      "injured": false,
       "marketValue": "€25.00m",
       "name": "Alexis Saelemaekers",
-      "number": "22",
       "position": "Right Midfield"
     },
     {
-      "contract": "Sep 4, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/667.png",
+        "name": "RC Strasbourg Alsace"
+      },
       "dateOfBirth": "Aug 6, 2004",
       "foot": "left",
       "height": "1,79m",
       "id": "655006",
-      "marketValue": "€18.00m",
+      "injured": false,
+      "marketValue": "€25.00m",
       "name": "Diego Moreira",
-      "number": "7",
       "position": "Left Midfield"
     },
     {
-      "contract": "Nov 11, 2020",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/800.png",
+        "name": "Atalanta BC"
+      },
       "dateOfBirth": "Mar 10, 2001",
       "foot": "left",
       "height": "1,92m",
       "id": "435772",
+      "injured": false,
       "marketValue": "€35.00m",
       "name": "Charles De Ketelaere",
-      "number": "17",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Sep 7, 2018",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/6195.png",
+        "name": "SSC Napoli"
+      },
+      "dateOfBirth": "Jun 28, 1991",
+      "foot": "right",
+      "height": "1,81m",
+      "id": "88755",
+      "injured": false,
+      "marketValue": "€10.00m",
+      "name": "Kevin De Bruyne",
+      "position": "Attacking Midfield"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/2282.png",
+        "name": "Club Brugge KV"
+      },
       "dateOfBirth": "Aug 24, 1992",
       "foot": "right",
       "height": "1,95m",
       "id": "137576",
+      "injured": false,
       "marketValue": "€6.00m",
       "name": "Hans Vanaken",
-      "number": "20",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Sep 5, 2020",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/281.png",
+        "name": "Manchester City"
+      },
       "dateOfBirth": "May 27, 2002",
       "foot": "right",
       "height": "1,73m",
       "id": "486049",
+      "injured": false,
       "marketValue": "€65.00m",
       "name": "Jérémy Doku",
-      "number": "11",
       "position": "Left Winger"
     },
     {
-      "contract": "Sep 5, 2020",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/11.png",
+        "name": "Arsenal FC"
+      },
       "dateOfBirth": "Dec 4, 1994",
       "foot": "right",
       "height": "1,72m",
       "id": "144028",
+      "injured": false,
       "marketValue": "€20.00m",
       "name": "Leandro Trossard",
-      "number": "10",
       "position": "Left Winger"
     },
     {
-      "contract": "Nov 11, 2020",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/294.png",
+        "name": "SL Benfica"
+      },
       "dateOfBirth": "Sep 24, 1997",
       "foot": "left",
       "height": "1,87m",
       "id": "303259",
+      "injured": false,
       "marketValue": "€20.00m",
       "name": "Dodi Lukébakio",
-      "number": "14",
       "position": "Right Winger"
     },
     {
-      "contract": "Jun 8, 2022",
-      "dateOfBirth": "Feb 16, 2000",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1082.png",
+        "name": "LOSC Lille"
+      },
+      "dateOfBirth": "Feb 3, 2005",
       "foot": "right",
-      "height": "1,77m",
-      "id": "368887",
-      "marketValue": "€40.00m",
-      "name": "Loïs Openda",
-      "number": "9",
+      "height": "1,88m",
+      "id": "724129",
+      "injured": false,
+      "marketValue": "€30.00m",
+      "name": "Matias Fernandez-Pardo",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Nov 15, 2025",
-      "dateOfBirth": "Jan 24, 2004",
-      "foot": "right",
-      "height": "1,84m",
-      "id": "708454",
-      "marketValue": "€8.00m",
-      "name": "Romeo Vermant",
-      "number": "19",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/6195.png",
+        "name": "SSC Napoli"
+      },
+      "dateOfBirth": "May 13, 1993",
+      "foot": "left",
+      "height": "1,91m",
+      "id": "96341",
+      "injured": false,
+      "marketValue": "€12.00m",
+      "name": "Romelu Lukaku",
       "position": "Centre-Forward"
     }
   ],

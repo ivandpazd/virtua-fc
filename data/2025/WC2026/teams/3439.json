@@ -3,6 +3,7 @@
   "name": "Brazil",
   "players": [
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/36.png",
         "name": "Fenerbahce"
@@ -12,11 +13,12 @@
       "height": "1,88m",
       "id": "238223",
       "injured": false,
-      "marketValue": "€30.00m",
+      "marketValue": "€10.00m",
       "name": "Ederson",
       "position": "Goalkeeper"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/31.png",
         "name": "Liverpool FC"
@@ -26,11 +28,12 @@
       "height": "1,93m",
       "id": "105470",
       "injured": true,
-      "marketValue": "€25.00m",
+      "marketValue": "€17.00m",
       "name": "Alisson",
       "position": "Goalkeeper"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/18544.png",
         "name": "Al-Nassr FC"
@@ -45,6 +48,7 @@
       "position": "Goalkeeper"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/399.png",
         "name": "Leeds United"
@@ -59,9 +63,10 @@
       "position": "Goalkeeper"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/199.png",
-        "name": "Sport Club Corinthians Paulista"
+        "name": "SC Corinthians Paulista"
       },
       "dateOfBirth": "Jan 31, 1999",
       "foot": "right",
@@ -73,6 +78,7 @@
       "position": "Goalkeeper"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/703.png",
         "name": "Nottingham Forest"
@@ -87,20 +93,22 @@
       "position": "Goalkeeper"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/210.png",
-        "name": "Grêmio Foot-Ball Porto Alegrense"
+        "name": "Grêmio Fbpa"
       },
       "dateOfBirth": "Dec 13, 1987",
       "foot": "right",
       "height": "1,89m",
       "id": "69400",
       "injured": false,
-      "marketValue": "€1.80m",
+      "marketValue": "€700k",
       "name": "Weverton",
       "position": "Goalkeeper"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/11.png",
         "name": "Arsenal FC"
@@ -115,6 +123,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/703.png",
         "name": "Nottingham Forest"
@@ -129,6 +138,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/418.png",
         "name": "Real Madrid"
@@ -143,6 +153,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/583.png",
         "name": "Paris Saint-Germain"
@@ -152,11 +163,12 @@
       "height": "1,83m",
       "id": "181767",
       "injured": false,
-      "marketValue": "€40.00m",
+      "marketValue": "€30.00m",
       "name": "Marquinhos",
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/583.png",
         "name": "Paris Saint-Germain"
@@ -171,6 +183,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/1082.png",
         "name": "LOSC Lille"
@@ -185,6 +198,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/614.png",
         "name": "CR Flamengo"
@@ -199,9 +213,10 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/609.png",
-        "name": "Cruzeiro Esporte Clube"
+        "name": "Cruzeiro Ec"
       },
       "dateOfBirth": "Feb 12, 1996",
       "foot": "right",
@@ -213,6 +228,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/614.png",
         "name": "CR Flamengo"
@@ -222,11 +238,12 @@
       "height": "1,84m",
       "id": "145707",
       "injured": false,
-      "marketValue": "€4.00m",
+      "marketValue": "€2.50m",
       "name": "Danilo",
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/46.png",
         "name": "Inter Milan"
@@ -241,6 +258,7 @@
       "position": "Left-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/162.png",
         "name": "AS Monaco"
@@ -255,6 +273,7 @@
       "position": "Left-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/2462.png",
         "name": "Fluminense Football Club"
@@ -269,6 +288,7 @@
       "position": "Left-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/964.png",
         "name": "Zenit St. Petersburg"
@@ -278,14 +298,15 @@
       "height": "1,76m",
       "id": "220793",
       "injured": false,
-      "marketValue": "€10.00m",
+      "marketValue": "€8.00m",
       "name": "Douglas Santos",
       "position": "Left-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/10010.png",
-        "name": "Esporte Clube Bahia"
+        "name": "EC Bahia"
       },
       "dateOfBirth": "Aug 29, 1999",
       "foot": "left",
@@ -297,6 +318,7 @@
       "position": "Left-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/614.png",
         "name": "CR Flamengo"
@@ -306,11 +328,12 @@
       "height": "1,81m",
       "id": "79960",
       "injured": false,
-      "marketValue": "€1.80m",
+      "marketValue": "€1.50m",
       "name": "Alex Sandro",
       "position": "Left-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/162.png",
         "name": "AS Monaco"
@@ -325,6 +348,7 @@
       "position": "Right-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/12.png",
         "name": "AS Roma"
@@ -334,14 +358,15 @@
       "height": "1,78m",
       "id": "964580",
       "injured": false,
-      "marketValue": "€9.00m",
+      "marketValue": "€40.00m",
       "name": "Wesley",
       "position": "Right-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/537.png",
-        "name": "Botafogo de Futebol e Regatas"
+        "name": "Botafogo fr"
       },
       "dateOfBirth": "Jul 23, 1999",
       "foot": "right",
@@ -353,6 +378,7 @@
       "position": "Right-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/978.png",
         "name": "Clube de Regatas Vasco da Gama"
@@ -367,6 +393,52 @@
       "position": "Right-Back"
     },
     {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/506.png",
+        "name": "Juventus FC"
+      },
+      "dateOfBirth": "Mar 18, 1997",
+      "foot": "right",
+      "height": "1,88m",
+      "id": "516716",
+      "injured": false,
+      "marketValue": "€35.00m",
+      "name": "Bremer",
+      "position": "Centre-Back"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/18487.png",
+        "name": "Al-Ahli SFC"
+      },
+      "dateOfBirth": "Nov 23, 1998",
+      "foot": "right",
+      "height": "1,85m",
+      "id": "524481",
+      "injured": false,
+      "marketValue": "€17.00m",
+      "name": "Roger Ibañez",
+      "position": "Centre-Back"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/614.png",
+        "name": "CR Flamengo"
+      },
+      "dateOfBirth": "Jan 31, 1996",
+      "foot": "left",
+      "height": "1,89m",
+      "id": "288431",
+      "injured": false,
+      "marketValue": "€10.00m",
+      "name": "Léo Pereira",
+      "position": "Centre-Back"
+    },
+    {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/543.png",
         "name": "Wolverhampton Wanderers"
@@ -381,6 +453,7 @@
       "position": "Defensive Midfield"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/8023.png",
         "name": "Al-Ittihad Club"
@@ -390,11 +463,12 @@
       "height": "1,88m",
       "id": "225693",
       "injured": false,
-      "marketValue": "€18.00m",
+      "marketValue": "€13.00m",
       "name": "Fabinho",
       "position": "Defensive Midfield"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/985.png",
         "name": "Manchester United"
@@ -404,11 +478,12 @@
       "height": "1,85m",
       "id": "16306",
       "injured": false,
-      "marketValue": "€12.00m",
+      "marketValue": "€8.00m",
       "name": "Casemiro",
       "position": "Defensive Midfield"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/762.png",
         "name": "Newcastle United"
@@ -418,11 +493,12 @@
       "height": "1,82m",
       "id": "520624",
       "injured": false,
-      "marketValue": "€80.00m",
+      "marketValue": "€75.00m",
       "name": "Bruno Guimarães",
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/800.png",
         "name": "Atalanta BC"
@@ -437,6 +513,7 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/762.png",
         "name": "Newcastle United"
@@ -451,6 +528,7 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/543.png",
         "name": "Wolverhampton Wanderers"
@@ -465,6 +543,7 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/631.png",
         "name": "Chelsea FC"
@@ -479,6 +558,7 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/1023.png",
         "name": "Sociedade Esportiva Palmeiras"
@@ -493,9 +573,10 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/609.png",
-        "name": "Cruzeiro Esporte Clube"
+        "name": "Cruzeiro Ec"
       },
       "dateOfBirth": "May 20, 1997",
       "foot": "left",
@@ -507,9 +588,10 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/10010.png",
-        "name": "Esporte Clube Bahia"
+        "name": "EC Bahia"
       },
       "dateOfBirth": "Jun 22, 1998",
       "foot": "right",
@@ -521,6 +603,7 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/614.png",
         "name": "CR Flamengo"
@@ -530,11 +613,42 @@
       "height": "1,80m",
       "id": "444523",
       "injured": false,
-      "marketValue": "€40.00m",
+      "marketValue": "€35.00m",
       "name": "Lucas Paquetá",
       "position": "Attacking Midfield"
     },
     {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/537.png",
+        "name": "Botafogo fr"
+      },
+      "dateOfBirth": "Apr 29, 2001",
+      "foot": "left",
+      "height": "1,77m",
+      "id": "808509",
+      "injured": false,
+      "marketValue": "€24.00m",
+      "name": "Danilo",
+      "position": "Central Midfield"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/221.png",
+        "name": "Santos FC"
+      },
+      "dateOfBirth": "Feb 5, 1992",
+      "foot": "right",
+      "height": "1,75m",
+      "id": "68290",
+      "injured": true,
+      "marketValue": "€10.00m",
+      "name": "Neymar",
+      "position": "Attacking Midfield"
+    },
+    {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/418.png",
         "name": "Real Madrid"
@@ -544,11 +658,12 @@
       "height": "1,76m",
       "id": "371998",
       "injured": false,
-      "marketValue": "€200.00m",
+      "marketValue": "€150.00m",
       "name": "Vinicius Junior",
       "position": "Left Winger"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/131.png",
         "name": "FC Barcelona"
@@ -563,6 +678,7 @@
       "position": "Left Winger"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/281.png",
         "name": "Manchester City"
@@ -577,6 +693,7 @@
       "position": "Left Winger"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/11.png",
         "name": "Arsenal FC"
@@ -586,11 +703,12 @@
       "height": "1,78m",
       "id": "655488",
       "injured": false,
-      "marketValue": "€55.00m",
+      "marketValue": "€45.00m",
       "name": "Gabriel Martinelli",
       "position": "Left Winger"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/614.png",
         "name": "CR Flamengo"
@@ -605,6 +723,7 @@
       "position": "Left Winger"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/418.png",
         "name": "Real Madrid"
@@ -619,6 +738,7 @@
       "position": "Right Winger"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/631.png",
         "name": "Chelsea FC"
@@ -633,6 +753,7 @@
       "position": "Right Winger"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/964.png",
         "name": "Zenit St. Petersburg"
@@ -642,11 +763,12 @@
       "height": "1,82m",
       "id": "800175",
       "injured": false,
-      "marketValue": "€22.00m",
+      "marketValue": "€24.00m",
       "name": "Luiz Henrique",
       "position": "Right Winger"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/150.png",
         "name": "Real Betis Balompié"
@@ -661,6 +783,7 @@
       "position": "Right Winger"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/631.png",
         "name": "Chelsea FC"
@@ -675,6 +798,7 @@
       "position": "Centre-Forward"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/985.png",
         "name": "Manchester United"
@@ -684,11 +808,12 @@
       "height": "1,83m",
       "id": "517894",
       "injured": false,
-      "marketValue": "€50.00m",
+      "marketValue": "€70.00m",
       "name": "Matheus Cunha",
       "position": "Centre-Forward"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/1041.png",
         "name": "Olympique Lyon"
@@ -698,11 +823,12 @@
       "height": "1,73m",
       "id": "971570",
       "injured": false,
-      "marketValue": "€40.00m",
+      "marketValue": "€35.00m",
       "name": "Endrick",
       "position": "Centre-Forward"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/148.png",
         "name": "Tottenham Hotspur"
@@ -717,6 +843,7 @@
       "position": "Centre-Forward"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/1023.png",
         "name": "Sociedade Esportiva Palmeiras"
@@ -731,6 +858,7 @@
       "position": "Centre-Forward"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/703.png",
         "name": "Nottingham Forest"
@@ -745,9 +873,10 @@
       "position": "Centre-Forward"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/609.png",
-        "name": "Cruzeiro Esporte Clube"
+        "name": "Cruzeiro Ec"
       },
       "dateOfBirth": "Jan 24, 2002",
       "foot": "right",
@@ -756,6 +885,36 @@
       "injured": false,
       "marketValue": "€4.50m",
       "name": "Kaio Jorge",
+      "position": "Centre-Forward"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/989.png",
+        "name": "AFC Bournemouth"
+      },
+      "dateOfBirth": "Aug 3, 2006",
+      "foot": "left",
+      "height": "1,85m",
+      "id": "1012564",
+      "injured": false,
+      "marketValue": "€40.00m",
+      "name": "Rayan",
+      "position": "Right Winger"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1148.png",
+        "name": "Brentford FC"
+      },
+      "dateOfBirth": "Jun 26, 2001",
+      "foot": "right",
+      "height": "1,91m",
+      "id": "739443",
+      "injured": false,
+      "marketValue": "€50.00m",
+      "name": "Igor Thiago",
       "position": "Centre-Forward"
     }
   ],

@@ -1,302 +1,397 @@
 {
-  "image": "https://tmssl.akamaized.net/images/wappen/big/3499.png",
+  "image": "https://assets.virtuafc.com/crests/3499.png",
   "name": "Senegal",
   "players": [
     {
-      "contract": "Jun 6, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/417.png",
+        "name": "OGC Nice"
+      },
       "dateOfBirth": "Nov 16, 1999",
       "foot": "right",
       "height": "1,88m",
       "id": "448632",
-      "marketValue": "€9.00m",
+      "injured": false,
+      "marketValue": "€7.00m",
       "name": "Yehvann Diouf",
-      "number": "1",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Nov 17, 2018",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/18487.png",
+        "name": "Al-Ahli SFC"
+      },
       "dateOfBirth": "Mar 1, 1992",
       "foot": "right",
       "height": "1,94m",
       "id": "442531",
+      "injured": false,
       "marketValue": "€4.50m",
       "name": "Edouard Mendy",
-      "number": "16",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Jun 20, 2023",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/738.png",
+        "name": "Le Havre AC"
+      },
       "dateOfBirth": "Jun 22, 1993",
       "foot": "right",
       "height": "1,97m",
       "id": "164904",
+      "injured": false,
       "marketValue": "€1.00m",
       "name": "Mory Diaw",
-      "number": "23",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Nov 18, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/631.png",
+        "name": "Chelsea FC"
+      },
       "dateOfBirth": "Aug 29, 2005",
       "foot": "right",
       "height": "1,94m",
       "id": "910905",
+      "injured": false,
       "marketValue": "€25.00m",
       "name": "Mamadou Sarr",
-      "number": "2",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 24, 2023",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1041.png",
+        "name": "Olympique Lyon"
+      },
       "dateOfBirth": "Mar 8, 1996",
       "foot": "left",
       "height": "1,90m",
       "id": "291200",
-      "marketValue": "€15.00m",
+      "injured": false,
+      "marketValue": "€18.00m",
       "name": "Moussa Niakhaté",
-      "number": "19",
       "position": "Centre-Back"
     },
     {
-      "contract": "Sep 5, 2015",
-      "dateOfBirth": "Jun 20, 1991",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/10004.png",
+        "name": "Paris FC"
+      },
+      "dateOfBirth": "Mar 8, 2000",
       "foot": "right",
-      "height": "1,86m",
-      "id": "93128",
-      "marketValue": "€5.00m",
-      "name": "Kalidou Koulibaly",
-      "number": "3",
+      "height": "1,92m",
+      "id": "649026",
+      "injured": false,
+      "marketValue": "€6.00m",
+      "name": "Moustapha Mbow",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 22, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/417.png",
+        "name": "OGC Nice"
+      },
       "dateOfBirth": "May 27, 2004",
       "foot": "right",
       "height": "1,87m",
       "id": "891998",
-      "marketValue": "€4.00m",
+      "injured": false,
+      "marketValue": "€6.00m",
       "name": "Antoine Mendy",
-      "number": "24",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 26, 2021",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1114.png",
+        "name": "Al-Hilal SFC"
+      },
+      "dateOfBirth": "Jun 20, 1991",
+      "foot": "right",
+      "height": "1,86m",
+      "id": "93128",
+      "injured": true,
+      "marketValue": "€5.00m",
+      "name": "Kalidou Koulibaly",
+      "position": "Centre-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1064.png",
+        "name": "Maccabi Haifa"
+      },
       "dateOfBirth": "Jun 4, 1992",
       "foot": "right",
       "height": "1,91m",
       "id": "265383",
+      "injured": false,
       "marketValue": "€500k",
       "name": "Abdoulaye Seck",
-      "number": "4",
       "position": "Centre-Back"
     },
     {
-      "contract": "Sep 9, 2024",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/379.png",
+        "name": "West Ham United"
+      },
       "dateOfBirth": "Dec 28, 2004",
       "foot": "left",
       "height": "1,83m",
       "id": "1111589",
+      "injured": false,
       "marketValue": "€28.00m",
       "name": "El Hadji Malick Diouf",
-      "number": "25",
       "position": "Left-Back"
     },
     {
-      "contract": "Sep 24, 2022",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/141.png",
+        "name": "Galatasaray"
+      },
       "dateOfBirth": "Aug 17, 1999",
       "foot": "left",
       "height": "1,84m",
       "id": "375137",
+      "injured": false,
       "marketValue": "€8.00m",
       "name": "Ismail Jakobs",
-      "number": "14",
       "position": "Left-Back"
     },
     {
-      "contract": "Sep 9, 2023",
-      "dateOfBirth": "Jan 5, 2003",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/58.png",
+        "name": "RSC Anderlecht"
+      },
+      "dateOfBirth": "Jan 18, 2003",
       "foot": "right",
-      "height": "1,93m",
-      "id": "776215",
-      "marketValue": "€1.40m",
-      "name": "Mamadou Lamine Camara",
-      "number": "22",
-      "position": "Defensive Midfield"
+      "height": "1,74m",
+      "id": "570781",
+      "injured": false,
+      "marketValue": "€4.00m",
+      "name": "Ilay Camara",
+      "position": "Right-Back"
     },
     {
-      "contract": "Nov 11, 2011",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/29.png",
+        "name": "Everton FC"
+      },
       "dateOfBirth": "Sep 26, 1989",
       "foot": "right",
       "height": "1,74m",
       "id": "126665",
+      "injured": false,
       "marketValue": "€1.00m",
       "name": "Idrissa Gueye",
-      "number": "5",
       "position": "Defensive Midfield"
     },
     {
-      "contract": "Mar 26, 2021",
-      "dateOfBirth": "Sep 14, 2002",
-      "foot": "right",
-      "height": "1,84m",
-      "id": "568693",
-      "marketValue": "€35.00m",
-      "name": "Pape Matar Sarr",
-      "number": "17",
-      "position": "Central Midfield"
-    },
-    {
-      "contract": "Mar 22, 2024",
-      "dateOfBirth": "Jan 3, 2004",
-      "foot": "right",
-      "height": "1,78m",
-      "id": "876631",
-      "marketValue": "€32.00m",
-      "name": "Habib Diarra",
-      "number": "7",
-      "position": "Central Midfield"
-    },
-    {
-      "contract": "Jan 14, 2023",
-      "dateOfBirth": "Jan 1, 2004",
-      "foot": "right",
-      "height": "1,73m",
-      "id": "918969",
-      "marketValue": "€30.00m",
-      "name": "Lamine Camara",
-      "number": "8",
-      "position": "Central Midfield"
-    },
-    {
-      "contract": "Nov 14, 2021",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1050.png",
+        "name": "Villarreal CF"
+      },
       "dateOfBirth": "Jan 24, 1999",
       "foot": "left",
       "height": "1,89m",
       "id": "485963",
-      "marketValue": "€20.00m",
+      "injured": false,
+      "marketValue": "€40.00m",
       "name": "Pape Gueye",
-      "number": "26",
       "position": "Central Midfield"
     },
     {
-      "contract": "Sep 24, 2022",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/162.png",
+        "name": "AS Monaco"
+      },
+      "dateOfBirth": "Jan 1, 2004",
+      "foot": "right",
+      "height": "1,73m",
+      "id": "918969",
+      "injured": false,
+      "marketValue": "€35.00m",
+      "name": "Lamine Camara",
+      "position": "Central Midfield"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/148.png",
+        "name": "Tottenham Hotspur"
+      },
+      "dateOfBirth": "Sep 14, 2002",
+      "foot": "right",
+      "height": "1,84m",
+      "id": "568693",
+      "injured": false,
+      "marketValue": "€32.00m",
+      "name": "Pape Matar Sarr",
+      "position": "Central Midfield"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/289.png",
+        "name": "Sunderland AFC"
+      },
+      "dateOfBirth": "Jan 3, 2004",
+      "foot": "right",
+      "height": "1,78m",
+      "id": "876631",
+      "injured": false,
+      "marketValue": "€32.00m",
+      "name": "Habib Diarra",
+      "position": "Central Midfield"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/367.png",
+        "name": "Rayo Vallecano"
+      },
       "dateOfBirth": "Mar 16, 1994",
       "foot": "right",
       "height": "1,86m",
       "id": "525578",
+      "injured": false,
       "marketValue": "€2.00m",
       "name": "Pathé Ciss",
-      "number": "6",
       "position": "Central Midfield"
     },
     {
-      "contract": "Mar 23, 2019",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/27.png",
+        "name": "Bayern Munich"
+      },
+      "dateOfBirth": "Dec 31, 2007",
+      "foot": "right",
+      "height": "1,80m",
+      "id": "1497653",
+      "injured": false,
+      "marketValue": "€300k",
+      "name": "Bara Sapoko Ndiaye",
+      "position": "Central Midfield"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/162.png",
+        "name": "AS Monaco"
+      },
       "dateOfBirth": "Feb 25, 1999",
       "foot": "right",
       "height": "1,75m",
       "id": "490426",
+      "injured": false,
       "marketValue": "€6.00m",
       "name": "Krépin Diatta",
-      "number": "15",
       "position": "Right Midfield"
     },
     {
-      "contract": "May 25, 2012",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1047.png",
+        "name": "Como 1907"
+      },
+      "dateOfBirth": "Sep 7, 2005",
+      "foot": "right",
+      "height": "1,85m",
+      "id": "1061282",
+      "injured": false,
+      "marketValue": "€30.00m",
+      "name": "Assane Diao",
+      "position": "Left Winger"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/18544.png",
+        "name": "Al-Nassr FC"
+      },
       "dateOfBirth": "Apr 10, 1992",
       "foot": "right",
       "height": "1,74m",
       "id": "200512",
+      "injured": false,
       "marketValue": "€7.00m",
       "name": "Sadio Mané",
-      "number": "10",
       "position": "Left Winger"
     },
     {
-      "contract": "Sep 9, 2023",
-      "dateOfBirth": "Mar 4, 1999",
-      "foot": "right",
-      "height": "1,68m",
-      "id": "568696",
-      "marketValue": "€3.50m",
-      "name": "Cheikh Sabaly",
-      "number": "21",
-      "position": "Left Winger"
-    },
-    {
-      "contract": "Jun 4, 2022",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/29.png",
+        "name": "Everton FC"
+      },
       "dateOfBirth": "Mar 6, 2000",
       "foot": "right",
       "height": "1,80m",
       "id": "623570",
-      "marketValue": "€45.00m",
+      "injured": false,
+      "marketValue": "€50.00m",
       "name": "Iliman Ndiaye",
-      "number": "13",
       "position": "Right Winger"
     },
     {
-      "contract": "Sep 3, 2016",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/873.png",
+        "name": "Crystal Palace"
+      },
       "dateOfBirth": "Feb 25, 1998",
       "foot": "right",
       "height": "1,85m",
       "id": "410225",
+      "injured": false,
       "marketValue": "€35.00m",
       "name": "Ismaïla Sarr",
-      "number": "18",
       "position": "Right Winger"
     },
     {
-      "contract": "Nov 15, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/583.png",
+        "name": "Paris Saint-Germain"
+      },
       "dateOfBirth": "Jan 24, 2008",
       "foot": "right",
       "height": "1,75m",
       "id": "1185888",
-      "marketValue": "€25.00m",
+      "injured": false,
+      "marketValue": "€30.00m",
       "name": "Ibrahim Mbaye",
-      "number": "27",
       "position": "Right Winger"
     },
     {
-      "contract": "Nov 21, 2022",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/27.png",
+        "name": "Bayern Munich"
+      },
       "dateOfBirth": "Jun 20, 2001",
       "foot": "right",
       "height": "1,87m",
       "id": "776890",
-      "marketValue": "€45.00m",
+      "injured": false,
+      "marketValue": "€40.00m",
       "name": "Nicolas Jackson",
-      "number": "11",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Oct 9, 2020",
-      "dateOfBirth": "Nov 16, 1996",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1158.png",
+        "name": "FC Lorient"
+      },
+      "dateOfBirth": "Mar 23, 2000",
       "foot": "right",
-      "height": "1,80m",
-      "id": "626913",
-      "marketValue": "€10.00m",
-      "name": "Boulaye Dia",
-      "number": "9",
+      "height": "1,78m",
+      "id": "822458",
+      "injured": false,
+      "marketValue": "€6.00m",
+      "name": "Bamba Dieng",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Jun 6, 2024",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/152.png",
+        "name": "Samsunspor"
+      },
       "dateOfBirth": "Jan 23, 1996",
       "foot": "right",
       "height": "1,90m",
       "id": "480705",
+      "injured": false,
       "marketValue": "€5.00m",
       "name": "Cherif Ndiaye",
-      "number": "12",
-      "position": "Centre-Forward"
-    },
-    {
-      "contract": "Nov 17, 2018",
-      "dateOfBirth": "Jun 18, 1995",
-      "foot": "right",
-      "height": "1,86m",
-      "id": "344888",
-      "marketValue": "€5.00m",
-      "name": "Habib Diallo",
-      "number": "20",
       "position": "Centre-Forward"
     }
   ],

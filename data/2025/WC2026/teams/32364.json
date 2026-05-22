@@ -165,7 +165,7 @@
       "foot": "right",
       "height": "1,87m",
       "id": "626764",
-      "injured": true,
+      "injured": false,
       "marketValue": "€700k",
       "name": "Livano Comenencia",
       "position": "Right-Back"
@@ -291,7 +291,7 @@
       "foot": "right",
       "height": "1,74m",
       "id": "374889",
-      "injured": true,
+      "injured": false,
       "marketValue": "€650k",
       "name": "Kenji Gorré",
       "position": "Left Winger"

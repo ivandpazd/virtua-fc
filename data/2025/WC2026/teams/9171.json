@@ -1,232 +1,367 @@
 {
-  "image": "https://tmssl.akamaized.net/images/wappen/big/9171.png",
+  "image": "https://assets.virtuafc.com/crests/9171.png",
   "name": "New Zealand",
   "players": [
     {
-      "contract": "Mar 24, 2018",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1028.png",
+        "name": "Millwall FC"
+      },
       "dateOfBirth": "Aug 12, 1993",
       "foot": "right",
       "height": "1,94m",
       "id": "207843",
+      "injured": false,
       "marketValue": "€1.00m",
       "name": "Max Crocombe",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Mar 18, 2022",
-      "dateOfBirth": "Jan 13, 1996",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/4000.png",
+        "name": "Lechia Gdansk"
+      },
+      "dateOfBirth": "Jul 4, 2002",
       "foot": "right",
-      "height": "1,97m",
-      "id": "290838",
-      "marketValue": "€250k",
-      "name": "Oliver Sail",
+      "height": "1,84m",
+      "id": "617009",
+      "injured": false,
+      "marketValue": "€750k",
+      "name": "Alex Paulsen",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Mar 23, 2023",
-      "dateOfBirth": "Mar 27, 2003",
-      "foot": "right",
-      "height": "1,94m",
-      "id": "733234",
-      "marketValue": "€250k",
-      "name": "Kees Sims",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/118373.png",
+        "name": "Auckland FC"
+      },
+      "dateOfBirth": "Jan 16, 1999",
+      "foot": "left",
+      "height": "1,96m",
+      "id": "350347",
+      "injured": false,
+      "marketValue": "€300k",
+      "name": "Michael Woud",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Jun 5, 2018",
-      "dateOfBirth": "Dec 23, 1996",
-      "foot": "right",
-      "height": "1,95m",
-      "id": "363901",
-      "marketValue": "€100k",
-      "name": "Nik Tzanev",
-      "position": "Goalkeeper"
-    },
-    {
-      "contract": "Nov 17, 2023",
-      "dateOfBirth": "Sep 23, 2003",
-      "foot": "right",
-      "height": "1,90m",
-      "id": "724809",
-      "marketValue": "€1.50m",
-      "name": "Finn Surman",
-      "position": "Centre-Back"
-    },
-    {
-      "contract": "Oct 13, 2023",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/350.png",
+        "name": "Sheffield United"
+      },
       "dateOfBirth": "Jan 27, 2005",
       "foot": "right",
       "height": "1,88m",
       "id": "1007720",
+      "injured": false,
       "marketValue": "€1.50m",
       "name": "Tyler Bindon",
       "position": "Centre-Back"
     },
     {
-      "contract": "Oct 16, 2013",
-      "dateOfBirth": "Mar 27, 1995",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/4291.png",
+        "name": "Portland Timbers"
+      },
+      "dateOfBirth": "Sep 23, 2003",
       "foot": "right",
-      "height": "1,82m",
-      "id": "172333",
+      "height": "1,90m",
+      "id": "724809",
+      "injured": false,
+      "marketValue": "€1.50m",
+      "name": "Finn Surman",
+      "position": "Centre-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/118373.png",
+        "name": "Auckland FC"
+      },
+      "dateOfBirth": "Feb 25, 1999",
+      "foot": "left",
+      "height": "1,92m",
+      "id": "455425",
+      "injured": false,
       "marketValue": "€400k",
-      "name": "Bill Tuiloma",
+      "name": "Nando Pijnaker",
       "position": "Centre-Back"
     },
     {
-      "dateOfBirth": "Aug 15, 2000",
-      "foot": "right",
-      "height": "1,91m",
-      "id": "509709",
-      "marketValue": "€200k",
-      "name": "George Stanger",
-      "position": "Centre-Back"
-    },
-    {
-      "contract": "Mar 25, 2011",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/56089.png",
+        "name": "Minnesota United FC"
+      },
       "dateOfBirth": "Aug 18, 1988",
       "foot": "right",
       "height": "1,88m",
       "id": "81723",
+      "injured": false,
       "marketValue": "€150k",
       "name": "Michael Boxall",
       "position": "Centre-Back"
     },
     {
-      "contract": "Nov 16, 2021",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/6340.png",
+        "name": "Braintree Town"
+      },
+      "dateOfBirth": "Mar 31, 1990",
+      "foot": "left",
+      "height": "1,87m",
+      "id": "54381",
+      "injured": false,
+      "marketValue": "€100k",
+      "name": "Tommy Smith",
+      "position": "Centre-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1112.png",
+        "name": "Wrexham AFC"
+      },
+      "dateOfBirth": "Sep 27, 2000",
+      "foot": "left",
+      "height": "1,83m",
+      "id": "469211",
+      "injured": false,
+      "marketValue": "€3.00m",
+      "name": "Liberato Cacace",
+      "position": "Left-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/618.png",
+        "name": "AS Saint-Étienne"
+      },
+      "dateOfBirth": "Aug 13, 2002",
+      "foot": "left",
+      "height": "1,73m",
+      "id": "617021",
+      "injured": false,
+      "marketValue": "€1.20m",
+      "name": "Ben Old",
+      "position": "Left-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/118373.png",
+        "name": "Auckland FC"
+      },
       "dateOfBirth": "Nov 28, 1994",
       "foot": "left",
       "height": "1,88m",
       "id": "207061",
+      "injured": false,
       "marketValue": "€600k",
       "name": "Francis de Vries",
       "position": "Left-Back"
     },
     {
-      "contract": "Mar 18, 2022",
-      "dateOfBirth": "Aug 13, 2002",
-      "foot": "left",
-      "height": "1,73m",
-      "id": "617021",
-      "marketValue": "€600k",
-      "name": "Ben Old",
-      "position": "Left-Back"
-    },
-    {
-      "contract": "Nov 17, 2019",
-      "dateOfBirth": "Apr 9, 1998",
-      "foot": "left",
-      "height": "1,80m",
-      "id": "345343",
-      "marketValue": "€400k",
-      "name": "James McGarry",
-      "position": "Left-Back"
-    },
-    {
-      "contract": "Nov 20, 2013",
-      "dateOfBirth": "Jan 13, 1993",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/8445.png",
+        "name": "Wellington Phoenix"
+      },
+      "dateOfBirth": "Jan 10, 1994",
       "foot": "right",
-      "height": "1,81m",
-      "id": "175699",
-      "marketValue": "€250k",
-      "name": "Storm Roux",
+      "height": "1,79m",
+      "id": "149901",
+      "injured": false,
+      "marketValue": "€400k",
+      "name": "Tim Payne",
       "position": "Right-Back"
     },
     {
-      "contract": "Nov 14, 2019",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/118373.png",
+        "name": "Auckland FC"
+      },
+      "dateOfBirth": "Jul 7, 1999",
+      "foot": "right",
+      "height": "1,77m",
+      "id": "482204",
+      "injured": false,
+      "marketValue": "€375k",
+      "name": "Callan Elliot",
+      "position": "Right-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/239.png",
+        "name": "Viking FK"
+      },
       "dateOfBirth": "Apr 27, 1999",
       "foot": "right",
       "height": "1,82m",
       "id": "345700",
+      "injured": false,
       "marketValue": "€3.00m",
       "name": "Joe Bell",
       "position": "Defensive Midfield"
     },
     {
-      "contract": "Sep 7, 2015",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1269.png",
+        "name": "PEC Zwolle"
+      },
+      "dateOfBirth": "Dec 20, 1994",
+      "foot": "right",
+      "height": "1,74m",
+      "id": "203357",
+      "injured": false,
+      "marketValue": "€700k",
+      "name": "Ryan Thomas",
+      "position": "Defensive Midfield"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/8445.png",
+        "name": "Wellington Phoenix"
+      },
       "dateOfBirth": "Jun 12, 1996",
       "foot": "right",
       "height": "1,84m",
       "id": "256019",
+      "injured": false,
       "marketValue": "€600k",
       "name": "Alex Rufer",
       "position": "Defensive Midfield"
     },
     {
-      "contract": "Oct 9, 2021",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/2288.png",
+        "name": "Swansea City"
+      },
       "dateOfBirth": "Feb 19, 2002",
       "foot": "right",
       "height": "1,88m",
       "id": "617018",
+      "injured": false,
       "marketValue": "€3.00m",
       "name": "Marko Stamenić",
       "position": "Central Midfield"
     },
     {
-      "contract": "Oct 9, 2021",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1072.png",
+        "name": "Peterborough United"
+      },
       "dateOfBirth": "Apr 13, 2002",
       "foot": "right",
       "height": "1,88m",
       "id": "617019",
-      "marketValue": "€400k",
+      "injured": false,
+      "marketValue": "€450k",
       "name": "Matthew Garbett",
       "position": "Central Midfield"
     },
     {
-      "contract": "Oct 9, 2025",
-      "dateOfBirth": "Dec 10, 1998",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/5551.png",
+        "name": "Newcastle United Jets"
+      },
+      "dateOfBirth": "Jul 24, 2002",
       "foot": "right",
-      "height": "1,73m",
-      "id": "400799",
+      "height": "1,79m",
+      "id": "1109358",
+      "injured": false,
       "marketValue": "€350k",
-      "name": "Owen Parker-Price",
+      "name": "Lachlan Bayliss",
       "position": "Central Midfield"
     },
     {
-      "contract": "Mar 24, 2018",
-      "dateOfBirth": "Nov 2, 1996",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1177.png",
+        "name": "Silkeborg IF"
+      },
+      "dateOfBirth": "Apr 30, 1999",
       "foot": "right",
-      "height": "1,81m",
-      "id": "264903",
-      "marketValue": "€800k",
-      "name": "Andre de Jong",
+      "height": "1,79m",
+      "id": "400797",
+      "injured": false,
+      "marketValue": "€2.00m",
+      "name": "Callum McCowatt",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Mar 24, 2018",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/8445.png",
+        "name": "Wellington Phoenix"
+      },
       "dateOfBirth": "Feb 20, 1999",
       "foot": "left",
       "height": "1,77m",
       "id": "350357",
+      "injured": false,
       "marketValue": "€500k",
       "name": "Sarpreet Singh",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Jun 18, 2024",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/118373.png",
+        "name": "Auckland FC"
+      },
       "dateOfBirth": "Aug 19, 2002",
       "foot": "right",
       "height": "1,76m",
       "id": "677509",
+      "injured": false,
       "marketValue": "€600k",
       "name": "Jesse Randall",
       "position": "Left Winger"
     },
     {
-      "contract": "Nov 14, 2019",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/987.png",
+        "name": "Motherwell FC"
+      },
       "dateOfBirth": "May 1, 2000",
       "foot": "left",
       "height": "1,75m",
       "id": "485672",
-      "marketValue": "€1.50m",
+      "injured": false,
+      "marketValue": "€2.50m",
       "name": "Elijah Just",
       "position": "Right Winger"
     },
     {
-      "contract": "Nov 19, 2008",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/703.png",
+        "name": "Nottingham Forest"
+      },
+      "dateOfBirth": "Dec 7, 1991",
+      "foot": "right",
+      "height": "1,91m",
+      "id": "108725",
+      "injured": false,
+      "marketValue": "€6.00m",
+      "name": "Chris Wood",
+      "position": "Centre-Forward"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1211.png",
+        "name": "Port Vale FC"
+      },
+      "dateOfBirth": "Jun 11, 2001",
+      "foot": "right",
+      "height": "1,79m",
+      "id": "539502",
+      "injured": false,
+      "marketValue": "€400k",
+      "name": "Ben Waine",
+      "position": "Centre-Forward"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/36100.png",
+        "name": "Western Sydney Wanderers"
+      },
       "dateOfBirth": "Feb 19, 1990",
       "foot": "both",
       "height": "1,71m",
       "id": "50200",
+      "injured": false,
       "marketValue": "€325k",
       "name": "Kosta Barbarouses",
       "position": "Centre-Forward"
