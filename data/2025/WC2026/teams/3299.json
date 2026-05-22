@@ -1,422 +1,620 @@
 {
-  "image": "https://tmssl.akamaized.net/images/wappen/big/3299.png",
+  "image": "https://assets.virtuafc.com/crests/3299.png",
   "name": "England",
   "players": [
     {
-      "contract": "Nov 12, 2020",
-      "dateOfBirth": "Mar 12, 1997",
-      "foot": "right",
-      "height": "1,88m",
-      "id": "258919",
-      "marketValue": "€28.00m",
-      "name": "Dean Henderson",
-      "position": "Goalkeeper"
-    },
-    {
-      "dateOfBirth": "Oct 10, 2002",
-      "foot": "right",
-      "height": "1,92m",
-      "id": "566799",
-      "marketValue": "€25.00m",
-      "name": "James Trafford",
-      "position": "Goalkeeper"
-    },
-    {
-      "contract": "Nov 10, 2017",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/29.png",
+        "name": "Everton FC"
+      },
       "dateOfBirth": "Mar 7, 1994",
       "foot": "left",
       "height": "1,85m",
       "id": "130164",
+      "injured": false,
       "marketValue": "€15.00m",
       "name": "Jordan Pickford",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Nov 15, 2021",
-      "dateOfBirth": "May 14, 1998",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/281.png",
+        "name": "Manchester City"
+      },
+      "dateOfBirth": "Oct 10, 2002",
       "foot": "right",
-      "height": "1,90m",
-      "id": "427568",
-      "marketValue": "€12.00m",
-      "name": "Aaron Ramsdale",
+      "height": "1,92m",
+      "id": "566799",
+      "injured": false,
+      "marketValue": "€25.00m",
+      "name": "James Trafford",
       "position": "Goalkeeper"
     },
     {
-      "dateOfBirth": "Aug 18, 1990",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/873.png",
+        "name": "Crystal Palace"
+      },
+      "dateOfBirth": "Mar 12, 1997",
       "foot": "right",
       "height": "1,88m",
-      "id": "73564",
-      "marketValue": "€750k",
-      "name": "Jason Steele",
+      "id": "258919",
+      "injured": false,
+      "marketValue": "€28.00m",
+      "name": "Dean Henderson",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Oct 13, 2023",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/631.png",
+        "name": "Chelsea FC"
+      },
       "dateOfBirth": "Feb 26, 2003",
       "foot": "left",
       "height": "1,87m",
       "id": "614258",
+      "injured": false,
       "marketValue": "€55.00m",
       "name": "Levi Colwill",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 26, 2022",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/281.png",
+        "name": "Manchester City"
+      },
       "dateOfBirth": "Jul 13, 2000",
       "foot": "right",
       "height": "1,82m",
       "id": "392757",
+      "injured": false,
       "marketValue": "€65.00m",
       "name": "Marc Guéhi",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 23, 2024",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/405.png",
+        "name": "Aston Villa"
+      },
       "dateOfBirth": "Oct 23, 1997",
       "foot": "right",
       "height": "1,83m",
       "id": "413403",
+      "injured": false,
       "marketValue": "€40.00m",
       "name": "Ezri Konsa",
       "position": "Centre-Back"
     },
     {
-      "contract": "Nov 17, 2019",
-      "dateOfBirth": "Dec 19, 1997",
-      "foot": "right",
-      "height": "1,85m",
-      "id": "303254",
-      "marketValue": "€20.00m",
-      "name": "Fikayo Tomori",
-      "position": "Centre-Back"
-    },
-    {
-      "contract": "May 30, 2014",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/281.png",
+        "name": "Manchester City"
+      },
       "dateOfBirth": "May 28, 1994",
       "foot": "right",
       "height": "1,88m",
       "id": "186590",
+      "injured": false,
       "marketValue": "€15.00m",
       "name": "John Stones",
       "position": "Centre-Back"
     },
     {
-      "contract": "Nov 16, 2025",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/15.png",
+        "name": "Bayer 04 Leverkusen"
+      },
       "dateOfBirth": "Jan 29, 2003",
       "foot": "right",
       "height": "1,90m",
       "id": "632349",
-      "marketValue": "€22.00m",
+      "injured": false,
+      "marketValue": "€45.00m",
       "name": "Jarell Quansah",
       "position": "Centre-Back"
     },
     {
-      "contract": "Oct 8, 2017",
-      "dateOfBirth": "Mar 5, 1993",
-      "foot": "right",
-      "height": "1,94m",
-      "id": "177907",
-      "marketValue": "€10.00m",
-      "name": "Harry Maguire",
-      "position": "Centre-Back"
-    },
-    {
-      "contract": "Jun 10, 2025",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/631.png",
+        "name": "Chelsea FC"
+      },
       "dateOfBirth": "Jul 5, 1999",
       "foot": "right",
       "height": "1,92m",
       "id": "346314",
+      "injured": false,
       "marketValue": "€13.00m",
       "name": "Trevoh Chalobah",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 21, 2025",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/762.png",
+        "name": "Newcastle United"
+      },
       "dateOfBirth": "May 9, 1992",
       "foot": "left",
       "height": "2,01m",
       "id": "134270",
+      "injured": false,
       "marketValue": "€5.00m",
       "name": "Dan Burn",
       "position": "Centre-Back"
     },
     {
-      "contract": "Nov 13, 2025",
-      "dateOfBirth": "Mar 21, 2005",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/11.png",
+        "name": "Arsenal FC"
+      },
+      "dateOfBirth": "Sep 26, 2006",
       "foot": "left",
-      "height": "1,93m",
-      "id": "743413",
-      "marketValue": "€50.00m",
-      "name": "Nico O'Reilly",
+      "height": "1,78m",
+      "id": "890721",
+      "injured": false,
+      "marketValue": "€10.00m",
+      "name": "Myles Lewis-Skelly",
       "position": "Left-Back"
     },
     {
-      "contract": "Nov 14, 2024",
-      "dateOfBirth": "Sep 8, 2004",
-      "foot": "left",
-      "height": "1,79m",
-      "id": "670858",
-      "marketValue": "€35.00m",
-      "name": "Lewis Hall",
-      "position": "Left-Back"
-    },
-    {
-      "contract": "Sep 9, 2025",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/148.png",
+        "name": "Tottenham Hotspur"
+      },
       "dateOfBirth": "Aug 9, 2000",
       "foot": "right",
       "height": "1,84m",
       "id": "483348",
+      "injured": false,
       "marketValue": "€30.00m",
       "name": "Djed Spence",
       "position": "Left-Back"
     },
     {
-      "contract": "Jun 7, 2018",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/281.png",
+        "name": "Manchester City"
+      },
+      "dateOfBirth": "Mar 21, 2005",
+      "foot": "left",
+      "height": "1,93m",
+      "id": "743413",
+      "injured": false,
+      "marketValue": "€50.00m",
+      "name": "Nico O'Reilly",
+      "position": "Left-Back"
+    },
+    {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/418.png",
+        "name": "Real Madrid"
+      },
       "dateOfBirth": "Oct 7, 1998",
       "foot": "right",
       "height": "1,80m",
       "id": "314353",
+      "injured": false,
       "marketValue": "€75.00m",
       "name": "Trent Alexander-Arnold",
       "position": "Right-Back"
     },
     {
-      "contract": "Nov 17, 2024",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/762.png",
+        "name": "Newcastle United"
+      },
       "dateOfBirth": "Nov 12, 2002",
       "foot": "right",
       "height": "1,82m",
       "id": "503981",
+      "injured": true,
       "marketValue": "€40.00m",
       "name": "Tino Livramento",
       "position": "Right-Back"
     },
     {
-      "contract": "Jun 2, 2021",
-      "dateOfBirth": "Oct 8, 1997",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/631.png",
+        "name": "Chelsea FC"
+      },
+      "dateOfBirth": "Dec 8, 1999",
       "foot": "right",
-      "height": "1,86m",
-      "id": "335721",
-      "marketValue": "€30.00m",
-      "name": "Ben White",
+      "height": "1,80m",
+      "id": "472423",
+      "injured": false,
+      "marketValue": "€60.00m",
+      "name": "Reece James",
       "position": "Right-Back"
     },
     {
-      "contract": "Jun 3, 2024",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1132.png",
+        "name": "Burnley FC"
+      },
+      "dateOfBirth": "May 28, 1990",
+      "foot": "right",
+      "height": "1,83m",
+      "id": "95424",
+      "injured": false,
+      "marketValue": "€10.00m",
+      "name": "Kyle Walker",
+      "position": "Right-Back"
+    },
+    {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/873.png",
+        "name": "Crystal Palace"
+      },
       "dateOfBirth": "Feb 6, 2004",
       "foot": "left",
       "height": "1,82m",
       "id": "744149",
-      "marketValue": "€60.00m",
+      "injured": false,
+      "marketValue": "€32.00m",
       "name": "Adam Wharton",
       "position": "Defensive Midfield"
     },
     {
-      "dateOfBirth": "Mar 13, 2001",
-      "foot": "right",
-      "height": "1,82m",
-      "id": "505219",
-      "marketValue": "€35.00m",
-      "name": "James Garner",
-      "position": "Defensive Midfield"
-    },
-    {
-      "contract": "Nov 17, 2010",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1148.png",
+        "name": "Brentford FC"
+      },
       "dateOfBirth": "Jun 17, 1990",
       "foot": "right",
       "height": "1,82m",
       "id": "61651",
+      "injured": false,
       "marketValue": "€2.00m",
       "name": "Jordan Henderson",
       "position": "Defensive Midfield"
     },
     {
-      "contract": "Mar 22, 2019",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/11.png",
+        "name": "Arsenal FC"
+      },
       "dateOfBirth": "Jan 14, 1999",
       "foot": "right",
       "height": "1,88m",
       "id": "357662",
+      "injured": false,
       "marketValue": "€120.00m",
       "name": "Declan Rice",
       "position": "Central Midfield"
     },
     {
-      "contract": "Nov 14, 2024",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/31.png",
+        "name": "Liverpool FC"
+      },
       "dateOfBirth": "Jan 30, 2001",
       "foot": "right",
       "height": "1,85m",
       "id": "433188",
+      "injured": false,
       "marketValue": "€45.00m",
       "name": "Curtis Jones",
       "position": "Central Midfield"
     },
     {
-      "contract": "Nov 15, 2021",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/148.png",
+        "name": "Tottenham Hotspur"
+      },
       "dateOfBirth": "Feb 6, 2000",
       "foot": "right",
       "height": "1,82m",
       "id": "488362",
+      "injured": false,
       "marketValue": "€40.00m",
       "name": "Conor Gallagher",
       "position": "Central Midfield"
     },
     {
-      "contract": "Sep 6, 2025",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/703.png",
+        "name": "Nottingham Forest"
+      },
       "dateOfBirth": "Nov 6, 2002",
       "foot": "right",
       "height": "1,79m",
       "id": "567576",
+      "injured": false,
       "marketValue": "€60.00m",
       "name": "Elliot Anderson",
       "position": "Central Midfield"
     },
     {
-      "contract": "Mar 23, 2024",
-      "dateOfBirth": "Apr 19, 2005",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/5.png",
+        "name": "AC Milan"
+      },
+      "dateOfBirth": "Jan 23, 1996",
       "foot": "right",
-      "height": "1,84m",
-      "id": "820374",
-      "marketValue": "€50.00m",
-      "name": "Kobbie Mainoo",
+      "height": "1,91m",
+      "id": "202886",
+      "injured": false,
+      "marketValue": "€20.00m",
+      "name": "Ruben Loftus-Cheek",
       "position": "Central Midfield"
     },
     {
-      "contract": "Nov 12, 2020",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/989.png",
+        "name": "AFC Bournemouth"
+      },
+      "dateOfBirth": "Aug 21, 2003",
+      "foot": "right",
+      "height": "1,78m",
+      "id": "855256",
+      "injured": false,
+      "marketValue": "€20.00m",
+      "name": "Alex Scott",
+      "position": "Central Midfield"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/418.png",
+        "name": "Real Madrid"
+      },
       "dateOfBirth": "Jun 29, 2003",
       "foot": "right",
       "height": "1,86m",
       "id": "581678",
+      "injured": false,
       "marketValue": "€140.00m",
       "name": "Jude Bellingham",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Nov 17, 2023",
-      "dateOfBirth": "May 6, 2002",
-      "foot": "left",
-      "height": "1,85m",
-      "id": "568177",
-      "marketValue": "€110.00m",
-      "name": "Cole Palmer",
-      "position": "Attacking Midfield"
-    },
-    {
-      "contract": "Sep 5, 2020",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/281.png",
+        "name": "Manchester City"
+      },
       "dateOfBirth": "May 28, 2000",
       "foot": "left",
       "height": "1,71m",
       "id": "406635",
-      "marketValue": "€80.00m",
+      "injured": false,
+      "marketValue": "€140.00m",
       "name": "Phil Foden",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Nov 14, 2024",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/631.png",
+        "name": "Chelsea FC"
+      },
+      "dateOfBirth": "May 6, 2002",
+      "foot": "left",
+      "height": "1,85m",
+      "id": "568177",
+      "injured": false,
+      "marketValue": "€130.00m",
+      "name": "Cole Palmer",
+      "position": "Attacking Midfield"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/11.png",
+        "name": "Arsenal FC"
+      },
+      "dateOfBirth": "Jun 29, 1998",
+      "foot": "right",
+      "height": "1,78m",
+      "id": "479999",
+      "injured": false,
+      "marketValue": "€60.00m",
+      "name": "Eberechi Eze",
+      "position": "Attacking Midfield"
+    },
+    {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/703.png",
+        "name": "Nottingham Forest"
+      },
+      "dateOfBirth": "Jan 27, 2000",
+      "foot": "right",
+      "height": "1,71m",
+      "id": "429014",
+      "injured": false,
+      "marketValue": "€40.00m",
+      "name": "Morgan Gibbs-White",
+      "position": "Attacking Midfield"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/405.png",
+        "name": "Aston Villa"
+      },
       "dateOfBirth": "Jul 26, 2002",
       "foot": "right",
       "height": "1,87m",
       "id": "503743",
+      "injured": false,
       "marketValue": "€80.00m",
       "name": "Morgan Rogers",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Mar 23, 2024",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/985.png",
+        "name": "Manchester United"
+      },
+      "dateOfBirth": "Apr 19, 2005",
+      "foot": "right",
+      "height": "1,84m",
+      "id": "820374",
+      "injured": false,
+      "marketValue": "€50.00m",
+      "name": "Kobbie Mainoo",
+      "position": "Central Midfield"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/762.png",
+        "name": "Newcastle United"
+      },
       "dateOfBirth": "Feb 24, 2001",
       "foot": "right",
       "height": "1,83m",
       "id": "503733",
+      "injured": false,
       "marketValue": "€60.00m",
       "name": "Anthony Gordon",
       "position": "Left Winger"
     },
     {
-      "contract": "May 27, 2016",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/131.png",
+        "name": "FC Barcelona"
+      },
       "dateOfBirth": "Oct 31, 1997",
       "foot": "right",
       "height": "1,85m",
       "id": "258923",
+      "injured": false,
       "marketValue": "€40.00m",
       "name": "Marcus Rashford",
       "position": "Left Winger"
     },
     {
-      "contract": "Oct 8, 2020",
-      "dateOfBirth": "Dec 9, 1997",
-      "foot": "right",
-      "height": "1,82m",
-      "id": "398065",
-      "marketValue": "€32.00m",
-      "name": "Harvey Barnes",
-      "position": "Left Winger"
-    },
-    {
-      "contract": "Oct 8, 2020",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/11.png",
+        "name": "Arsenal FC"
+      },
       "dateOfBirth": "Sep 5, 2001",
       "foot": "left",
       "height": "1,78m",
       "id": "433177",
+      "injured": false,
       "marketValue": "€120.00m",
       "name": "Bukayo Saka",
       "position": "Right Winger"
     },
     {
-      "contract": "Sep 10, 2024",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/379.png",
+        "name": "West Ham United"
+      },
+      "dateOfBirth": "Dec 20, 1996",
+      "foot": "left",
+      "height": "1,76m",
+      "id": "314875",
+      "injured": false,
+      "marketValue": "€45.00m",
+      "name": "Jarrod Bowen",
+      "position": "Right Winger"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/11.png",
+        "name": "Arsenal FC"
+      },
       "dateOfBirth": "Mar 10, 2002",
       "foot": "left",
       "height": "1,82m",
       "id": "503987",
+      "injured": false,
       "marketValue": "€50.00m",
       "name": "Noni Madueke",
       "position": "Right Winger"
     },
     {
-      "contract": "Jun 4, 2022",
-      "dateOfBirth": "Dec 20, 1996",
-      "foot": "left",
-      "height": "1,76m",
-      "id": "314875",
-      "marketValue": "€35.00m",
-      "name": "Jarrod Bowen",
-      "position": "Right Winger"
-    },
-    {
-      "contract": "Mar 27, 2015",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/27.png",
+        "name": "Bayern Munich"
+      },
       "dateOfBirth": "Jul 28, 1993",
       "foot": "right",
       "height": "1,88m",
       "id": "132098",
+      "injured": false,
       "marketValue": "€65.00m",
       "name": "Harry Kane",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Mar 25, 2021",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/405.png",
+        "name": "Aston Villa"
+      },
       "dateOfBirth": "Dec 30, 1995",
       "foot": "right",
       "height": "1,80m",
       "id": "324358",
-      "marketValue": "€55.00m",
+      "injured": false,
+      "marketValue": "€30.00m",
       "name": "Ollie Watkins",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Nov 14, 2017",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/148.png",
+        "name": "Tottenham Hotspur"
+      },
       "dateOfBirth": "Sep 14, 1997",
       "foot": "right",
       "height": "1,86m",
       "id": "258889",
-      "marketValue": "€35.00m",
+      "injured": false,
+      "marketValue": "€45.00m",
       "name": "Dominic Solanke",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Oct 8, 2020",
-      "dateOfBirth": "Mar 16, 1997",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/18487.png",
+        "name": "Al-Ahli SFC"
+      },
+      "dateOfBirth": "Mar 16, 1996",
       "foot": "right",
-      "height": "1,89m",
-      "id": "306024",
-      "marketValue": "€22.00m",
-      "name": "Dominic Calvert-Lewin",
+      "height": "1,85m",
+      "id": "251664",
+      "injured": false,
+      "marketValue": "€20.00m",
+      "name": "Ivan Toney",
       "position": "Centre-Forward"
     }
   ],
