@@ -327,7 +327,7 @@
       "foot": "right",
       "height": "1,78m",
       "id": "810092",
-      "injured": true,
+      "injured": false,
       "marketValue": "€60.00m",
       "name": "Warren Zaïre-Emery",
       "position": "Central Midfield"
@@ -537,7 +537,7 @@
       "foot": "both",
       "height": "1,78m",
       "id": "288230",
-      "injured": true,
+      "injured": false,
       "marketValue": "€100.00m",
       "name": "Ousmane Dembélé",
       "position": "Centre-Forward"
