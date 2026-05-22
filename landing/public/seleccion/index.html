@@ -173,7 +173,7 @@
             </p>
 
             <!-- Inline waitlist -->
-            <form id="waitlist-form" class="hero-reveal hero-reveal-4 mt-8 flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
+            <form id="waitlist-form" class="hero-reveal hero-reveal-4 mt-8 flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
                 <input
                     type="text"
                     id="name"
@@ -253,7 +253,7 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    formMessage.textContent = '¡Estás en la lista! Te avisaremos pronto.';
+                    formMessage.textContent = '¡Estás en la lista! Consulta tu email para encontrar el código de invitación.';
                     formMessage.className = 'text-xs mt-3 text-green-400';
                     formMessage.classList.remove('hidden');
                     form.reset();
