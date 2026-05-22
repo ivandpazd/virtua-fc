@@ -27,7 +27,7 @@
       "foot": "right",
       "height": "1,93m",
       "id": "105470",
-      "injured": true,
+      "injured": false,
       "marketValue": "€17.00m",
       "name": "Alisson",
       "position": "Goalkeeper"
@@ -366,7 +366,7 @@
       "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/537.png",
-        "name": "Botafogo fr"
+        "name": "Botafogo FR"
       },
       "dateOfBirth": "Jul 23, 1999",
       "foot": "right",
@@ -381,7 +381,7 @@
       "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/978.png",
-        "name": "Clube de Regatas Vasco da Gama"
+        "name": "CR Vasco da Gama"
       },
       "dateOfBirth": "Jul 25, 1996",
       "foot": "right",
@@ -561,7 +561,7 @@
       "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/1023.png",
-        "name": "Sociedade Esportiva Palmeiras"
+        "name": "SE Palmeiras"
       },
       "dateOfBirth": "Jan 1, 1996",
       "foot": "right",
@@ -621,7 +621,7 @@
       "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/537.png",
-        "name": "Botafogo fr"
+        "name": "Botafogo FR"
       },
       "dateOfBirth": "Apr 29, 2001",
       "foot": "left",
@@ -846,7 +846,7 @@
       "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/1023.png",
-        "name": "Sociedade Esportiva Palmeiras"
+        "name": "SE Palmeiras"
       },
       "dateOfBirth": "Feb 28, 2005",
       "foot": "right",
