@@ -11,6 +11,8 @@
  * @module atmosphere-generator
  */
 
+import { MINUTE } from './match-phases.js';
+
 // Position-group weights for shot attribution (forwards shoot more)
 const SHOT_WEIGHTS = {
     Forward: 25,
@@ -23,6 +25,32 @@ const SHOT_WEIGHTS = {
 const SHOTS_PER_XG = 3.0;
 const ON_TARGET_RATIO = 0.3;
 const XG_BASELINE = 1.2; // added to score as xG proxy
+
+/**
+ * Format an atmosphere event's clock-time minute the same way the live
+ * clock would render it at the moment of reveal: stoppage windows of any
+ * half are shown as "45+N'" / "90+N'" / "105+N'" / "120+N'", regular
+ * play as a bare integer minute. Server events get this for free via
+ * MatchEvent::displayMinute() because they carry (phase, base, stoppage)
+ * — atmosphere events only have a sort-minute, so we compute it here
+ * using the persisted per-match stoppage durations.
+ */
+export function formatAtmosphereDisplayMinute(sortMinute, stoppage = {}) {
+    const m = Math.floor(sortMinute);
+    const fhs   = stoppage.firstHalfStoppage   ?? 0;
+    const shs   = stoppage.secondHalfStoppage  ?? 0;
+    const etfhs = stoppage.etFirstHalfStoppage ?? 0;
+    const etshs = stoppage.etSecondHalfStoppage ?? 0;
+
+    if (m <= MINUTE.FIRST_HALF_END)               return `${m}'`;
+    if (m <= MINUTE.FIRST_HALF_END + fhs)         return `${MINUTE.FIRST_HALF_END}+${m - MINUTE.FIRST_HALF_END}'`;
+    if (m <= MINUTE.REGULAR_TIME_END)             return `${m}'`;
+    if (m <= MINUTE.REGULAR_TIME_END + shs)       return `${MINUTE.REGULAR_TIME_END}+${m - MINUTE.REGULAR_TIME_END}'`;
+    if (m <= MINUTE.ET_FIRST_HALF_END)            return `${m}'`;
+    if (m <= MINUTE.ET_FIRST_HALF_END + etfhs)    return `${MINUTE.ET_FIRST_HALF_END}+${m - MINUTE.ET_FIRST_HALF_END}'`;
+    if (m <= MINUTE.ET_END)                       return `${m}'`;
+    return `${MINUTE.ET_END}+${m - MINUTE.ET_END}'`;
+}
 
 /**
  * Build a set of player IDs that are OFF the pitch at a given minute,
@@ -198,6 +226,7 @@ export function generateAtmosphereForPeriod(config) {
         narrativeTemplates, allEvents,
         minMinute, maxMinute,
     } = config;
+    const displayMinuteFor = (m) => formatAtmosphereDisplayMinute(m, config);
 
     const totalMinutes = maxMinute - minMinute + 1;
     const matchFraction = totalMinutes / 90;
@@ -243,6 +272,7 @@ export function generateAtmosphereForPeriod(config) {
 
             events.push({
                 minute,
+                displayMinute: displayMinuteFor(minute),
                 type: 'shot_on_target',
                 atmosphere: true,
                 playerName: player.name,
@@ -269,6 +299,7 @@ export function generateAtmosphereForPeriod(config) {
 
             events.push({
                 minute,
+                displayMinute: displayMinuteFor(minute),
                 type: 'shot_off_target',
                 atmosphere: true,
                 playerName: player.name,
@@ -352,6 +383,7 @@ export function generateContextualNarratives(config) {
         venueName, narrativeTemplates, allEvents,
         isKnockout, isTwoLeggedTie,
         isNeutralVenue,
+        firstHalfStoppage,
     } = config;
 
     const venue = venueName || '';
@@ -388,12 +420,17 @@ export function generateContextualNarratives(config) {
         { minute: 85, type: 'end' },
     ];
 
+    // Second-half-start narrative is placed just past the end of 1H stoppage
+    // so the simulator's clock tick reveals it the moment 2H starts (not
+    // during 1H stoppage, where "game resumed" would feel premature). It
+    // also carries phase='second_half' + displayMinute="45'" so event-feed
+    // partitions it into the 2H bucket regardless of `firstHalfStoppage`.
+    const fhs = firstHalfStoppage ?? 0;
+    const secondHalfStartMinute = MINUTE.FIRST_HALF_END + fhs + 0.1;
+
     for (const cp of checkpoints) {
-        // Second-half-start uses 45.9 so it sorts after first-half events
-        // but before minute-46 events, appearing right after the half-time
-        // break in the feed. Displayed as "45'" via Math.floor in the template.
         const m = cp.type === 'second_half_start'
-            ? 45.9
+            ? secondHalfStartMinute
             : uniqueMinute(usedMinutes, cp.minute, cp.minute + 3);
         const score = scoreAtMinute(allEvents, homeTeamId, m);
         const scoreStr = `${score.home}-${score.away}`;
@@ -500,15 +537,30 @@ export function generateContextualNarratives(config) {
         const narrative = pickNarrative(templates, extraReplacements, { excludeVenue: noVenue });
         if (!narrative) continue;
 
-        events.push({
+        const event = {
             minute: m,
+            displayMinute: formatAtmosphereDisplayMinute(m, config),
             type: 'contextual',
             atmosphere: true,
             playerName: '',
             teamId: null,
             gamePlayerId: null,
             metadata: { narrative },
-        });
+        };
+
+        // Tag the second-half-start narrative so event-feed buckets it
+        // into the 2H section (its absolute minute = 45+fhs+0.1 would
+        // otherwise fall into the 1H-stoppage range when fhs > 0). The
+        // displayed label stays as "45'" to match the convention used
+        // for half-time substitutions persisted at base=45 — override
+        // the stoppage-formatted default ("45+N'") that would otherwise
+        // come out of formatAtmosphereDisplayMinute.
+        if (cp.type === 'second_half_start') {
+            event.phase = 'second_half';
+            event.displayMinute = `${MINUTE.FIRST_HALF_END}'`;
+        }
+
+        events.push(event);
     }
 
     return events;
@@ -612,6 +664,7 @@ export function generateTacticalNarratives(config) {
 
         events.push({
             minute: m,
+            displayMinute: formatAtmosphereDisplayMinute(m, config),
             type: 'contextual',
             atmosphere: true,
             playerName: '',
@@ -720,74 +773,3 @@ export function addGoalNarratives(events, config) {
     }
 }
 
-/**
- * Regenerate shot atmosphere for [minMinute..maxMinute] and merge into the
- * target array (sorted by minute).
- *
- * Call BEFORE merging any server-resimulated real events so fresh shots
- * aren't influenced by just-added goals — this matches the long-standing
- * ordering used by the tactical-change flow.
- *
- * @param {object}   params.config              _atmosphereConfig() payload
- * @param {object[]} params.target              array to mutate (events or extraTimeEvents)
- * @param {object[]} params.availabilityEvents  full context for who's on the pitch
- *                                              (regular + ET when mutating extraTimeEvents)
- * @param {number}   params.minMinute
- * @param {number}   params.maxMinute           90 for regular time, 120 for extra time
- */
-export function regenerateShots({ config, target, availabilityEvents, minMinute, maxMinute }) {
-    const fresh = generateAtmosphereForPeriod({
-        ...config,
-        allEvents: availabilityEvents,
-        minMinute,
-        maxMinute,
-    });
-    if (fresh.length) {
-        target.push(...fresh);
-        target.sort((a, b) => a.minute - b.minute);
-    }
-}
-
-/**
- * Regenerate narratives on the target array. Always re-runs
- * addGoalNarratives (needed after new server goals have been merged in),
- * then optionally generates contextual/tactical narratives for checkpoints
- * at or after minMinute and merges them into the target.
- *
- * Call AFTER merging server-resimulated real events so goal narratives
- * attach to the fresh goals.
- *
- * @param {object}   params.config
- * @param {object[]} params.target
- * @param {object[]} params.availabilityEvents
- * @param {number}   params.minMinute
- * @param {boolean}  [params.includeContextual=false]
- * @param {boolean}  [params.includeTactical=false]
- */
-export function regenerateNarratives({
-    config,
-    target,
-    availabilityEvents,
-    minMinute,
-    includeContextual = false,
-    includeTactical = false,
-}) {
-    addGoalNarratives(target, config);
-    const fresh = [];
-    if (includeContextual) {
-        fresh.push(
-            ...generateContextualNarratives({ ...config, allEvents: availabilityEvents })
-                .filter(e => e.minute >= minMinute)
-        );
-    }
-    if (includeTactical) {
-        fresh.push(
-            ...generateTacticalNarratives({ ...config, allEvents: availabilityEvents })
-                .filter(e => e.minute >= minMinute)
-        );
-    }
-    if (fresh.length) {
-        target.push(...fresh);
-        target.sort((a, b) => a.minute - b.minute);
-    }
-}

@@ -554,14 +554,15 @@ export function createMatchSimulation(ctx) {
                 return;
             }
 
-            state.extraTimeEvents = result.extraTimeEvents || [];
+            state.realExtraTimeEvents = result.extraTimeEvents || [];
             state.etHomeScore = result.homeScoreET || 0;
             state.etAwayScore = result.awayScoreET || 0;
             state._needsPenalties = result.needsPenalties || false;
 
-            // Generate client-side atmosphere for extra time
-            if (typeof state._injectETAtmosphere === 'function') {
-                state._injectETAtmosphere();
+            // Derive ET atmosphere from the freshly-loaded ET real events
+            // (mirrors recomputeRegularAtmosphere at initial load).
+            if (typeof state.recomputeETAtmosphere === 'function') {
+                state.recomputeETAtmosphere();
             }
 
             if (result.homePossession !== undefined) {
@@ -694,13 +695,20 @@ export function createMatchSimulation(ctx) {
             _kickoffTimeout = null;
         }
 
-        // Reveal all first-half events (FH + FH stoppage). Phase-aware so a
-        // 45+2' event doesn't get skipped when the user clicks "skip to HT".
-        // Backend uses 'first_half'/'first_half_stoppage' phase strings on
-        // MatchEvent rows — distinct from PHASE.* which model the *clock*.
+        // Reveal all first-half events (FH + FH stoppage). Backend events
+        // carry an explicit phase tuple, so we trust that when present;
+        // client-injected atmosphere events (shots, narratives) don't
+        // have a phase, so we fall back to a minute-based check against
+        // the persisted 1H stoppage. Without the fallback the loop used
+        // to break at the first atmosphere event encountered — usually a
+        // shot near minute 5 — leaving the rest of the half unrevealed
+        // until the 2H tick caught up.
+        const firstHalfEnd = MINUTE.FIRST_HALF_END + (state.firstHalfStoppage || 0);
         for (let i = state.lastRevealedIndex + 1; i < state.events.length; i++) {
             const event = state.events[i];
-            const isFirstHalf = event.phase === 'first_half' || event.phase === 'first_half_stoppage';
+            const isFirstHalf = event.phase
+                ? (event.phase === 'first_half' || event.phase === 'first_half_stoppage')
+                : event.minute <= firstHalfEnd;
             if (!isFirstHalf) break;
             state.lastRevealedIndex = i;
             state.revealedEvents.unshift(event);
@@ -877,8 +885,17 @@ export function createMatchSimulation(ctx) {
     function start() {
         const state = ctx();
 
-        // Synthesize goals if events are empty but there's a final score
-        state.events = synthesizeGoalsIfNeeded(state.events);
+        // Synthesize ghost goals into the canonical real-event list so any
+        // goals the server omitted (because they were generated for an AI
+        // team without an event row) still appear in the feed. Atmosphere
+        // is then re-derived to merge the synthesized goals into c.events.
+        const synthesized = synthesizeGoalsIfNeeded(state.realEvents);
+        if (synthesized.length !== state.realEvents.length) {
+            state.realEvents = synthesized;
+            if (typeof state.recomputeRegularAtmosphere === 'function') {
+                state.recomputeRegularAtmosphere();
+            }
+        }
 
         // Brief delay before kickoff
         _kickoffTimeout = setTimeout(() => {
