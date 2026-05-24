@@ -50,8 +50,8 @@
     {
       "calledUp": false,
       "club": {
-        "image": "https://assets.virtuafc.com/crests/10789.png",
-        "name": "SC Braga B"
+        "image": "https://assets.virtuafc.com/crests/1075.png",
+        "name": "SC Braga"
       },
       "dateOfBirth": "Apr 9, 2004",
       "foot": "right",
@@ -374,21 +374,6 @@
       "injured": false,
       "marketValue": "€65.00m",
       "name": "Rafael Leão",
-      "position": "Left Winger"
-    },
-    {
-      "calledUp": false,
-      "club": {
-        "image": "https://assets.virtuafc.com/crests/4023.png",
-        "name": "---"
-      },
-      "dateOfBirth": "Dec 4, 1996",
-      "foot": "right",
-      "height": "1,78m",
-      "id": "340950",
-      "injured": false,
-      "marketValue": "€50.00m",
-      "name": "Diogo Jota",
       "position": "Left Winger"
     },
     {
