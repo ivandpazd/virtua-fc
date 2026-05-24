@@ -73,7 +73,14 @@ class ShowGame
                     'gameId' => $gameId,
                     'matchId' => $result->matchId,
                 ]),
-                'season_complete' => redirect()->route($game->isTournamentMode() ? 'game.tournament-end' : 'game.season-end', $gameId),
+                // Tournament mode goes straight to tournament-end (no
+                // "between matches" dashboard exists). Season-based modes
+                // fall through to render the dashboard with $nextMatch=null
+                // so the user can browse their club one last time before
+                // committing to the season transition.
+                'season_complete' => $game->isTournamentMode()
+                    ? redirect()->route('game.tournament-end', $gameId)
+                    : redirect()->route('show-game', $gameId),
                 'done' => redirect()->route('show-game', $gameId),
                 'blocked' => $result->pendingAction && $result->pendingAction['route']
                     ? redirect()->route($result->pendingAction['route'], $gameId)->with('warning', __('messages.action_required'))
@@ -115,11 +122,15 @@ class ShowGame
                 ]);
             }
 
+            // User's team has finished the season but other competitions
+            // still have AI-only fixtures to simulate. Use a generic screen —
+            // no club crest, no "teams warming up" copy — because the user
+            // isn't playing.
             return view('game-loading', [
                 'game' => $game,
-                'title' => __('game.simulating_matches'),
-                'message' => __('game.simulating_matches_message'),
-                'showCrest' => true,
+                'title' => __('game.simulating_other_matches'),
+                'message' => __('game.simulating_other_matches_message'),
+                'showCrest' => false,
             ]);
         }
 
@@ -141,11 +152,12 @@ class ShowGame
             return redirect()->route('game.simulate-tournament', $gameId);
         }
 
-        // Season/tournament complete: redirect to end-of-season summary
-        if (!$nextMatch && !$hasRemainingMatches) {
-            return $game->isTournamentMode()
-                ? redirect()->route('game.tournament-end', $gameId)
-                : redirect()->route('game.season-end', $gameId);
+        // Tournament complete: redirect to tournament-end. Season-based
+        // modes fall through and render the dashboard with $nextMatch=null
+        // so the user can browse their club before clicking through to the
+        // season summary (the irreversible "Start New Season" lives there).
+        if (!$nextMatch && !$hasRemainingMatches && $game->isTournamentMode()) {
+            return redirect()->route('game.tournament-end', $gameId);
         }
 
         $notifications = $this->notificationService->getNotifications($game->id, true, 15);
