@@ -8,20 +8,13 @@
         "image": "https://assets.virtuafc.com/crests/720.png",
         "name": "FC Porto"
       },
+      "dateOfBirth": "Sep 19, 1999",
+      "foot": "right",
+      "height": "1,86m",
       "id": "357153",
       "injured": false,
+      "marketValue": "€40.00m",
       "name": "Diogo Costa",
-      "position": "Goalkeeper"
-    },
-    {
-      "calledUp": true,
-      "club": {
-        "image": "https://assets.virtuafc.com/crests/336.png",
-        "name": "Sporting CP"
-      },
-      "id": "234811",
-      "injured": false,
-      "name": "Rui Silva",
       "position": "Goalkeeper"
     },
     {
@@ -30,19 +23,42 @@
         "image": "https://assets.virtuafc.com/crests/543.png",
         "name": "Wolverhampton Wanderers"
       },
+      "dateOfBirth": "Jan 17, 1993",
+      "foot": "right",
+      "height": "1,92m",
       "id": "249994",
       "injured": false,
+      "marketValue": "€5.00m",
       "name": "José Sá",
       "position": "Goalkeeper"
     },
     {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/336.png",
+        "name": "Sporting CP"
+      },
+      "dateOfBirth": "Feb 7, 1994",
+      "foot": "left",
+      "height": "1,91m",
+      "id": "234811",
+      "injured": false,
+      "marketValue": "€7.00m",
+      "name": "Rui Silva",
+      "position": "Goalkeeper"
+    },
+    {
       "calledUp": false,
-      "dateOfBirth": "Aug 20, 1998",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/10789.png",
+        "name": "SC Braga B"
+      },
+      "dateOfBirth": "Apr 9, 2004",
       "foot": "right",
-      "height": "1,88m",
-      "id": "527026",
-      "marketValue": "€2.50m",
-      "name": "Ricardo Velho",
+      "height": "1,89m",
+      "id": "929868",
+      "injured": false,
+      "name": "João Carvalho",
       "position": "Goalkeeper"
     },
     {
@@ -51,8 +67,12 @@
         "image": "https://assets.virtuafc.com/crests/281.png",
         "name": "Manchester City"
       },
+      "dateOfBirth": "May 14, 1997",
+      "foot": "right",
+      "height": "1,87m",
       "id": "258004",
       "injured": false,
+      "marketValue": "€60.00m",
       "name": "Rúben Dias",
       "position": "Centre-Back"
     },
@@ -62,32 +82,28 @@
         "image": "https://assets.virtuafc.com/crests/336.png",
         "name": "Sporting CP"
       },
+      "dateOfBirth": "Aug 25, 2001",
+      "foot": "left",
+      "height": "1,86m",
       "id": "549006",
       "injured": false,
+      "marketValue": "€40.00m",
       "name": "Gonçalo Inácio",
       "position": "Centre-Back"
     },
     {
-      "calledUp": true,
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/294.png",
         "name": "SL Benfica"
       },
-      "id": "504087",
-      "injured": false,
-      "name": "Tomás Araújo",
-      "position": "Centre-Back"
-    },
-    {
-      "calledUp": false,
-      "contract": "Nov 17, 2022",
       "dateOfBirth": "Oct 30, 2003",
       "foot": "right",
       "height": "1,87m",
       "id": "650568",
-      "marketValue": "€28.00m",
+      "injured": false,
+      "marketValue": "€38.00m",
       "name": "António Silva",
-      "number": "4",
       "position": "Centre-Back"
     },
     {
@@ -96,8 +112,12 @@
         "image": "https://assets.virtuafc.com/crests/1050.png",
         "name": "Villarreal CF"
       },
+      "dateOfBirth": "Jul 29, 2003",
+      "foot": "left",
+      "height": "1,90m",
       "id": "805714",
       "injured": false,
+      "marketValue": "€25.00m",
       "name": "Renato Veiga",
       "position": "Centre-Back"
     },
@@ -107,18 +127,26 @@
         "image": "https://assets.virtuafc.com/crests/583.png",
         "name": "Paris Saint-Germain"
       },
+      "dateOfBirth": "Jun 19, 2002",
+      "foot": "left",
+      "height": "1,80m",
       "id": "616341",
-      "injured": true,
+      "injured": false,
+      "marketValue": "€75.00m",
       "name": "Nuno Mendes",
       "position": "Left-Back"
     },
     {
       "calledUp": false,
-      "contract": "Nov 15, 2024",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/398.png",
+        "name": "SS Lazio"
+      },
       "dateOfBirth": "Jan 26, 2000",
       "foot": "left",
       "height": "1,83m",
       "id": "535955",
+      "injured": false,
       "marketValue": "€25.00m",
       "name": "Nuno Tavares",
       "position": "Left-Back"
@@ -126,23 +154,31 @@
     {
       "calledUp": true,
       "club": {
-        "image": "https://assets.virtuafc.com/crests/281.png",
-        "name": "Manchester City"
+        "image": "https://assets.virtuafc.com/crests/985.png",
+        "name": "Manchester United"
       },
-      "id": "601883",
+      "dateOfBirth": "Mar 18, 1999",
+      "foot": "right",
+      "height": "1,83m",
+      "id": "357147",
       "injured": false,
-      "name": "Matheus Nunes",
+      "marketValue": "€30.00m",
+      "name": "Diogo Dalot",
       "position": "Right-Back"
     },
     {
       "calledUp": true,
       "club": {
-        "image": "https://assets.virtuafc.com/crests/985.png",
-        "name": "Manchester United"
+        "image": "https://assets.virtuafc.com/crests/281.png",
+        "name": "Manchester City"
       },
-      "id": "357147",
+      "dateOfBirth": "Aug 27, 1998",
+      "foot": "right",
+      "height": "1,83m",
+      "id": "601883",
       "injured": false,
-      "name": "Diogo Dalot",
+      "marketValue": "€45.00m",
+      "name": "Matheus Nunes",
       "position": "Right-Back"
     },
     {
@@ -151,8 +187,12 @@
         "image": "https://assets.virtuafc.com/crests/131.png",
         "name": "FC Barcelona"
       },
+      "dateOfBirth": "May 27, 1994",
+      "foot": "right",
+      "height": "1,82m",
       "id": "182712",
       "injured": false,
+      "marketValue": "€9.00m",
       "name": "João Cancelo",
       "position": "Right-Back"
     },
@@ -162,10 +202,29 @@
         "image": "https://assets.virtuafc.com/crests/36.png",
         "name": "Fenerbahce"
       },
+      "dateOfBirth": "Nov 16, 1993",
+      "foot": "right",
+      "height": "1,77m",
       "id": "231572",
       "injured": false,
+      "marketValue": "€6.00m",
       "name": "Nélson Semedo",
       "position": "Right-Back"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/294.png",
+        "name": "SL Benfica"
+      },
+      "dateOfBirth": "May 16, 2002",
+      "foot": "right",
+      "height": "1,87m",
+      "id": "504087",
+      "injured": false,
+      "marketValue": "€28.00m",
+      "name": "Tomás Araújo",
+      "position": "Centre-Back"
     },
     {
       "calledUp": true,
@@ -173,18 +232,26 @@
         "image": "https://assets.virtuafc.com/crests/583.png",
         "name": "Paris Saint-Germain"
       },
+      "dateOfBirth": "Feb 13, 2000",
+      "foot": "right",
+      "height": "1,72m",
       "id": "487469",
       "injured": false,
+      "marketValue": "€110.00m",
       "name": "Vitinha",
       "position": "Defensive Midfield"
     },
     {
       "calledUp": false,
-      "contract": "Mar 24, 2021",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/148.png",
+        "name": "Tottenham Hotspur"
+      },
       "dateOfBirth": "Jul 9, 1995",
       "foot": "right",
       "height": "1,90m",
       "id": "257455",
+      "injured": false,
       "marketValue": "€40.00m",
       "name": "João Palhinha",
       "position": "Defensive Midfield"
@@ -195,20 +262,13 @@
         "image": "https://assets.virtuafc.com/crests/1114.png",
         "name": "Al-Hilal SFC"
       },
+      "dateOfBirth": "Mar 13, 1997",
+      "foot": "right",
+      "height": "1,80m",
       "id": "225161",
       "injured": false,
+      "marketValue": "€25.00m",
       "name": "Rúben Neves",
-      "position": "Defensive Midfield"
-    },
-    {
-      "calledUp": true,
-      "club": {
-        "image": "https://assets.virtuafc.com/crests/237.png",
-        "name": "RCD Mallorca"
-      },
-      "id": "657430",
-      "injured": false,
-      "name": "Samú Costa",
       "position": "Defensive Midfield"
     },
     {
@@ -217,8 +277,12 @@
         "image": "https://assets.virtuafc.com/crests/583.png",
         "name": "Paris Saint-Germain"
       },
+      "dateOfBirth": "Sep 27, 2004",
+      "foot": "right",
+      "height": "1,74m",
       "id": "670681",
       "injured": false,
+      "marketValue": "€110.00m",
       "name": "João Neves",
       "position": "Central Midfield"
     },
@@ -228,20 +292,14 @@
         "image": "https://assets.virtuafc.com/crests/281.png",
         "name": "Manchester City"
       },
+      "dateOfBirth": "Aug 10, 1994",
+      "foot": "left",
+      "height": "1,73m",
       "id": "241641",
       "injured": false,
+      "marketValue": "€27.00m",
       "name": "Bernardo Silva",
       "position": "Attacking Midfield"
-    },
-    {
-      "calledUp": false,
-      "dateOfBirth": "Jul 10, 2004",
-      "foot": "right",
-      "height": "1,80m",
-      "id": "880245",
-      "marketValue": "€35.00m",
-      "name": "Mateus Fernandes",
-      "position": "Central Midfield"
     },
     {
       "calledUp": true,
@@ -249,8 +307,12 @@
         "image": "https://assets.virtuafc.com/crests/985.png",
         "name": "Manchester United"
       },
+      "dateOfBirth": "Sep 8, 1994",
+      "foot": "right",
+      "height": "1,79m",
       "id": "240306",
       "injured": false,
+      "marketValue": "€40.00m",
       "name": "Bruno Fernandes",
       "position": "Attacking Midfield"
     },
@@ -260,17 +322,26 @@
         "image": "https://assets.virtuafc.com/crests/336.png",
         "name": "Sporting CP"
       },
+      "dateOfBirth": "Dec 29, 1999",
+      "foot": "left",
+      "height": "1,84m",
       "id": "412669",
       "injured": false,
+      "marketValue": "€35.00m",
       "name": "Francisco Trincão",
       "position": "Attacking Midfield"
     },
     {
       "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/720.png",
+        "name": "FC Porto"
+      },
       "dateOfBirth": "May 5, 2007",
       "foot": "right",
       "height": "1,68m",
       "id": "957653",
+      "injured": false,
       "marketValue": "€10.00m",
       "name": "Rodrigo Mora",
       "position": "Attacking Midfield"
@@ -278,46 +349,61 @@
     {
       "calledUp": true,
       "club": {
+        "image": "https://assets.virtuafc.com/crests/237.png",
+        "name": "RCD Mallorca"
+      },
+      "dateOfBirth": "Nov 27, 2000",
+      "foot": "left",
+      "height": "1,85m",
+      "id": "657430",
+      "injured": false,
+      "marketValue": "€15.00m",
+      "name": "Samú Costa",
+      "position": "Defensive Midfield"
+    },
+    {
+      "calledUp": true,
+      "club": {
         "image": "https://assets.virtuafc.com/crests/5.png",
         "name": "AC Milan"
       },
+      "dateOfBirth": "Jun 10, 1999",
+      "foot": "right",
+      "height": "1,88m",
       "id": "357164",
       "injured": false,
+      "marketValue": "€65.00m",
       "name": "Rafael Leão",
       "position": "Left Winger"
     },
     {
       "calledUp": false,
-      "contract": "Jun 4, 2021",
-      "dateOfBirth": "Jun 28, 1998",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/4023.png",
+        "name": "---"
+      },
+      "dateOfBirth": "Dec 4, 1996",
       "foot": "right",
-      "height": "1,73m",
-      "id": "426620",
-      "marketValue": "€28.00m",
-      "name": "Pedro Gonçalves",
+      "height": "1,78m",
+      "id": "340950",
+      "injured": false,
+      "marketValue": "€50.00m",
+      "name": "Diogo Jota",
       "position": "Left Winger"
     },
     {
       "calledUp": false,
-      "contract": "Sep 7, 2014",
-      "dateOfBirth": "Sep 15, 1994",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/336.png",
+        "name": "Sporting CP"
+      },
+      "dateOfBirth": "Jun 28, 1998",
       "foot": "right",
       "height": "1,73m",
-      "id": "261927",
-      "marketValue": "€10.00m",
-      "name": "Ricardo Horta",
-      "number": "15",
-      "position": "Left Winger"
-    },
-    {
-      "calledUp": true,
-      "club": {
-        "image": "https://assets.virtuafc.com/crests/681.png",
-        "name": "Real Sociedad"
-      },
-      "id": "225122",
+      "id": "426620",
       "injured": false,
-      "name": "Gonçalo Guedes",
+      "marketValue": "€32.00m",
+      "name": "Pedro Gonçalves",
       "position": "Left Winger"
     },
     {
@@ -326,8 +412,12 @@
         "image": "https://assets.virtuafc.com/crests/631.png",
         "name": "Chelsea FC"
       },
+      "dateOfBirth": "Mar 9, 2000",
+      "foot": "left",
+      "height": "1,74m",
       "id": "487465",
       "injured": false,
+      "marketValue": "€60.00m",
       "name": "Pedro Neto",
       "position": "Right Winger"
     },
@@ -337,19 +427,43 @@
         "image": "https://assets.virtuafc.com/crests/506.png",
         "name": "Juventus FC"
       },
+      "dateOfBirth": "Dec 14, 2002",
+      "foot": "left",
+      "height": "1,70m",
       "id": "487474",
       "injured": false,
+      "marketValue": "€30.00m",
       "name": "Francisco Conceição",
       "position": "Right Winger"
     },
     {
       "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/336.png",
+        "name": "Sporting CP"
+      },
       "dateOfBirth": "Apr 30, 2007",
       "foot": "left",
       "height": "1,72m",
       "id": "1138758",
+      "injured": false,
       "marketValue": "€30.00m",
       "name": "Geovany Quenda",
+      "position": "Right Winger"
+    },
+    {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/2282.png",
+        "name": "Club Brugge KV"
+      },
+      "dateOfBirth": "Mar 19, 2004",
+      "foot": "left",
+      "height": "1,69m",
+      "id": "742451",
+      "injured": false,
+      "marketValue": "€8.00m",
+      "name": "Carlos Forbs",
       "position": "Right Winger"
     },
     {
@@ -358,8 +472,12 @@
         "image": "https://assets.virtuafc.com/crests/18544.png",
         "name": "Al-Nassr FC"
       },
+      "dateOfBirth": "Nov 10, 1999",
+      "foot": "right",
+      "height": "1,81m",
       "id": "462250",
       "injured": false,
+      "marketValue": "€25.00m",
       "name": "João Félix",
       "position": "Second Striker"
     },
@@ -369,8 +487,12 @@
         "image": "https://assets.virtuafc.com/crests/583.png",
         "name": "Paris Saint-Germain"
       },
+      "dateOfBirth": "Jun 20, 2001",
+      "foot": "right",
+      "height": "1,85m",
       "id": "550550",
       "injured": false,
+      "marketValue": "€35.00m",
       "name": "Gonçalo Ramos",
       "position": "Centre-Forward"
     },
@@ -380,21 +502,29 @@
         "image": "https://assets.virtuafc.com/crests/18544.png",
         "name": "Al-Nassr FC"
       },
+      "dateOfBirth": "Feb 5, 1985",
+      "foot": "right",
+      "height": "1,88m",
       "id": "8198",
       "injured": false,
+      "marketValue": "€12.00m",
       "name": "Cristiano Ronaldo",
       "position": "Centre-Forward"
     },
     {
-      "calledUp": false,
-      "contract": "Nov 11, 2020",
-      "dateOfBirth": "Nov 9, 1992",
-      "foot": "left",
-      "height": "1,88m",
-      "id": "211072",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/681.png",
+        "name": "Real Sociedad"
+      },
+      "dateOfBirth": "Nov 29, 1996",
+      "foot": "right",
+      "height": "1,79m",
+      "id": "225122",
+      "injured": false,
       "marketValue": "€6.00m",
-      "name": "Paulinho",
-      "position": "Centre-Forward"
+      "name": "Gonçalo Guedes",
+      "position": "Left Winger"
     }
   ],
   "stadiumName": null,
