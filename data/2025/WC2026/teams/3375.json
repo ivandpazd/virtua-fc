@@ -103,6 +103,34 @@
     {
       "calledUp": false,
       "club": {
+        "image": "https://assets.virtuafc.com/crests/681.png",
+        "name": "Real Sociedad"
+      },
+      "dateOfBirth": "Apr 23, 2006",
+      "foot": "right",
+      "height": "1,87m",
+      "id": "1018938",
+      "marketValue": "€20.00m",
+      "name": "Jon Martín",
+      "position": "Centre-Back"
+    },
+    {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/940.png",
+        "name": "RC Celta"
+      },
+      "dateOfBirth": "Jun 27, 2003",
+      "foot": "right",
+      "height": "1,78m",
+      "id": "1076815",
+      "marketValue": "€15.00m",
+      "name": "Javi Rodríguez",
+      "position": "Centre-Back"
+    },
+    {
+      "calledUp": false,
+      "club": {
         "image": "https://assets.virtuafc.com/crests/418.png",
         "name": "Real Madrid"
       },
@@ -339,6 +367,34 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/131.png",
+        "name": "FC Barcelona"
+      },
+      "dateOfBirth": "May 26, 2007",
+      "foot": "left",
+      "height": "1,93m",
+      "id": "1018920",
+      "marketValue": "€30.00m",
+      "name": "Marc Bernal",
+      "position": "Defensive Midfield"
+    },
+    {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1049.png",
+        "name": "Valencia CF"
+      },
+      "dateOfBirth": "May 13, 2003",
+      "foot": "right",
+      "height": "1,87m",
+      "id": "834764",
+      "marketValue": "€25.00m",
+      "name": "Javi Guerra",
+      "position": "Central Midfield"
+    },
+    {
       "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/131.png",
@@ -448,6 +504,20 @@
       "id": "646740",
       "marketValue": "€80.00m",
       "name": "Gavi",
+      "position": "Central Midfield"
+    },
+    {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/681.png",
+        "name": "Real Sociedad"
+      },
+      "dateOfBirth": "Jan 31, 2002",
+      "foot": "right",
+      "height": "1,81m",
+      "id": "634431",
+      "marketValue": "€10.00m",
+      "name": "Beñat Turrientes",
       "position": "Central Midfield"
     },
     {
@@ -660,6 +730,34 @@
       "injured": false,
       "marketValue": "€6.00m",
       "name": "Ayoze Pérez",
+      "position": "Centre-Forward"
+    },
+    {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/418.png",
+        "name": "Real Madrid"
+      },
+      "dateOfBirth": "Mar 24, 2004",
+      "foot": "both",
+      "height": "1,82m",
+      "id": "935230",
+      "marketValue": "€30.00m",
+      "name": "Gonzalo García",
+      "position": "Centre-Forward"
+    },
+    {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/3368.png",
+        "name": "Levante UD"
+      },
+      "dateOfBirth": "Jul 24, 2005",
+      "foot": "right",
+      "height": "1,94m",
+      "id": "1063338",
+      "marketValue": "€2.50m",
+      "name": "Carlos Espí",
       "position": "Centre-Forward"
     }
   ],
