@@ -3,6 +3,7 @@
   "name": "Spain",
   "players": [
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/131.png",
         "name": "FC Barcelona"
@@ -16,6 +17,7 @@
       "position": "Goalkeeper"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/11.png",
         "name": "Arsenal FC"
@@ -29,6 +31,7 @@
       "position": "Goalkeeper"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/621.png",
         "name": "Athletic Club"
@@ -42,6 +45,7 @@
       "position": "Goalkeeper"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/681.png",
         "name": "Real Sociedad"
@@ -55,6 +59,7 @@
       "position": "Goalkeeper"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/631.png",
         "name": "Chelsea FC"
@@ -68,6 +73,7 @@
       "position": "Goalkeeper"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/237.png",
         "name": "RCD Mallorca"
@@ -81,6 +87,7 @@
       "position": "Goalkeeper"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/131.png",
         "name": "FC Barcelona"
@@ -94,6 +101,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/418.png",
         "name": "Real Madrid"
@@ -107,6 +115,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/11.png",
         "name": "Arsenal FC"
@@ -120,6 +129,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/131.png",
         "name": "FC Barcelona"
@@ -133,6 +143,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/621.png",
         "name": "Athletic Club"
@@ -146,6 +157,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "name": "Atlético de Madrid",
         "image": "https://assets.virtuafc.com/crests/13.png"
@@ -159,6 +171,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "name": "Athletic Club",
         "image": "https://assets.virtuafc.com/crests/621.png"
@@ -172,6 +185,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "name": "FC Barcelona",
         "image": "https://assets.virtuafc.com/crests/131.png"
@@ -185,6 +199,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/631.png",
         "name": "Chelsea FC"
@@ -198,6 +213,7 @@
       "position": "Left-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/15.png",
         "name": "Bayer 04 Leverkusen"
@@ -211,6 +227,7 @@
       "position": "Left-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/148.png",
         "name": "Tottenham Hotspur"
@@ -224,6 +241,7 @@
       "position": "Right-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/13.png",
         "name": "Atlético de Madrid"
@@ -237,6 +255,7 @@
       "position": "Right-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "name": "Atlético de Madrid",
         "image": "https://assets.virtuafc.com/crests/13.png"
@@ -250,6 +269,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/681.png",
         "name": "Real Sociedad"
@@ -263,6 +283,7 @@
       "position": "Left-Back"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/1075.png",
         "name": "SC Braga"
@@ -276,6 +297,7 @@
       "position": "Right-Back"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/11.png",
         "name": "Arsenal FC"
@@ -289,6 +311,7 @@
       "position": "Defensive Midfield"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/281.png",
         "name": "Manchester City"
@@ -302,6 +325,21 @@
       "position": "Defensive Midfield"
     },
     {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/11.png",
+        "name": "Arsenal FC"
+      },
+      "dateOfBirth": "Jun 22, 1996",
+      "foot": "left",
+      "height": "1,89m",
+      "id": "338424",
+      "marketValue": "€30.00m",
+      "name": "Mikel Merino",
+      "position": "Central Midfield"
+    },
+    {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/131.png",
         "name": "FC Barcelona"
@@ -315,6 +353,7 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "club": {
         "name": "Atlético de Madrid",
         "image": "https://assets.virtuafc.com/crests/13.png"
@@ -328,6 +367,7 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "club": {
         "name": "Bayer 04 Leverkusen",
         "image": "https://assets.virtuafc.com/crests/15.png"
@@ -341,6 +381,7 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/681.png",
         "name": "Real Sociedad"
@@ -354,6 +395,7 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/150.png",
         "name": "Real Betis Balompié"
@@ -367,6 +409,21 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/583.png",
+        "name": "Paris Saint-Germain"
+      },
+      "dateOfBirth": "Apr 3, 1996",
+      "foot": "left",
+      "height": "1,89m",
+      "id": "350219",
+      "marketValue": "€40.00m",
+      "name": "Fabián Ruiz",
+      "position": "Central Midfield"
+    },
+    {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/131.png",
         "name": "FC Barcelona"
@@ -380,6 +437,7 @@
       "position": "Attacking Midfield"
     },
     {
+      "calledUp": true,
       "club": {
         "name": "FC Barcelona",
         "image": "https://assets.virtuafc.com/crests/131.png"
@@ -393,6 +451,7 @@
       "position": "Central Midfield"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/131.png",
         "name": "FC Barcelona"
@@ -406,6 +465,7 @@
       "position": "Attacking Midfield"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/13.png",
         "name": "Atlético de Madrid"
@@ -419,6 +479,7 @@
       "position": "Left Winger"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/331.png",
         "name": "CA Osasuna"
@@ -432,6 +493,7 @@
       "position": "Left Winger"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/681.png",
         "name": "Real Sociedad"
@@ -445,6 +507,7 @@
       "position": "Left Winger"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/131.png",
         "name": "FC Barcelona"
@@ -458,6 +521,7 @@
       "position": "Right Winger"
     },
     {
+      "calledUp": false,
       "club": {
         "name": "Rayo Vallecano",
         "image": "https://assets.virtuafc.com/crests/367.png"
@@ -471,6 +535,7 @@
       "position": "Right Winger"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/873.png",
         "name": "Crystal Palace"
@@ -484,6 +549,7 @@
       "position": "Right Winger"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/1047.png",
         "name": "Como 1907"
@@ -497,6 +563,7 @@
       "position": "Left Winger"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/621.png",
         "name": "Athletic Club"
@@ -510,6 +577,7 @@
       "position": "Left Winger"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/131.png",
         "name": "FC Barcelona"
@@ -523,6 +591,7 @@
       "position": "Centre-Forward"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/681.png",
         "name": "Real Sociedad"
@@ -536,6 +605,7 @@
       "position": "Centre-Forward"
     },
     {
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/940.png",
         "name": "RC Celta"
@@ -549,6 +619,7 @@
       "position": "Centre-Forward"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/1050.png",
         "name": "Villarreal CF"
@@ -562,6 +633,7 @@
       "position": "Left Winger"
     },
     {
+      "calledUp": false,
       "club": {
         "name": "FC Porto",
         "image": "https://assets.virtuafc.com/crests/720.png"
@@ -576,6 +648,7 @@
       "position": "Centre-Forward"
     },
     {
+      "calledUp": false,
       "club": {
         "image": "https://assets.virtuafc.com/crests/1050.png",
         "name": "Villarreal CF"
