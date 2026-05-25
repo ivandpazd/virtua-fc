@@ -465,7 +465,7 @@
       "position": "Central Midfield"
     },
     {
-      "calledUp": false,
+      "calledUp": true,
       "club": {
         "image": "https://assets.virtuafc.com/crests/583.png",
         "name": "Paris Saint-Germain"
@@ -488,6 +488,7 @@
       "foot": "right",
       "height": "1,74m",
       "id": "636703",
+      "injured": true,
       "marketValue": "€100.00m",
       "name": "Fermín López",
       "position": "Attacking Midfield"
