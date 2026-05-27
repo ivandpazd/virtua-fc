@@ -1,398 +1,621 @@
 {
-  "image": "https://tmssl.akamaized.net/images/wappen/big/3379.png",
+  "image": "https://assets.virtuafc.com/crests/3379.png",
   "name": "Netherlands",
   "players": [
     {
-      "contract": "Oct 13, 2023",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1237.png",
+        "name": "Brighton & Hove Albion"
+      },
       "dateOfBirth": "Aug 18, 2002",
       "foot": "right",
       "height": "1,94m",
       "id": "565093",
-      "marketValue": "€25.00m",
+      "injured": false,
+      "marketValue": "€40.00m",
       "name": "Bart Verbruggen",
-      "number": "1",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Mar 26, 2022",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/15.png",
+        "name": "Bayer 04 Leverkusen"
+      },
       "dateOfBirth": "Jun 13, 1993",
       "foot": "both",
       "height": "1,95m",
       "id": "125714",
-      "marketValue": "€10.00m",
+      "injured": false,
+      "marketValue": "€6.00m",
       "name": "Mark Flekken",
-      "number": "23",
       "position": "Goalkeeper"
     },
     {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/3948.png",
+        "name": "Union Saint-Gilloise"
+      },
       "dateOfBirth": "Jan 23, 2000",
       "foot": "right",
       "height": "2,06m",
       "id": "463527",
+      "injured": false,
       "marketValue": "€4.00m",
       "name": "Kjell Scherpen",
       "position": "Goalkeeper"
     },
     {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/383.png",
+        "name": "PSV Eindhoven"
+      },
       "dateOfBirth": "Aug 1, 1995",
       "foot": "right",
       "height": "1,84m",
       "id": "215094",
+      "injured": false,
       "marketValue": "€3.50m",
       "name": "Nick Olij",
       "position": "Goalkeeper"
     },
     {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/289.png",
+        "name": "Sunderland AFC"
+      },
       "dateOfBirth": "Jan 17, 2003",
       "foot": "left",
       "height": "1,93m",
       "id": "646991",
-      "marketValue": "€1.50m",
+      "injured": false,
+      "marketValue": "€25.00m",
       "name": "Robin Roefs",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Oct 13, 2023",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/148.png",
+        "name": "Tottenham Hotspur"
+      },
       "dateOfBirth": "Apr 19, 2001",
       "foot": "left",
       "height": "1,93m",
       "id": "557459",
-      "marketValue": "€55.00m",
+      "injured": false,
+      "marketValue": "€65.00m",
       "name": "Micky van de Ven",
-      "number": "15",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 25, 2017",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/985.png",
+        "name": "Manchester United"
+      },
       "dateOfBirth": "Aug 12, 1999",
       "foot": "right",
       "height": "1,89m",
       "id": "326031",
+      "injured": true,
       "marketValue": "€45.00m",
       "name": "Matthijs de Ligt",
       "position": "Centre-Back"
     },
     {
-      "contract": "May 31, 2017",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/281.png",
+        "name": "Manchester City"
+      },
       "dateOfBirth": "Feb 18, 1995",
       "foot": "left",
       "height": "1,80m",
       "id": "177476",
-      "marketValue": "€35.00m",
+      "injured": false,
+      "marketValue": "€15.00m",
       "name": "Nathan Aké",
-      "number": "5",
       "position": "Centre-Back"
     },
     {
-      "contract": "Sep 10, 2024",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1237.png",
+        "name": "Brighton & Hove Albion"
+      },
       "dateOfBirth": "Jun 8, 2000",
       "foot": "right",
       "height": "1,89m",
       "id": "576314",
-      "marketValue": "€32.00m",
+      "injured": false,
+      "marketValue": "€35.00m",
       "name": "Jan Paul van Hecke",
-      "number": "12",
       "position": "Centre-Back"
     },
     {
-      "contract": "Oct 10, 2015",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/31.png",
+        "name": "Liverpool FC"
+      },
       "dateOfBirth": "Jul 8, 1991",
       "foot": "right",
       "height": "1,95m",
       "id": "139208",
-      "marketValue": "€28.00m",
+      "injured": false,
+      "marketValue": "€18.00m",
       "name": "Virgil van Dijk",
-      "number": "4",
       "position": "Centre-Back"
     },
     {
-      "contract": "Aug 15, 2012",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/46.png",
+        "name": "Inter Milan"
+      },
       "dateOfBirth": "Feb 5, 1992",
       "foot": "right",
       "height": "1,89m",
       "id": "111196",
+      "injured": true,
       "marketValue": "€7.00m",
       "name": "Stefan de Vrij",
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/610.png",
+        "name": "Ajax Amsterdam"
+      },
       "dateOfBirth": "Mar 17, 2003",
       "foot": "left",
       "height": "1,88m",
       "id": "559327",
+      "injured": false,
       "marketValue": "€6.00m",
       "name": "Youri Baas",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 23, 2025",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/405.png",
+        "name": "Aston Villa"
+      },
       "dateOfBirth": "Mar 10, 2002",
       "foot": "left",
       "height": "1,78m",
       "id": "485585",
+      "injured": false,
       "marketValue": "€32.00m",
       "name": "Ian Maatsen",
       "position": "Left-Back"
     },
     {
-      "contract": "Nov 21, 2023",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/631.png",
+        "name": "Chelsea FC"
+      },
       "dateOfBirth": "Mar 7, 2006",
       "foot": "left",
       "height": "1,82m",
       "id": "904802",
-      "marketValue": "€30.00m",
+      "injured": false,
+      "marketValue": "€35.00m",
       "name": "Jorrel Hato",
       "position": "Left-Back"
     },
     {
-      "contract": "Oct 13, 2023",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1132.png",
+        "name": "Burnley FC"
+      },
       "dateOfBirth": "Nov 14, 2001",
       "foot": "left",
       "height": "1,83m",
       "id": "514285",
+      "injured": false,
       "marketValue": "€23.00m",
       "name": "Quilindschy Hartman",
       "position": "Left-Back"
     },
     {
-      "contract": "Oct 13, 2023",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/31.png",
+        "name": "Liverpool FC"
+      },
       "dateOfBirth": "Dec 10, 2000",
       "foot": "right",
       "height": "1,72m",
       "id": "484547",
+      "injured": false,
       "marketValue": "€50.00m",
       "name": "Jeremie Frimpong",
       "position": "Right-Back"
     },
     {
-      "contract": "Jun 2, 2021",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/11.png",
+        "name": "Arsenal FC"
+      },
       "dateOfBirth": "Jun 17, 2001",
       "foot": "right",
       "height": "1,79m",
       "id": "420243",
-      "marketValue": "€45.00m",
+      "injured": false,
+      "marketValue": "€70.00m",
       "name": "Jurriën Timber",
       "position": "Right-Back"
     },
     {
-      "contract": "Mar 24, 2023",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/289.png",
+        "name": "Sunderland AFC"
+      },
       "dateOfBirth": "Jul 18, 2000",
       "foot": "right",
       "height": "1,84m",
       "id": "420210",
+      "injured": false,
       "marketValue": "€32.00m",
       "name": "Lutsharel Geertruida",
-      "number": "2",
       "position": "Right-Back"
     },
     {
-      "contract": "Oct 13, 2018",
-      "dateOfBirth": "Apr 18, 1996",
-      "foot": "right",
-      "height": "1,88m",
-      "id": "321528",
-      "marketValue": "€20.00m",
-      "name": "Denzel Dumfries",
-      "position": "Right-Back"
-    },
-    {
-      "contract": "Mar 24, 2021",
-      "dateOfBirth": "May 16, 2002",
-      "foot": "right",
-      "height": "1,90m",
-      "id": "478573",
-      "marketValue": "€55.00m",
-      "name": "Ryan Gravenberch",
-      "number": "8",
-      "position": "Defensive Midfield"
-    },
-    {
-      "contract": "Jun 8, 2022",
-      "dateOfBirth": "Jan 12, 1997",
-      "foot": "right",
-      "height": "1,85m",
-      "id": "347900",
-      "marketValue": "€32.00m",
-      "name": "Jerdy Schouten",
-      "number": "16",
-      "position": "Defensive Midfield"
-    },
-    {
-      "contract": "Mar 27, 2023",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1237.png",
+        "name": "Brighton & Hove Albion"
+      },
       "dateOfBirth": "Nov 16, 1999",
       "foot": "right",
       "height": "1,88m",
       "id": "415381",
-      "marketValue": "€30.00m",
+      "injured": false,
+      "marketValue": "€25.00m",
       "name": "Mats Wieffer",
+      "position": "Right-Back"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/46.png",
+        "name": "Inter Milan"
+      },
+      "dateOfBirth": "Apr 18, 1996",
+      "foot": "right",
+      "height": "1,88m",
+      "id": "321528",
+      "injured": false,
+      "marketValue": "€25.00m",
+      "name": "Denzel Dumfries",
+      "position": "Right-Back"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/31.png",
+        "name": "Liverpool FC"
+      },
+      "dateOfBirth": "May 16, 2002",
+      "foot": "right",
+      "height": "1,90m",
+      "id": "478573",
+      "injured": false,
+      "marketValue": "€90.00m",
+      "name": "Ryan Gravenberch",
       "position": "Defensive Midfield"
     },
     {
-      "contract": "Sep 7, 2023",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/506.png",
+        "name": "Juventus FC"
+      },
+      "dateOfBirth": "Feb 28, 1998",
+      "foot": "left",
+      "height": "1,84m",
+      "id": "360518",
+      "injured": false,
+      "marketValue": "€20.00m",
+      "name": "Teun Koopmeiners",
+      "position": "Defensive Midfield"
+    },
+    {
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/383.png",
+        "name": "PSV Eindhoven"
+      },
+      "dateOfBirth": "Jan 12, 1997",
+      "foot": "right",
+      "height": "1,85m",
+      "id": "347900",
+      "injured": true,
+      "marketValue": "€32.00m",
+      "name": "Jerdy Schouten",
+      "position": "Defensive Midfield"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/281.png",
+        "name": "Manchester City"
+      },
       "dateOfBirth": "Jul 29, 1998",
       "foot": "right",
       "height": "1,85m",
       "id": "460939",
-      "marketValue": "€50.00m",
+      "injured": false,
+      "marketValue": "€60.00m",
       "name": "Tijjani Reijnders",
       "position": "Central Midfield"
     },
     {
-      "contract": "Sep 6, 2018",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/131.png",
+        "name": "FC Barcelona"
+      },
       "dateOfBirth": "May 12, 1997",
       "foot": "right",
       "height": "1,81m",
       "id": "326330",
+      "injured": false,
       "marketValue": "€45.00m",
       "name": "Frenkie de Jong",
       "position": "Central Midfield"
     },
     {
-      "contract": "Mar 26, 2024",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/244.png",
+        "name": "Olympique Marseille"
+      },
       "dateOfBirth": "Jun 17, 2001",
       "foot": "right",
       "height": "1,79m",
       "id": "420213",
-      "marketValue": "€32.00m",
+      "injured": false,
+      "marketValue": "€25.00m",
       "name": "Quinten Timber",
-      "number": "20",
       "position": "Central Midfield"
     },
     {
-      "contract": "Sep 22, 2022",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/398.png",
+        "name": "SS Lazio"
+      },
       "dateOfBirth": "May 16, 2002",
       "foot": "left",
       "height": "1,82m",
       "id": "470394",
+      "injured": false,
       "marketValue": "€16.00m",
       "name": "Kenneth Taylor",
       "position": "Central Midfield"
     },
     {
-      "contract": "Nov 17, 2025",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/234.png",
+        "name": "Feyenoord Rotterdam"
+      },
       "dateOfBirth": "Oct 4, 2003",
       "foot": "right",
       "height": "1,89m",
       "id": "601495",
+      "injured": false,
       "marketValue": "€1.50m",
       "name": "Luciano Valente",
-      "number": "22",
       "position": "Central Midfield"
     },
     {
-      "contract": "Dec 3, 2022",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/148.png",
+        "name": "Tottenham Hotspur"
+      },
       "dateOfBirth": "Apr 21, 2003",
       "foot": "right",
       "height": "1,79m",
       "id": "566931",
+      "injured": true,
       "marketValue": "€80.00m",
       "name": "Xavi Simons",
-      "number": "7",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Oct 7, 2020",
-      "dateOfBirth": "Feb 28, 1998",
-      "foot": "left",
-      "height": "1,84m",
-      "id": "360518",
-      "marketValue": "€50.00m",
-      "name": "Teun Koopmeiners",
-      "position": "Attacking Midfield"
-    },
-    {
-      "contract": "Mar 26, 2018",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/989.png",
+        "name": "AFC Bournemouth"
+      },
       "dateOfBirth": "May 5, 1999",
       "foot": "both",
       "height": "1,72m",
       "id": "330659",
-      "marketValue": "€22.00m",
+      "injured": false,
+      "marketValue": "€30.00m",
       "name": "Justin Kluivert",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Sep 7, 2025",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/234.png",
+        "name": "Feyenoord Rotterdam"
+      },
       "dateOfBirth": "Nov 12, 2001",
       "foot": "right",
       "height": "1,73m",
       "id": "593519",
+      "injured": false,
       "marketValue": "€10.00m",
       "name": "Sem Steijn",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Jun 21, 2021",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/800.png",
+        "name": "Atalanta BC"
+      },
+      "dateOfBirth": "Mar 29, 1991",
+      "foot": "right",
+      "height": "1,85m",
+      "id": "133179",
+      "injured": false,
+      "marketValue": "€3.50m",
+      "name": "Marten de Roon",
+      "position": "Defensive Midfield"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/383.png",
+        "name": "PSV Eindhoven"
+      },
+      "dateOfBirth": "Dec 22, 1997",
+      "foot": "right",
+      "height": "1,87m",
+      "id": "372267",
+      "injured": false,
+      "marketValue": "€15.00m",
+      "name": "Guus Til",
+      "position": "Attacking Midfield"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/31.png",
+        "name": "Liverpool FC"
+      },
       "dateOfBirth": "May 7, 1999",
       "foot": "right",
       "height": "1,93m",
       "id": "434675",
-      "marketValue": "€60.00m",
+      "injured": false,
+      "marketValue": "€65.00m",
       "name": "Cody Gakpo",
-      "number": "11",
       "position": "Left Winger"
     },
     {
-      "contract": "Oct 8, 2021",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/141.png",
+        "name": "Galatasaray"
+      },
       "dateOfBirth": "Jun 17, 1999",
       "foot": "right",
       "height": "1,73m",
       "id": "339332",
-      "marketValue": "€20.00m",
+      "injured": false,
+      "marketValue": "€22.00m",
       "name": "Noa Lang",
-      "number": "17",
       "position": "Left Winger"
     },
     {
-      "contract": "Oct 15, 2013",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/199.png",
+        "name": "Sport Club Corinthians Paulista"
+      },
       "dateOfBirth": "Feb 13, 1994",
       "foot": "right",
       "height": "1,78m",
       "id": "167850",
-      "marketValue": "€10.00m",
+      "injured": false,
+      "marketValue": "€7.00m",
       "name": "Memphis Depay",
-      "number": "10",
       "position": "Second Striker"
     },
     {
-      "contract": "Oct 16, 2023",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/289.png",
+        "name": "Sunderland AFC"
+      },
       "dateOfBirth": "Feb 1, 2002",
       "foot": "right",
       "height": "1,80m",
       "id": "473169",
-      "marketValue": "€30.00m",
+      "injured": false,
+      "marketValue": "€25.00m",
       "name": "Brian Brobbey",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Sep 6, 2019",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/12.png",
+        "name": "AS Roma"
+      },
       "dateOfBirth": "Jan 19, 1999",
       "foot": "right",
       "height": "1,76m",
       "id": "326029",
-      "marketValue": "€28.00m",
+      "injured": false,
+      "marketValue": "€35.00m",
       "name": "Donyell Malen",
-      "number": "18",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Nov 14, 2025",
+      "calledUp": false,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/667.png",
+        "name": "RC Strasbourg Alsace"
+      },
       "dateOfBirth": "Feb 3, 2003",
       "foot": "right",
       "height": "1,96m",
       "id": "559328",
+      "injured": true,
       "marketValue": "€15.00m",
       "name": "Emmanuel Emegha",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Mar 23, 2018",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/610.png",
+        "name": "Ajax Amsterdam"
+      },
       "dateOfBirth": "Aug 7, 1992",
       "foot": "right",
       "height": "1,97m",
       "id": "228645",
-      "marketValue": "€5.00m",
+      "injured": false,
+      "marketValue": "€2.50m",
       "name": "Wout Weghorst",
       "position": "Centre-Forward"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/379.png",
+        "name": "West Ham United"
+      },
+      "dateOfBirth": "Oct 30, 2001",
+      "foot": "right",
+      "height": "1,74m",
+      "id": "474701",
+      "injured": false,
+      "marketValue": "€30.00m",
+      "name": "Crysencio Summerville",
+      "position": "Left Winger"
     }
   ],
   "stadiumName": null,

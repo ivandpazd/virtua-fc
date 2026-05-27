@@ -1,263 +1,366 @@
 {
-  "image": "https://tmssl.akamaized.net/images/wappen/big/3505.png",
+  "image": "https://assets.virtuafc.com/crests/3505.png",
   "name": "United States",
   "players": [
     {
-      "contract": "Jan 20, 2024",
-      "dateOfBirth": "Mar 13, 2001",
-      "height": "1,93m",
-      "id": "649397",
-      "marketValue": "€3.50m",
-      "name": "Patrick Schulte",
-      "number": "25",
-      "position": "Goalkeeper"
-    },
-    {
-      "dateOfBirth": "Apr 8, 1997",
-      "foot": "right",
-      "height": "1,95m",
-      "id": "334992",
-      "marketValue": "€3.00m",
-      "name": "Jonathan Klinsmann",
-      "number": "21",
-      "position": "Goalkeeper"
-    },
-    {
-      "dateOfBirth": "Sep 14, 2000",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/626.png",
+        "name": "New England Revolution"
+      },
+      "dateOfBirth": "Jun 24, 1994",
       "foot": "right",
       "height": "1,91m",
-      "id": "972454",
+      "id": "425306",
+      "injured": false,
       "marketValue": "€2.50m",
-      "name": "Roman Celentano",
-      "number": "24",
+      "name": "Matt Turner",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Jun 7, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/432.png",
+        "name": "Chicago Fire FC"
+      },
+      "dateOfBirth": "Mar 3, 2004",
+      "height": "1,90m",
+      "id": "765504",
+      "injured": false,
+      "marketValue": "€2.50m",
+      "name": "Chris Brady",
+      "position": "Goalkeeper"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/40058.png",
+        "name": "New York City FC"
+      },
       "dateOfBirth": "Sep 2, 1998",
       "height": "1,93m",
       "id": "500309",
+      "injured": false,
       "marketValue": "€2.00m",
       "name": "Matt Freese",
-      "number": "1",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Mar 25, 2023",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/873.png",
+        "name": "Crystal Palace"
+      },
+      "dateOfBirth": "Mar 28, 2000",
+      "foot": "right",
+      "height": "1,88m",
+      "id": "578539",
+      "injured": false,
+      "marketValue": "€25.00m",
+      "name": "Chris Richards",
+      "position": "Centre-Back"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/371.png",
+        "name": "Celtic FC"
+      },
       "dateOfBirth": "Aug 12, 1998",
       "foot": "left",
       "height": "1,90m",
       "id": "389253",
+      "injured": false,
       "marketValue": "€6.00m",
       "name": "Auston Trusty",
-      "number": "15",
       "position": "Centre-Back"
     },
     {
-      "contract": "Feb 1, 2020",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/415.png",
+        "name": "FC Toulouse"
+      },
       "dateOfBirth": "Feb 25, 1999",
       "foot": "right",
       "height": "1,84m",
       "id": "429259",
+      "injured": false,
       "marketValue": "€6.00m",
       "name": "Mark McKenzie",
-      "number": "22",
       "position": "Centre-Back"
     },
     {
-      "contract": "Sep 7, 2019",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/51772.png",
+        "name": "FC Cincinnati"
+      },
       "dateOfBirth": "Mar 14, 1997",
       "foot": "right",
       "height": "1,88m",
       "id": "468022",
+      "injured": false,
       "marketValue": "€3.50m",
       "name": "Miles Robinson",
-      "number": "12",
       "position": "Centre-Back"
     },
     {
-      "contract": "Nov 17, 2010",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/78435.png",
+        "name": "Charlotte FC"
+      },
       "dateOfBirth": "Oct 5, 1987",
       "foot": "left",
       "height": "1,86m",
       "id": "145466",
+      "injured": false,
       "marketValue": "€200k",
       "name": "Tim Ream",
-      "number": "13",
       "position": "Centre-Back"
     },
     {
-      "contract": "Jan 29, 2023",
-      "dateOfBirth": "Jul 31, 2002",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/931.png",
+        "name": "Fulham FC"
+      },
+      "dateOfBirth": "Aug 8, 1997",
       "foot": "left",
-      "height": "1,70m",
-      "id": "683812",
-      "marketValue": "€2.50m",
-      "name": "John Tolkin",
-      "number": "3",
+      "height": "1,83m",
+      "id": "349701",
+      "injured": false,
+      "marketValue": "€25.00m",
+      "name": "Antonee Robinson",
       "position": "Left-Back"
     },
     {
-      "contract": "Sep 7, 2019",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/383.png",
+        "name": "PSV Eindhoven"
+      },
       "dateOfBirth": "Nov 3, 2000",
       "foot": "right",
       "height": "1,73m",
       "id": "361104",
+      "injured": false,
       "marketValue": "€18.00m",
       "name": "Sergiño Dest",
-      "number": "2",
       "position": "Right-Back"
     },
     {
-      "contract": "Jun 2, 2022",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/18.png",
+        "name": "Borussia Mönchengladbach"
+      },
       "dateOfBirth": "Dec 31, 2002",
       "foot": "right",
       "height": "1,84m",
       "id": "504153",
+      "injured": false,
       "marketValue": "€7.00m",
       "name": "Joe Scally",
-      "number": "5",
       "position": "Right-Back"
     },
     {
-      "contract": "Jun 7, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1050.png",
+        "name": "Villarreal CF"
+      },
       "dateOfBirth": "Aug 9, 2004",
       "height": "1,88m",
       "id": "985806",
+      "injured": false,
       "marketValue": "€3.50m",
       "name": "Alex Freeman",
-      "number": "16",
       "position": "Right-Back"
     },
     {
-      "contract": "Feb 1, 2021",
-      "dateOfBirth": "Sep 24, 2001",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/989.png",
+        "name": "AFC Bournemouth"
+      },
+      "dateOfBirth": "Feb 14, 1999",
       "foot": "right",
-      "height": "1,88m",
-      "id": "670096",
-      "marketValue": "€12.00m",
-      "name": "Tanner Tessmann",
-      "number": "8",
+      "height": "1,75m",
+      "id": "332705",
+      "injured": false,
+      "marketValue": "€25.00m",
+      "name": "Tyler Adams",
       "position": "Defensive Midfield"
     },
     {
-      "contract": "Jan 26, 2023",
-      "dateOfBirth": "Nov 16, 2001",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/506.png",
+        "name": "Juventus FC"
+      },
+      "dateOfBirth": "Aug 28, 1998",
       "foot": "right",
-      "height": "1,75m",
-      "id": "513968",
-      "marketValue": "€9.00m",
-      "name": "Aidan Morris",
+      "height": "1,85m",
+      "id": "332697",
+      "injured": false,
+      "marketValue": "€30.00m",
+      "name": "Weston McKennie",
       "position": "Central Midfield"
     },
     {
-      "contract": "Jun 11, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/6321.png",
+        "name": "Vancouver Whitecaps FC"
+      },
       "dateOfBirth": "May 10, 2001",
       "foot": "right",
       "height": "1,75m",
       "id": "734761",
+      "injured": false,
       "marketValue": "€5.00m",
       "name": "Sebastian Berhalter",
-      "number": "17",
       "position": "Central Midfield"
     },
     {
-      "contract": "Jul 13, 2017",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/9636.png",
+        "name": "Seattle Sounders FC"
+      },
       "dateOfBirth": "Jun 3, 1995",
       "foot": "right",
       "height": "1,73m",
       "id": "354792",
+      "injured": false,
       "marketValue": "€3.50m",
       "name": "Cristian Roldán",
-      "number": "6",
       "position": "Central Midfield"
     },
     {
-      "contract": "Jan 20, 2024",
-      "dateOfBirth": "Jan 4, 1999",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/244.png",
+        "name": "Olympique Marseille"
+      },
+      "dateOfBirth": "Feb 22, 2000",
       "foot": "right",
       "height": "1,83m",
-      "id": "310662",
-      "marketValue": "€3.00m",
-      "name": "Timothy Tillman",
-      "number": "14",
-      "position": "Central Midfield"
+      "id": "370846",
+      "injured": false,
+      "marketValue": "€20.00m",
+      "name": "Timothy Weah",
+      "position": "Right Midfield"
     },
     {
-      "contract": "Jan 20, 2024",
-      "dateOfBirth": "Sep 7, 2003",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/15.png",
+        "name": "Bayer 04 Leverkusen"
+      },
+      "dateOfBirth": "May 28, 2002",
       "foot": "right",
-      "height": "1,73m",
-      "id": "880626",
-      "marketValue": "€8.00m",
-      "name": "Diego Luna",
-      "number": "10",
-      "position": "Left Midfield"
+      "height": "1,87m",
+      "id": "467437",
+      "injured": false,
+      "marketValue": "€30.00m",
+      "name": "Malik Tillman",
+      "position": "Attacking Midfield"
     },
     {
-      "contract": "Feb 1, 2020",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/399.png",
+        "name": "Leeds United"
+      },
       "dateOfBirth": "Oct 22, 2000",
       "foot": "right",
       "height": "1,77m",
       "id": "393323",
-      "marketValue": "€15.00m",
+      "injured": false,
+      "marketValue": "€18.00m",
       "name": "Brenden Aaronson",
-      "number": "11",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Nov 12, 2020",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/18.png",
+        "name": "Borussia Mönchengladbach"
+      },
       "dateOfBirth": "Nov 13, 2002",
       "foot": "right",
       "height": "1,87m",
       "id": "504215",
-      "marketValue": "€6.00m",
+      "injured": false,
+      "marketValue": "€4.00m",
       "name": "Giovanni Reyna",
-      "number": "7",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Jan 18, 2025",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/813.png",
+        "name": "Columbus Crew"
+      },
       "dateOfBirth": "Apr 19, 2001",
       "foot": "left",
       "height": "1,85m",
       "id": "993063",
+      "injured": false,
       "marketValue": "€4.50m",
       "name": "Max Arfsten",
-      "number": "18",
       "position": "Left Winger"
     },
     {
-      "contract": "Jun 16, 2023",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/5.png",
+        "name": "AC Milan"
+      },
+      "dateOfBirth": "Sep 18, 1998",
+      "foot": "right",
+      "height": "1,77m",
+      "id": "315779",
+      "injured": false,
+      "marketValue": "€50.00m",
+      "name": "Christian Pulisic",
+      "position": "Right Winger"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/3631.png",
+        "name": "CF América"
+      },
+      "dateOfBirth": "Feb 7, 1998",
+      "foot": "left",
+      "height": "1,67m",
+      "id": "351505",
+      "injured": false,
+      "marketValue": "€10.00m",
+      "name": "Álex Zendejas",
+      "position": "Right Winger"
+    },
+    {
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/162.png",
+        "name": "AS Monaco"
+      },
       "dateOfBirth": "Jul 3, 2001",
       "foot": "right",
       "height": "1,78m",
       "id": "503770",
-      "marketValue": "€22.00m",
+      "injured": false,
+      "marketValue": "€30.00m",
       "name": "Folarin Balogun",
-      "number": "20",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Sep 9, 2021",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/383.png",
+        "name": "PSV Eindhoven"
+      },
       "dateOfBirth": "Jan 9, 2003",
       "foot": "right",
       "height": "1,85m",
       "id": "627207",
-      "marketValue": "€15.00m",
+      "injured": false,
+      "marketValue": "€25.00m",
       "name": "Ricardo Pepi",
-      "number": "9",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Jun 2, 2022",
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/990.png",
+        "name": "Coventry City"
+      },
       "dateOfBirth": "Mar 27, 1998",
       "foot": "right",
-      "height": "1,93m",
+      "height": "1,91m",
       "id": "315291",
+      "injured": false,
       "marketValue": "€14.00m",
       "name": "Haji Wright",
-      "number": "19",
       "position": "Centre-Forward"
     }
   ],
