@@ -78,8 +78,16 @@ class BudgetProjectionService
     /**
      * Generate season projections for a game.
      * Called at the start of each season during pre-season.
+     *
+     * When $freshClub is true, the projection treats the team as if this were
+     * its first season in the game: no carry-overs, no loan repayments, and
+     * commercial revenue uses the stadium-based baseline instead of the prior
+     * season's actuals. This is set during a Pro Manager team switch — the
+     * previous season's finances belong to the old club and must not follow
+     * the manager. See ApplyPendingTeamSwitchProcessor and
+     * BudgetProjectionProcessor for the signal flow.
      */
-    public function generateProjections(Game $game): GameFinances
+    public function generateProjections(Game $game, bool $freshClub = false): GameFinances
     {
         // Get user's team and league
         $team = $game->team;
@@ -95,7 +103,9 @@ class BudgetProjectionService
         $projectedTvRevenue = $this->calculateTvRevenue($projectedPosition, $league);
         $projectedMatchdayRevenue = $this->calculateMatchdayRevenue($team, $game);
         $projectedSolidarityFundsRevenue = self::SOLIDARITY_FUNDS_BY_TIER[$game->competition->tier] ?? 0;
-        $projectedCommercialRevenue = $this->getBaseCommercialRevenue($game, $team, $league);
+        $projectedCommercialRevenue = $freshClub
+            ? $this->firstSeasonCommercialRevenue($game, $team, $league)
+            : $this->getBaseCommercialRevenue($game, $team, $league);
         $projectedSeasonTicketRevenue = $this->seasonTicketPricingService->getCurrent($game)?->total_revenue ?? 0;
 
         $projectedTotalRevenue = $projectedTvRevenue
@@ -116,10 +126,12 @@ class BudgetProjectionService
         // Calculate projected surplus
         $projectedSurplus = $projectedTotalRevenue - $projectedWages - $projectedOperatingExpenses;
 
-        // Get carried debt, surplus, and loan repayment from previous season
-        $carriedDebt = $this->getCarriedDebt($game);
-        $carriedSurplus = $this->getCarriedSurplus($game);
-        $previousLoanRepayment = $this->getPreviousSeasonLoanRepayment($game);
+        // Get carried debt, surplus, and loan repayment from previous season.
+        // After a Pro Manager team switch the previous season's GameFinances
+        // and BudgetLoan rows belong to the old club, so we skip them.
+        $carriedDebt = $freshClub ? 0 : $this->getCarriedDebt($game);
+        $carriedSurplus = $freshClub ? 0 : $this->getCarriedSurplus($game);
+        $previousLoanRepayment = $freshClub ? 0 : $this->getPreviousSeasonLoanRepayment($game);
 
         // Stadium debt service: next instalment of every active stadium
         // loan. Treated like previous_loan_repayment — reduces available
@@ -377,7 +389,16 @@ class BudgetProjectionService
             return $previousFinances->actual_commercial_revenue;
         }
 
-        // First season: calculate from stadium seats × config rate (capped)
+        return $this->firstSeasonCommercialRevenue($game, $team, $league);
+    }
+
+    /**
+     * Commercial revenue baseline when there is no prior-season actual to
+     * carry forward — used for season 1 of a new game and for the first
+     * season at a new club after a Pro Manager team switch.
+     */
+    private function firstSeasonCommercialRevenue(Game $game, Team $team, Competition $league): int|float
+    {
         $reputation = TeamReputation::resolveLevel($game->id, $team->id);
         $seats = min($team->stadium_seats, self::MAX_COMMERCIAL_SEATS);
 
