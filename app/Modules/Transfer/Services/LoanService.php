@@ -439,6 +439,9 @@ class LoanService
             'offer_type' => TransferOffer::TYPE_LOAN_IN,
             'direction' => TransferOffer::DIRECTION_INCOMING,
             'transfer_fee' => 0,
+            // The borrowing club pays the loaned-in player's full wage (no
+            // subsidy), so stamp it on the offer for the salary-cap accounting.
+            'offered_wage' => $player->annual_wage,
             'status' => TransferOffer::STATUS_PENDING,
             'expires_at' => $game->current_date->addDays(30),
             'game_date' => $game->current_date,
