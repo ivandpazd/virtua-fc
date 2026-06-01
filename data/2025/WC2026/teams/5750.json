@@ -1,18 +1,24 @@
 {
-  "image": "https://tmssl.akamaized.net/images/wappen/big/5750.png",
+  "image": "https://assets.virtuafc.com/crests/5750.png",
   "name": "Ecuador",
   "players": [
     {
-      "contract": "Oct 8, 2021",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/30120.png",
+        "name": "AE Kifisia"
+      },
       "dateOfBirth": "Sep 9, 2000",
       "foot": "right",
       "height": "1,85m",
       "id": "450233",
-      "marketValue": "€1.20m",
+      "injured": false,
+      "marketValue": "€800k",
       "name": "Moisés Ramírez",
       "position": "Goalkeeper"
     },
     {
+      "calledUp": false,
       "dateOfBirth": "Jun 12, 1995",
       "height": "1,86m",
       "id": "488586",
@@ -21,6 +27,7 @@
       "position": "Goalkeeper"
     },
     {
+      "calledUp": false,
       "contract": "Nov 19, 2025",
       "dateOfBirth": "Mar 9, 2006",
       "foot": "right",
@@ -31,66 +38,97 @@
       "position": "Goalkeeper"
     },
     {
-      "contract": "Jun 23, 2021",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/2063.png",
+        "name": "CA Huracán"
+      },
       "dateOfBirth": "Mar 30, 1987",
       "foot": "right",
       "height": "1,89m",
       "id": "77127",
-      "marketValue": "€350k",
+      "injured": false,
+      "marketValue": "€300k",
       "name": "Hernán Galíndez",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Jun 6, 2025",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/9855.png",
+        "name": "LDU Quito"
+      },
       "dateOfBirth": "Feb 28, 1996",
       "foot": "right",
       "height": "1,85m",
       "id": "351941",
-      "marketValue": "€350k",
+      "injured": false,
+      "marketValue": "€1.80m",
       "name": "Gonzalo Valle",
       "position": "Goalkeeper"
     },
     {
-      "contract": "Jun 14, 2021",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/11.png",
+        "name": "Arsenal FC"
+      },
       "dateOfBirth": "Jan 9, 2002",
       "foot": "left",
       "height": "1,84m",
       "id": "659813",
-      "marketValue": "€40.00m",
+      "injured": false,
+      "marketValue": "€50.00m",
       "name": "Piero Hincapié",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 28, 2023",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/583.png",
+        "name": "Paris Saint-Germain"
+      },
       "dateOfBirth": "Oct 16, 2001",
       "foot": "left",
       "height": "1,88m",
       "id": "661171",
-      "marketValue": "€40.00m",
+      "injured": false,
+      "marketValue": "€80.00m",
       "name": "Willian Pacho",
       "position": "Centre-Back"
     },
     {
-      "contract": "Mar 22, 2024",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/2282.png",
+        "name": "Club Brugge KV"
+      },
       "dateOfBirth": "Apr 21, 2004",
       "foot": "right",
       "height": "1,88m",
       "id": "893661",
-      "marketValue": "€18.00m",
+      "injured": false,
+      "marketValue": "€33.00m",
       "name": "Joel Ordóñez",
       "position": "Centre-Back"
     },
     {
-      "contract": "Sep 11, 2019",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/6600.png",
+        "name": "Sport Club Internacional"
+      },
       "dateOfBirth": "Jan 11, 1997",
       "foot": "right",
       "height": "1,87m",
       "id": "468174",
-      "marketValue": "€4.00m",
+      "injured": false,
+      "marketValue": "€1.00m",
       "name": "Félix Torres",
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "contract": "Nov 21, 2018",
       "dateOfBirth": "Sep 28, 1994",
       "height": "1,84m",
@@ -100,6 +138,7 @@
       "position": "Centre-Back"
     },
     {
+      "calledUp": false,
       "contract": "Jun 21, 2023",
       "dateOfBirth": "Feb 26, 2001",
       "foot": "right",
@@ -110,16 +149,22 @@
       "position": "Centre-Back"
     },
     {
-      "contract": "Oct 13, 2019",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/5.png",
+        "name": "AC Milan"
+      },
       "dateOfBirth": "Jan 21, 1998",
       "foot": "left",
       "height": "1,75m",
       "id": "349599",
-      "marketValue": "€30.00m",
+      "injured": false,
+      "marketValue": "€12.00m",
       "name": "Pervis Estupiñán",
       "position": "Left-Back"
     },
     {
+      "calledUp": false,
       "contract": "Nov 12, 2022",
       "dateOfBirth": "Apr 25, 2002",
       "foot": "left",
@@ -130,16 +175,22 @@
       "position": "Left-Back"
     },
     {
-      "contract": "Sep 7, 2024",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1184.png",
+        "name": "KRC Genk"
+      },
       "dateOfBirth": "Nov 5, 2004",
       "foot": "left",
       "height": "1,78m",
       "id": "893659",
-      "marketValue": "€3.50m",
+      "injured": false,
+      "marketValue": "€4.00m",
       "name": "Yaimar Medina",
       "position": "Left-Back"
     },
     {
+      "calledUp": false,
       "contract": "Nov 20, 2013",
       "dateOfBirth": "Aug 12, 1994",
       "foot": "left",
@@ -150,26 +201,52 @@
       "position": "Left-Back"
     },
     {
-      "contract": "Oct 12, 2018",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/330.png",
+        "name": "Clube Atlético Mineiro"
+      },
       "dateOfBirth": "Feb 18, 1998",
       "foot": "right",
       "height": "1,73m",
       "id": "450241",
-      "marketValue": "€4.50m",
+      "injured": false,
+      "marketValue": "€3.50m",
       "name": "Angelo Preciado",
       "position": "Right-Back"
     },
     {
-      "contract": "Oct 9, 2020",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/13353.png",
+        "name": "Club Tijuana"
+      },
+      "dateOfBirth": "Aug 4, 2000",
+      "foot": "right",
+      "height": "1,93m",
+      "id": "491616",
+      "injured": false,
+      "marketValue": "€2.50m",
+      "name": "Jackson Porozo",
+      "position": "Centre-Back"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/631.png",
+        "name": "Chelsea FC"
+      },
       "dateOfBirth": "Nov 2, 2001",
       "foot": "right",
       "height": "1,78m",
       "id": "687626",
-      "marketValue": "€80.00m",
+      "injured": false,
+      "marketValue": "€110.00m",
       "name": "Moisés Caicedo",
       "position": "Defensive Midfield"
     },
     {
+      "calledUp": false,
       "contract": "Sep 12, 2018",
       "dateOfBirth": "Apr 26, 1997",
       "foot": "right",
@@ -180,35 +257,52 @@
       "position": "Defensive Midfield"
     },
     {
-      "contract": "Dec 5, 2021",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/19309.png",
+        "name": "Independiente del Valle"
+      },
       "dateOfBirth": "Aug 5, 1999",
+      "foot": "right",
       "height": "1,75m",
       "id": "598145",
-      "marketValue": "€1.00m",
+      "injured": false,
+      "marketValue": "€1.80m",
       "name": "Jordy Alcívar",
       "position": "Defensive Midfield"
     },
     {
-      "contract": "Sep 12, 2018",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/330.png",
+        "name": "Clube Atlético Mineiro"
+      },
       "dateOfBirth": "Aug 21, 1998",
       "foot": "right",
       "height": "1,76m",
       "id": "400960",
-      "marketValue": "€3.50m",
+      "injured": false,
+      "marketValue": "€4.50m",
       "name": "Alan Franco",
       "position": "Central Midfield"
     },
     {
-      "contract": "Mar 21, 2025",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/865.png",
+        "name": "FC Midtjylland"
+      },
       "dateOfBirth": "Mar 24, 2004",
       "foot": "right",
-      "height": "1,89m",
+      "height": "1,87m",
       "id": "941418",
-      "marketValue": "€2.50m",
+      "injured": false,
+      "marketValue": "€7.00m",
       "name": "Denil Castillo",
       "position": "Central Midfield"
     },
     {
+      "calledUp": false,
       "contract": "Mar 26, 2025",
       "dateOfBirth": "Nov 6, 2007",
       "height": "1,74m",
@@ -217,26 +311,37 @@
       "position": "Central Midfield"
     },
     {
-      "contract": "Sep 12, 2023",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/209.png",
+        "name": "CA River Plate"
+      },
       "dateOfBirth": "May 4, 2007",
       "foot": "left",
       "height": "1,78m",
       "id": "1052439",
-      "marketValue": "€12.00m",
+      "injured": false,
+      "marketValue": "€8.00m",
       "name": "Kendry Páez",
       "position": "Attacking Midfield"
     },
     {
-      "contract": "Jun 21, 2023",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/7633.png",
+        "name": "UNAM Pumas"
+      },
       "dateOfBirth": "Mar 9, 2002",
       "foot": "left",
       "height": "1,73m",
       "id": "659806",
-      "marketValue": "€3.00m",
+      "injured": false,
+      "marketValue": "€6.00m",
       "name": "Pedro Vite",
       "position": "Attacking Midfield"
     },
     {
+      "calledUp": false,
       "contract": "Sep 5, 2025",
       "dateOfBirth": "Jul 31, 2003",
       "foot": "right",
@@ -247,6 +352,7 @@
       "position": "Attacking Midfield"
     },
     {
+      "calledUp": false,
       "contract": "Sep 7, 2024",
       "dateOfBirth": "Jun 3, 2002",
       "foot": "left",
@@ -257,36 +363,52 @@
       "position": "Left Winger"
     },
     {
-      "contract": "Oct 28, 2021",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/289.png",
+        "name": "Sunderland AFC"
+      },
       "dateOfBirth": "Jun 19, 2003",
       "foot": "right",
       "height": "1,83m",
       "id": "903611",
-      "marketValue": "€1.50m",
+      "injured": false,
+      "marketValue": "€17.00m",
       "name": "Nilson Angulo",
       "position": "Left Winger"
     },
     {
-      "contract": "Sep 6, 2019",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/614.png",
+        "name": "CR Flamengo"
+      },
       "dateOfBirth": "Nov 1, 2000",
       "foot": "left",
       "height": "1,78m",
       "id": "592735",
-      "marketValue": "€6.00m",
+      "injured": false,
+      "marketValue": "€9.00m",
       "name": "Gonzalo Plata",
       "position": "Right Winger"
     },
     {
-      "contract": "Mar 22, 2024",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/330.png",
+        "name": "Clube Atlético Mineiro"
+      },
       "dateOfBirth": "May 14, 2003",
       "foot": "right",
       "height": "1,71m",
       "id": "897051",
-      "marketValue": "€6.00m",
+      "injured": false,
+      "marketValue": "€3.00m",
       "name": "Alan Minda",
       "position": "Right Winger"
     },
     {
+      "calledUp": false,
       "contract": "Oct 16, 2024",
       "dateOfBirth": "Feb 14, 2006",
       "foot": "left",
@@ -297,6 +419,7 @@
       "position": "Right Winger"
     },
     {
+      "calledUp": false,
       "contract": "Oct 28, 2021",
       "dateOfBirth": "Sep 8, 1995",
       "foot": "right",
@@ -307,6 +430,7 @@
       "position": "Right Winger"
     },
     {
+      "calledUp": false,
       "dateOfBirth": "Aug 11, 2000",
       "foot": "left",
       "height": "1,77m",
@@ -316,16 +440,22 @@
       "position": "Right Winger"
     },
     {
-      "contract": "Mar 22, 2024",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/607.png",
+        "name": "Venezia FC"
+      },
       "dateOfBirth": "Jun 23, 2000",
       "foot": "left",
       "height": "1,70m",
       "id": "439914",
-      "marketValue": "€2.50m",
+      "injured": false,
+      "marketValue": "€5.00m",
       "name": "John Yeboah",
       "position": "Second Striker"
     },
     {
+      "calledUp": false,
       "contract": "Mar 22, 2019",
       "dateOfBirth": "Jul 24, 2000",
       "foot": "left",
@@ -336,33 +466,78 @@
       "position": "Centre-Forward"
     },
     {
-      "contract": "Nov 12, 2022",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/3948.png",
+        "name": "Union Saint-Gilloise"
+      },
       "dateOfBirth": "Mar 4, 2000",
       "foot": "right",
       "height": "1,90m",
       "id": "684159",
-      "marketValue": "€2.50m",
+      "injured": false,
+      "marketValue": "€5.00m",
       "name": "Kevin Rodríguez",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Mar 1, 2012",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/4035.png",
+        "name": "CF Pachuca"
+      },
       "dateOfBirth": "Nov 4, 1989",
       "foot": "right",
       "height": "1,77m",
       "id": "139503",
-      "marketValue": "€2.00m",
+      "injured": false,
+      "marketValue": "€1.00m",
       "name": "Enner Valencia",
       "position": "Centre-Forward"
     },
     {
-      "contract": "Nov 14, 2025",
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/79.png",
+        "name": "VfB Stuttgart"
+      },
       "dateOfBirth": "Mar 19, 2005",
       "foot": "left",
       "height": "1,82m",
       "id": "971663",
-      "marketValue": "€200k",
+      "injured": false,
+      "marketValue": "€7.00m",
       "name": "Jeremy Arévalo",
+      "position": "Centre-Forward"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/1096.png",
+        "name": "Royal Antwerp FC"
+      },
+      "dateOfBirth": "Jul 21, 2003",
+      "foot": "left",
+      "height": "1,74m",
+      "id": "974374",
+      "injured": false,
+      "marketValue": "€1.00m",
+      "name": "Anthony Valencia",
+      "position": "Right Winger"
+    },
+    {
+      "calledUp": true,
+      "club": {
+        "image": "https://assets.virtuafc.com/crests/2063.png",
+        "name": "CA Huracán"
+      },
+      "dateOfBirth": "Nov 18, 1997",
+      "foot": "right",
+      "height": "1,85m",
+      "id": "360412",
+      "injured": false,
+      "marketValue": "€2.00m",
+      "name": "Jordy Caicedo",
       "position": "Centre-Forward"
     }
   ],
