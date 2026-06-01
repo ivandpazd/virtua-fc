@@ -13,7 +13,9 @@
       "injured": false,
       "marketValue": "€700k",
       "name": "Nawaf Al-Aqidi",
-      "position": "Goalkeeper"
+      "overall_score": 72,
+      "position": "Goalkeeper",
+      "potential": 77
     },
     {
       "club": {
@@ -27,7 +29,9 @@
       "injured": false,
       "marketValue": "€300k",
       "name": "Mohammed Al-Owais",
-      "position": "Goalkeeper"
+      "overall_score": 68,
+      "position": "Goalkeeper",
+      "potential": 68
     },
     {
       "club": {
@@ -41,7 +45,9 @@
       "injured": false,
       "marketValue": "€175k",
       "name": "Ahmed Al-Kassar",
-      "position": "Goalkeeper"
+      "overall_score": 63,
+      "position": "Goalkeeper",
+      "potential": 63
     },
     {
       "club": {
@@ -55,7 +61,9 @@
       "injured": false,
       "marketValue": "€1.80m",
       "name": "Hassan Tambakti",
-      "position": "Centre-Back"
+      "overall_score": 74,
+      "position": "Centre-Back",
+      "potential": 77
     },
     {
       "club": {
@@ -69,7 +77,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Abdulelah Al-Amri",
-      "position": "Centre-Back"
+      "overall_score": 71,
+      "position": "Centre-Back",
+      "potential": 72
     },
     {
       "club": {
@@ -82,7 +92,9 @@
       "injured": false,
       "marketValue": "€900k",
       "name": "Jehad Thakri",
-      "position": "Centre-Back"
+      "overall_score": 67,
+      "position": "Centre-Back",
+      "potential": 76
     },
     {
       "club": {
@@ -96,7 +108,9 @@
       "injured": false,
       "marketValue": "€800k",
       "name": "Ali Lajami",
-      "position": "Centre-Back"
+      "overall_score": 69,
+      "position": "Centre-Back",
+      "potential": 69
     },
     {
       "club": {
@@ -109,7 +123,9 @@
       "injured": false,
       "marketValue": "€1.40m",
       "name": "Ayman Yahya",
-      "position": "Left-Back"
+      "overall_score": 69,
+      "position": "Left-Back",
+      "potential": 74
     },
     {
       "club": {
@@ -123,7 +139,9 @@
       "injured": false,
       "marketValue": "€1.20m",
       "name": "Moteb Al-Harbi",
-      "position": "Left-Back"
+      "overall_score": 67,
+      "position": "Left-Back",
+      "potential": 70
     },
     {
       "club": {
@@ -137,7 +155,9 @@
       "injured": false,
       "marketValue": "€300k",
       "name": "Hassan Kadesh",
-      "position": "Left-Back"
+      "overall_score": 71,
+      "position": "Left-Back",
+      "potential": 71
     },
     {
       "club": {
@@ -151,7 +171,9 @@
       "injured": false,
       "marketValue": "€9.00m",
       "name": "Saud Abdulhamid",
-      "position": "Right-Back"
+      "overall_score": 76,
+      "position": "Right-Back",
+      "potential": 78
     },
     {
       "club": {
@@ -165,7 +187,9 @@
       "injured": false,
       "marketValue": "€1.40m",
       "name": "Mohammed Abu Al-Shamat",
-      "position": "Right-Back"
+      "overall_score": 71,
+      "position": "Right-Back",
+      "potential": 80
     },
     {
       "club": {
@@ -179,7 +203,9 @@
       "injured": false,
       "marketValue": "€1.40m",
       "name": "Nawaf Boushal",
-      "position": "Right-Back"
+      "overall_score": 69,
+      "position": "Right-Back",
+      "potential": 72
     },
     {
       "club": {
@@ -193,7 +219,9 @@
       "injured": false,
       "marketValue": "€1.20m",
       "name": "Ali Majrashi",
-      "position": "Right-Back"
+      "overall_score": 72,
+      "position": "Right-Back",
+      "potential": 75
     },
     {
       "club": {
@@ -207,7 +235,9 @@
       "injured": false,
       "marketValue": "€800k",
       "name": "Ziyad Al-Johani",
-      "position": "Defensive Midfield"
+      "overall_score": 67,
+      "position": "Defensive Midfield",
+      "potential": 74
     },
     {
       "club": {
@@ -221,7 +251,9 @@
       "injured": false,
       "marketValue": "€4.50m",
       "name": "Musab Al-Juwayr",
-      "position": "Central Midfield"
+      "overall_score": 76,
+      "position": "Central Midfield",
+      "potential": 83
     },
     {
       "club": {
@@ -235,7 +267,9 @@
       "injured": false,
       "marketValue": "€900k",
       "name": "Mohamed Kanno",
-      "position": "Central Midfield"
+      "overall_score": 74,
+      "position": "Central Midfield",
+      "potential": 74
     },
     {
       "club": {
@@ -249,7 +283,9 @@
       "injured": false,
       "marketValue": "€800k",
       "name": "Nasser Al-Dawsari",
-      "position": "Central Midfield"
+      "overall_score": 68,
+      "position": "Central Midfield",
+      "potential": 69
     },
     {
       "club": {
@@ -263,7 +299,9 @@
       "injured": false,
       "marketValue": "€150k",
       "name": "Alaa Hejji",
-      "position": "Central Midfield"
+      "overall_score": 63,
+      "position": "Central Midfield",
+      "potential": 63
     },
     {
       "club": {
@@ -277,7 +315,9 @@
       "injured": false,
       "marketValue": "€1.30m",
       "name": "Salem Al-Dawsari",
-      "position": "Left Winger"
+      "overall_score": 82,
+      "position": "Left Winger",
+      "potential": 82
     },
     {
       "club": {
@@ -304,7 +344,9 @@
       "injured": false,
       "marketValue": "€900k",
       "name": "Khalid Al-Ghannam",
-      "position": "Left Winger"
+      "overall_score": 65,
+      "position": "Left Winger",
+      "potential": 68
     },
     {
       "club": {
@@ -332,7 +374,9 @@
       "injured": false,
       "marketValue": "€400k",
       "name": "Sultan Mandash",
-      "position": "Right Winger"
+      "overall_score": 69,
+      "position": "Right Winger",
+      "potential": 69
     },
     {
       "club": {
@@ -360,7 +404,9 @@
       "injured": false,
       "marketValue": "€550k",
       "name": "Saleh Al-Shehri",
-      "position": "Centre-Forward"
+      "overall_score": 68,
+      "position": "Centre-Forward",
+      "potential": 68
     },
     {
       "club": {
@@ -373,7 +419,9 @@
       "injured": false,
       "marketValue": "€325k",
       "name": "Abdullah Al-Hamdan",
-      "position": "Centre-Forward"
+      "overall_score": 64,
+      "position": "Centre-Forward",
+      "potential": 67
     }
   ],
   "stadiumName": null,

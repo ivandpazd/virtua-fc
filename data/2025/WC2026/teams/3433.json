@@ -14,7 +14,9 @@
       "injured": false,
       "marketValue": "€2.00m",
       "name": "Mathew Ryan",
-      "position": "Goalkeeper"
+      "overall_score": 79,
+      "position": "Goalkeeper",
+      "potential": 79
     },
     {
       "club": {
@@ -28,7 +30,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Patrick Beach",
-      "position": "Goalkeeper"
+      "overall_score": 66,
+      "position": "Goalkeeper",
+      "potential": 78
     },
     {
       "club": {
@@ -42,7 +46,9 @@
       "injured": false,
       "marketValue": "€500k",
       "name": "Paul Izzo",
-      "position": "Goalkeeper"
+      "overall_score": 72,
+      "position": "Goalkeeper",
+      "potential": 72
     },
     {
       "club": {
@@ -56,7 +62,9 @@
       "injured": false,
       "marketValue": "€12.00m",
       "name": "Alessandro Circati",
-      "position": "Centre-Back"
+      "overall_score": 72,
+      "position": "Centre-Back",
+      "potential": 80
     },
     {
       "club": {
@@ -70,7 +78,9 @@
       "injured": false,
       "marketValue": "€3.50m",
       "name": "Harry Souttar",
-      "position": "Centre-Back"
+      "overall_score": 72,
+      "position": "Centre-Back",
+      "potential": 74
     },
     {
       "club": {
@@ -84,7 +94,9 @@
       "injured": false,
       "marketValue": "€1.50m",
       "name": "Cameron Burgess",
-      "position": "Centre-Back"
+      "overall_score": 73,
+      "position": "Centre-Back",
+      "potential": 73
     },
     {
       "club": {
@@ -98,7 +110,9 @@
       "injured": false,
       "marketValue": "€1.50m",
       "name": "Lucas Herrington",
-      "position": "Centre-Back"
+      "overall_score": 60,
+      "position": "Centre-Back",
+      "potential": 82
     },
     {
       "club": {
@@ -112,7 +126,9 @@
       "injured": false,
       "marketValue": "€500k",
       "name": "Milos Degenek",
-      "position": "Centre-Back"
+      "overall_score": 68,
+      "position": "Centre-Back",
+      "potential": 68
     },
     {
       "club": {
@@ -126,7 +142,9 @@
       "injured": false,
       "marketValue": "€12.00m",
       "name": "Jordan Bos",
-      "position": "Left-Back"
+      "overall_score": 74,
+      "position": "Left-Back",
+      "potential": 82
     },
     {
       "club": {
@@ -140,7 +158,9 @@
       "injured": false,
       "marketValue": "€250k",
       "name": "Aziz Behich",
-      "position": "Left-Back"
+      "overall_score": 67,
+      "position": "Left-Back",
+      "potential": 67
     },
     {
       "club": {
@@ -154,7 +174,9 @@
       "injured": false,
       "marketValue": "€600k",
       "name": "Jacob Italiano",
-      "position": "Right-Back"
+      "overall_score": 66,
+      "position": "Right-Back",
+      "potential": 71
     },
     {
       "club": {
@@ -168,7 +190,9 @@
       "injured": false,
       "marketValue": "€400k",
       "name": "Jason Geria",
-      "position": "Right-Back"
+      "overall_score": 66,
+      "position": "Right-Back",
+      "potential": 66
     },
     {
       "club": {
@@ -182,7 +206,9 @@
       "injured": false,
       "marketValue": "€3.00m",
       "name": "Aiden O'Neill",
-      "position": "Defensive Midfield"
+      "overall_score": 70,
+      "position": "Defensive Midfield",
+      "potential": 70
     },
     {
       "club": {
@@ -196,7 +222,9 @@
       "injured": false,
       "marketValue": "€1.20m",
       "name": "Paul Okon-Engstler",
-      "position": "Defensive Midfield"
+      "overall_score": 60,
+      "position": "Defensive Midfield",
+      "potential": 75
     },
     {
       "club": {
@@ -210,7 +238,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Kai Trewin",
-      "position": "Defensive Midfield"
+      "overall_score": 69,
+      "position": "Defensive Midfield",
+      "potential": 76
     },
     {
       "club": {
@@ -224,7 +254,9 @@
       "injured": false,
       "marketValue": "€2.00m",
       "name": "Cammy Devlin",
-      "position": "Central Midfield"
+      "overall_score": 74,
+      "position": "Central Midfield",
+      "potential": 77
     },
     {
       "club": {
@@ -238,7 +270,9 @@
       "injured": false,
       "marketValue": "€1.50m",
       "name": "Connor Metcalfe",
-      "position": "Central Midfield"
+      "overall_score": 69,
+      "position": "Central Midfield",
+      "potential": 71
     },
     {
       "club": {
@@ -252,7 +286,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Jackson Irvine",
-      "position": "Central Midfield"
+      "overall_score": 74,
+      "position": "Central Midfield",
+      "potential": 74
     },
     {
       "club": {
@@ -266,7 +302,9 @@
       "injured": false,
       "marketValue": "€600k",
       "name": "Ajdin Hrustic",
-      "position": "Central Midfield"
+      "overall_score": 68,
+      "position": "Central Midfield",
+      "potential": 68
     },
     {
       "club": {
@@ -280,7 +318,9 @@
       "injured": false,
       "marketValue": "€10.00m",
       "name": "Cristian Volpato",
-      "position": "Attacking Midfield"
+      "overall_score": 70,
+      "position": "Attacking Midfield",
+      "potential": 78
     },
     {
       "club": {
@@ -294,7 +334,9 @@
       "injured": false,
       "marketValue": "€650k",
       "name": "Nishan Velupillay",
-      "position": "Left Winger"
+      "overall_score": 65,
+      "position": "Left Winger",
+      "potential": 68
     },
     {
       "club": {
@@ -308,7 +350,9 @@
       "injured": false,
       "marketValue": "€400k",
       "name": "Awer Mabil",
-      "position": "Left Winger"
+      "overall_score": 68,
+      "position": "Left Winger",
+      "potential": 68
     },
     {
       "club": {
@@ -322,7 +366,9 @@
       "injured": false,
       "marketValue": "€300k",
       "name": "Mathew Leckie",
-      "position": "Left Winger"
+      "overall_score": 70,
+      "position": "Left Winger",
+      "potential": 70
     },
     {
       "club": {
@@ -336,7 +382,9 @@
       "injured": false,
       "marketValue": "€8.00m",
       "name": "Nestory Irankunda",
-      "position": "Right Winger"
+      "overall_score": 69,
+      "position": "Right Winger",
+      "potential": 84
     },
     {
       "club": {
@@ -350,7 +398,9 @@
       "injured": false,
       "marketValue": "€8.00m",
       "name": "Mohamed Touré",
-      "position": "Centre-Forward"
+      "overall_score": 69,
+      "position": "Centre-Forward",
+      "potential": 76
     },
     {
       "club": {
@@ -364,7 +414,9 @@
       "injured": false,
       "marketValue": "€250k",
       "name": "Tete Yengi",
-      "position": "Centre-Forward"
+      "overall_score": 59,
+      "position": "Centre-Forward",
+      "potential": 64
     }
   ],
   "stadiumName": null,

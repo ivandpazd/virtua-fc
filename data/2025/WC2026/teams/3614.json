@@ -14,7 +14,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Luca Zidane",
-      "position": "Goalkeeper"
+      "overall_score": 68,
+      "position": "Goalkeeper",
+      "potential": 71
     },
     {
       "club": {
@@ -27,7 +29,9 @@
       "injured": false,
       "marketValue": "€850k",
       "name": "Oussama Benbout",
-      "position": "Goalkeeper"
+      "overall_score": 65,
+      "position": "Goalkeeper",
+      "potential": 65
     },
     {
       "club": {
@@ -41,7 +45,9 @@
       "injured": false,
       "marketValue": "€250k",
       "name": "Melvin Mastil",
-      "position": "Goalkeeper"
+      "overall_score": 61,
+      "position": "Goalkeeper",
+      "potential": 65
     },
     {
       "club": {
@@ -55,7 +61,9 @@
       "injured": false,
       "marketValue": "€7.00m",
       "name": "Ramy Bensebaini",
-      "position": "Centre-Back"
+      "overall_score": 79,
+      "position": "Centre-Back",
+      "potential": 79
     },
     {
       "club": {
@@ -69,7 +77,9 @@
       "injured": false,
       "marketValue": "€3.00m",
       "name": "Samir Chergui",
-      "position": "Centre-Back"
+      "overall_score": 70,
+      "position": "Centre-Back",
+      "potential": 73
     },
     {
       "club": {
@@ -83,7 +93,9 @@
       "injured": false,
       "marketValue": "€1.50m",
       "name": "Zineddine Belaid",
-      "position": "Centre-Back"
+      "overall_score": 68,
+      "position": "Centre-Back",
+      "potential": 71
     },
     {
       "club": {
@@ -97,7 +109,9 @@
       "injured": false,
       "marketValue": "€1.30m",
       "name": "Mohamed Amine Tougai",
-      "position": "Centre-Back"
+      "overall_score": 68,
+      "position": "Centre-Back",
+      "potential": 75
     },
     {
       "club": {
@@ -111,7 +125,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Aïssa Mandi",
-      "position": "Centre-Back"
+      "overall_score": 77,
+      "position": "Centre-Back",
+      "potential": 77
     },
     {
       "club": {
@@ -125,7 +141,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Achref Abada",
-      "position": "Centre-Back"
+      "overall_score": 65,
+      "position": "Centre-Back",
+      "potential": 68
     },
     {
       "club": {
@@ -139,7 +157,9 @@
       "injured": false,
       "marketValue": "€40.00m",
       "name": "Rayan Aït-Nouri",
-      "position": "Left-Back"
+      "overall_score": 81,
+      "position": "Left-Back",
+      "potential": 85
     },
     {
       "club": {
@@ -153,7 +173,9 @@
       "injured": false,
       "marketValue": "€8.00m",
       "name": "Jaouen Hadjam",
-      "position": "Left-Back"
+      "overall_score": 69,
+      "position": "Left-Back",
+      "potential": 77
     },
     {
       "club": {
@@ -167,7 +189,9 @@
       "injured": false,
       "marketValue": "€7.00m",
       "name": "Rafik Belghali",
-      "position": "Right-Back"
+      "overall_score": 70,
+      "position": "Right-Back",
+      "potential": 74
     },
     {
       "club": {
@@ -181,7 +205,9 @@
       "injured": false,
       "marketValue": "€6.50m",
       "name": "Ramiz Zerrouki",
-      "position": "Defensive Midfield"
+      "overall_score": 73,
+      "position": "Defensive Midfield",
+      "potential": 76
     },
     {
       "club": {
@@ -195,7 +221,9 @@
       "injured": false,
       "marketValue": "€5.00m",
       "name": "Nabil Bentaleb",
-      "position": "Defensive Midfield"
+      "overall_score": 77,
+      "position": "Defensive Midfield",
+      "potential": 77
     },
     {
       "club": {
@@ -209,7 +237,9 @@
       "injured": false,
       "marketValue": "€12.00m",
       "name": "Hicham Boudaoui",
-      "position": "Central Midfield"
+      "overall_score": 76,
+      "position": "Central Midfield",
+      "potential": 79
     },
     {
       "club": {
@@ -222,7 +252,9 @@
       "injured": false,
       "marketValue": "€7.00m",
       "name": "Yassine Titraoui",
-      "position": "Central Midfield"
+      "overall_score": 69,
+      "position": "Central Midfield",
+      "potential": 79
     },
     {
       "club": {
@@ -236,7 +268,9 @@
       "injured": false,
       "marketValue": "€45.00m",
       "name": "Ibrahim Maza",
-      "position": "Attacking Midfield"
+      "overall_score": 79,
+      "position": "Attacking Midfield",
+      "potential": 87
     },
     {
       "club": {
@@ -250,7 +284,9 @@
       "injured": false,
       "marketValue": "€15.00m",
       "name": "Farès Chaïbi",
-      "position": "Attacking Midfield"
+      "overall_score": 76,
+      "position": "Attacking Midfield",
+      "potential": 81
     },
     {
       "club": {
@@ -264,7 +300,9 @@
       "injured": false,
       "marketValue": "€8.00m",
       "name": "Houssem Aouar",
-      "position": "Attacking Midfield"
+      "overall_score": 77,
+      "position": "Attacking Midfield",
+      "potential": 78
     },
     {
       "club": {
@@ -277,7 +315,9 @@
       "injured": false,
       "marketValue": "€3.00m",
       "name": "Adil Boulbina",
-      "position": "Left Winger"
+      "overall_score": 66,
+      "position": "Left Winger",
+      "potential": 69
     },
     {
       "club": {
@@ -291,7 +331,9 @@
       "injured": false,
       "marketValue": "€23.00m",
       "name": "Anis Hadj Moussa",
-      "position": "Right Winger"
+      "overall_score": 76,
+      "position": "Right Winger",
+      "potential": 82
     },
     {
       "club": {
@@ -305,7 +347,9 @@
       "injured": false,
       "marketValue": "€7.00m",
       "name": "Riyad Mahrez",
-      "position": "Right Winger"
+      "overall_score": 84,
+      "position": "Right Winger",
+      "potential": 84
     },
     {
       "club": {
@@ -319,7 +363,9 @@
       "injured": false,
       "marketValue": "€5.50m",
       "name": "Farès Ghedjemis",
-      "position": "Right Winger"
+      "overall_score": 70,
+      "position": "Right Winger",
+      "potential": 74
     },
     {
       "club": {
@@ -333,7 +379,9 @@
       "injured": false,
       "marketValue": "€28.00m",
       "name": "Amine Gouiri",
-      "position": "Centre-Forward"
+      "overall_score": 79,
+      "position": "Centre-Forward",
+      "potential": 82
     },
     {
       "club": {
@@ -347,7 +395,9 @@
       "injured": false,
       "marketValue": "€20.00m",
       "name": "Mohamed Amoura",
-      "position": "Centre-Forward"
+      "overall_score": 80,
+      "position": "Centre-Forward",
+      "potential": 83
     },
     {
       "club": {
@@ -361,7 +411,9 @@
       "injured": false,
       "marketValue": "€1.20m",
       "name": "Nadhir Benbouali",
-      "position": "Centre-Forward"
+      "overall_score": 66,
+      "position": "Centre-Forward",
+      "potential": 69
     }
   ],
   "stadiumName": null,

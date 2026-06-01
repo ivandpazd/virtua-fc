@@ -14,7 +14,9 @@
       "injured": false,
       "marketValue": "€1.20m",
       "name": "Oufa Shobeir",
-      "position": "Goalkeeper"
+      "overall_score": 71,
+      "position": "Goalkeeper",
+      "potential": 76
     },
     {
       "club": {
@@ -41,7 +43,9 @@
       "injured": false,
       "marketValue": "€500k",
       "name": "Mohamed El Shenawy",
-      "position": "Goalkeeper"
+      "overall_score": 74,
+      "position": "Goalkeeper",
+      "potential": 74
     },
     {
       "club": {
@@ -55,7 +59,9 @@
       "injured": false,
       "marketValue": "€150k",
       "name": "El Mahdi Soliman",
-      "position": "Goalkeeper"
+      "overall_score": 68,
+      "position": "Goalkeeper",
+      "potential": 68
     },
     {
       "club": {
@@ -69,7 +75,9 @@
       "injured": false,
       "marketValue": "€3.00m",
       "name": "Mohamed Abdelmonem",
-      "position": "Centre-Back"
+      "overall_score": 73,
+      "position": "Centre-Back",
+      "potential": 76
     },
     {
       "club": {
@@ -83,7 +91,9 @@
       "injured": false,
       "marketValue": "€2.00m",
       "name": "Hossam Abdelmaguid",
-      "position": "Centre-Back"
+      "overall_score": 69,
+      "position": "Centre-Back",
+      "potential": 75
     },
     {
       "club": {
@@ -97,7 +107,9 @@
       "injured": false,
       "marketValue": "€600k",
       "name": "Ramy Rabia",
-      "position": "Centre-Back"
+      "overall_score": 70,
+      "position": "Centre-Back",
+      "potential": 70
     },
     {
       "club": {
@@ -111,7 +123,9 @@
       "injured": false,
       "marketValue": "€275k",
       "name": "Yasser Ibrahim",
-      "position": "Centre-Back"
+      "overall_score": 72,
+      "position": "Centre-Back",
+      "potential": 72
     },
     {
       "club": {
@@ -125,7 +139,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Ahmed Fatouh",
-      "position": "Left-Back"
+      "overall_score": 68,
+      "position": "Left-Back",
+      "potential": 68
     },
     {
       "club": {
@@ -139,7 +155,9 @@
       "injured": false,
       "marketValue": "€700k",
       "name": "Karim Hafez",
-      "position": "Left-Back"
+      "overall_score": 70,
+      "position": "Left-Back",
+      "potential": 70
     },
     {
       "club": {
@@ -153,7 +171,9 @@
       "injured": false,
       "marketValue": "€1.50m",
       "name": "Mohamed Hany",
-      "position": "Right-Back"
+      "overall_score": 71,
+      "position": "Right-Back",
+      "potential": 71
     },
     {
       "club": {
@@ -166,7 +186,9 @@
       "injured": false,
       "marketValue": "€250k",
       "name": "Tarek Alaa",
-      "position": "Right-Back"
+      "overall_score": 66,
+      "position": "Right-Back",
+      "potential": 68
     },
     {
       "club": {
@@ -180,7 +202,9 @@
       "injured": false,
       "marketValue": "€4.00m",
       "name": "Marwan Ateya",
-      "position": "Defensive Midfield"
+      "overall_score": 74,
+      "position": "Defensive Midfield",
+      "potential": 76
     },
     {
       "club": {
@@ -194,7 +218,9 @@
       "injured": false,
       "marketValue": "€3.00m",
       "name": "Mohanad Lasheen",
-      "position": "Defensive Midfield"
+      "overall_score": 68,
+      "position": "Defensive Midfield",
+      "potential": 68
     },
     {
       "club": {
@@ -208,7 +234,9 @@
       "injured": false,
       "marketValue": "€1.80m",
       "name": "Hamdy Fathy",
-      "position": "Defensive Midfield"
+      "overall_score": 74,
+      "position": "Defensive Midfield",
+      "potential": 74
     },
     {
       "club": {
@@ -222,7 +250,9 @@
       "injured": false,
       "marketValue": "€1.20m",
       "name": "Nabil Dunga",
-      "position": "Defensive Midfield"
+      "overall_score": 64,
+      "position": "Defensive Midfield",
+      "potential": 64
     },
     {
       "club": {
@@ -236,7 +266,9 @@
       "injured": false,
       "marketValue": "€4.00m",
       "name": "Emam Ashour",
-      "position": "Central Midfield"
+      "overall_score": 75,
+      "position": "Central Midfield",
+      "potential": 75
     },
     {
       "club": {
@@ -249,7 +281,9 @@
       "injured": false,
       "marketValue": "€1.50m",
       "name": "Mahmoud Saber",
-      "position": "Central Midfield"
+      "overall_score": 70,
+      "position": "Central Midfield",
+      "potential": 74
     },
     {
       "club": {
@@ -263,7 +297,9 @@
       "injured": false,
       "marketValue": "€4.50m",
       "name": "Trezeguet",
-      "position": "Left Winger"
+      "overall_score": 75,
+      "position": "Left Winger",
+      "potential": 75
     },
     {
       "club": {
@@ -277,7 +313,9 @@
       "injured": false,
       "marketValue": "€2.50m",
       "name": "Ibrahim Adel",
-      "position": "Left Winger"
+      "overall_score": 70,
+      "position": "Left Winger",
+      "potential": 73
     },
     {
       "club": {
@@ -291,7 +329,9 @@
       "injured": false,
       "marketValue": "€1.80m",
       "name": "Mostafa Ziko",
-      "position": "Left Winger"
+      "overall_score": 62,
+      "position": "Left Winger",
+      "potential": 62
     },
     {
       "club": {
@@ -305,7 +345,9 @@
       "injured": false,
       "marketValue": "€30.00m",
       "name": "Mohamed Salah",
-      "position": "Right Winger"
+      "overall_score": 89,
+      "position": "Right Winger",
+      "potential": 89
     },
     {
       "club": {
@@ -319,7 +361,9 @@
       "injured": false,
       "marketValue": "€4.00m",
       "name": "Haissem Hassan",
-      "position": "Right Winger"
+      "overall_score": 73,
+      "position": "Right Winger",
+      "potential": 79
     },
     {
       "club": {
@@ -333,7 +377,9 @@
       "injured": false,
       "marketValue": "€3.50m",
       "name": "Zizo",
-      "position": "Right Winger"
+      "overall_score": 74,
+      "position": "Right Winger",
+      "potential": 74
     },
     {
       "club": {
@@ -347,7 +393,9 @@
       "injured": false,
       "marketValue": "€60.00m",
       "name": "Omar Marmoush",
-      "position": "Centre-Forward"
+      "overall_score": 83,
+      "position": "Centre-Forward",
+      "potential": 83
     },
     {
       "club": {
@@ -361,7 +409,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Hamza Abdelkarim",
-      "position": "Centre-Forward"
+      "overall_score": 60,
+      "position": "Centre-Forward",
+      "potential": 83
     }
   ],
   "stadiumName": null,

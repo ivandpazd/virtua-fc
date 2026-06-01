@@ -13,7 +13,9 @@
       "injured": false,
       "marketValue": "€1.40m",
       "name": "Sipho Chaine",
-      "position": "Goalkeeper"
+      "overall_score": 71,
+      "position": "Goalkeeper",
+      "potential": 73
     },
     {
       "club": {
@@ -27,7 +29,9 @@
       "injured": false,
       "marketValue": "€900k",
       "name": "Ronwen Williams",
-      "position": "Goalkeeper"
+      "overall_score": 76,
+      "position": "Goalkeeper",
+      "potential": 76
     },
     {
       "club": {
@@ -41,7 +45,9 @@
       "injured": false,
       "marketValue": "€350k",
       "name": "Ricardo Goss",
-      "position": "Goalkeeper"
+      "overall_score": 67,
+      "position": "Goalkeeper",
+      "potential": 67
     },
     {
       "club": {
@@ -55,7 +61,9 @@
       "injured": false,
       "marketValue": "€2.50m",
       "name": "Mbekezeli Mbokazi",
-      "position": "Centre-Back"
+      "overall_score": 72,
+      "position": "Centre-Back",
+      "potential": 82
     },
     {
       "club": {
@@ -69,7 +77,9 @@
       "injured": false,
       "marketValue": "€2.00m",
       "name": "Olwethu Makhanya",
-      "position": "Centre-Back"
+      "overall_score": 65,
+      "position": "Centre-Back",
+      "potential": 73
     },
     {
       "club": {
@@ -83,7 +93,9 @@
       "injured": false,
       "marketValue": "€2.00m",
       "name": "Ime Okon",
-      "position": "Centre-Back"
+      "overall_score": 68,
+      "position": "Centre-Back",
+      "potential": 75
     },
     {
       "club": {
@@ -97,7 +109,9 @@
       "injured": false,
       "marketValue": "€1.60m",
       "name": "Nkosinathi Sibisi",
-      "position": "Centre-Back"
+      "overall_score": 69,
+      "position": "Centre-Back",
+      "potential": 69
     },
     {
       "club": {
@@ -110,7 +124,9 @@
       "injured": false,
       "marketValue": "€800k",
       "name": "Khulumani Ndamane",
-      "position": "Centre-Back"
+      "overall_score": 60,
+      "position": "Centre-Back",
+      "potential": 70
     },
     {
       "club": {
@@ -124,7 +140,9 @@
       "injured": false,
       "marketValue": "€2.50m",
       "name": "Samukele Kabini",
-      "position": "Left-Back"
+      "overall_score": 65,
+      "position": "Left-Back",
+      "potential": 76
     },
     {
       "club": {
@@ -138,7 +156,9 @@
       "injured": false,
       "marketValue": "€1.80m",
       "name": "Aubrey Modiba",
-      "position": "Left-Back"
+      "overall_score": 71,
+      "position": "Left-Back",
+      "potential": 71
     },
     {
       "club": {
@@ -152,7 +172,9 @@
       "injured": false,
       "marketValue": "€650k",
       "name": "Bradley Cross",
-      "position": "Left-Back"
+      "overall_score": 63,
+      "position": "Left-Back",
+      "potential": 70
     },
     {
       "club": {
@@ -166,7 +188,9 @@
       "injured": false,
       "marketValue": "€1.20m",
       "name": "Khuliso Mudau",
-      "position": "Right-Back"
+      "overall_score": 71,
+      "position": "Right-Back",
+      "potential": 71
     },
     {
       "club": {
@@ -179,7 +203,9 @@
       "injured": false,
       "marketValue": "€900k",
       "name": "Thabang Matuludi",
-      "position": "Right-Back"
+      "overall_score": 63,
+      "position": "Right-Back",
+      "potential": 64
     },
     {
       "club": {
@@ -192,7 +218,9 @@
       "injured": false,
       "marketValue": "€850k",
       "name": "Kamogelo Sebelebele",
-      "position": "Right-Back"
+      "overall_score": 67,
+      "position": "Right-Back",
+      "potential": 73
     },
     {
       "club": {
@@ -206,7 +234,9 @@
       "injured": false,
       "marketValue": "€2.50m",
       "name": "Teboho Mokoena",
-      "position": "Defensive Midfield"
+      "overall_score": 72,
+      "position": "Defensive Midfield",
+      "potential": 72
     },
     {
       "club": {
@@ -220,7 +250,9 @@
       "injured": false,
       "marketValue": "€1.60m",
       "name": "Thalente Mbatha",
-      "position": "Central Midfield"
+      "overall_score": 60,
+      "position": "Central Midfield",
+      "potential": 63
     },
     {
       "club": {
@@ -234,7 +266,9 @@
       "injured": false,
       "marketValue": "€1.40m",
       "name": "Jayden Adams",
-      "position": "Central Midfield"
+      "overall_score": 69,
+      "position": "Central Midfield",
+      "potential": 74
     },
     {
       "club": {
@@ -248,7 +282,9 @@
       "injured": false,
       "marketValue": "€600k",
       "name": "Yaya Sithole",
-      "position": "Central Midfield"
+      "overall_score": 66,
+      "position": "Central Midfield",
+      "potential": 69
     },
     {
       "club": {
@@ -262,7 +298,9 @@
       "injured": false,
       "marketValue": "€300k",
       "name": "Themba Zwane",
-      "position": "Attacking Midfield"
+      "overall_score": 73,
+      "position": "Attacking Midfield",
+      "potential": 73
     },
     {
       "club": {
@@ -276,7 +314,9 @@
       "injured": false,
       "marketValue": "€2.00m",
       "name": "Oswin Appollis",
-      "position": "Left Winger"
+      "overall_score": 75,
+      "position": "Left Winger",
+      "potential": 80
     },
     {
       "club": {
@@ -290,7 +330,9 @@
       "injured": false,
       "marketValue": "€2.00m",
       "name": "Relebohile Mofokeng",
-      "position": "Left Winger"
+      "overall_score": 65,
+      "position": "Left Winger",
+      "potential": 72
     },
     {
       "club": {
@@ -302,7 +344,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Tshepang Moremi",
-      "position": "Left Winger"
+      "overall_score": 64,
+      "position": "Left Winger",
+      "potential": 69
     },
     {
       "club": {
@@ -316,7 +360,9 @@
       "injured": false,
       "marketValue": "€750k",
       "name": "Thapelo Maseko",
-      "position": "Left Winger"
+      "overall_score": 66,
+      "position": "Left Winger",
+      "potential": 76
     },
     {
       "club": {
@@ -330,7 +376,9 @@
       "injured": false,
       "marketValue": "€10.00m",
       "name": "Lyle Foster",
-      "position": "Centre-Forward"
+      "overall_score": 73,
+      "position": "Centre-Forward",
+      "potential": 75
     },
     {
       "club": {
@@ -344,7 +392,9 @@
       "injured": false,
       "marketValue": "€3.00m",
       "name": "Iqraam Rayners",
-      "position": "Centre-Forward"
+      "overall_score": 60,
+      "position": "Centre-Forward",
+      "potential": 60
     },
     {
       "club": {
@@ -358,7 +408,9 @@
       "injured": false,
       "marketValue": "€1.20m",
       "name": "Evidence Makgopa",
-      "position": "Centre-Forward"
+      "overall_score": 68,
+      "position": "Centre-Forward",
+      "potential": 73
     }
   ],
   "stadiumName": null,

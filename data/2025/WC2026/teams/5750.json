@@ -15,7 +15,9 @@
       "injured": false,
       "marketValue": "€800k",
       "name": "Moisés Ramírez",
-      "position": "Goalkeeper"
+      "overall_score": 70,
+      "position": "Goalkeeper",
+      "potential": 75
     },
     {
       "calledUp": false,
@@ -50,7 +52,9 @@
       "injured": false,
       "marketValue": "€300k",
       "name": "Hernán Galíndez",
-      "position": "Goalkeeper"
+      "overall_score": 74,
+      "position": "Goalkeeper",
+      "potential": 74
     },
     {
       "calledUp": true,
@@ -65,7 +69,9 @@
       "injured": false,
       "marketValue": "€1.80m",
       "name": "Gonzalo Valle",
-      "position": "Goalkeeper"
+      "overall_score": 73,
+      "position": "Goalkeeper",
+      "potential": 74
     },
     {
       "calledUp": true,
@@ -80,7 +86,9 @@
       "injured": false,
       "marketValue": "€50.00m",
       "name": "Piero Hincapié",
-      "position": "Centre-Back"
+      "overall_score": 83,
+      "position": "Centre-Back",
+      "potential": 87
     },
     {
       "calledUp": true,
@@ -95,7 +103,9 @@
       "injured": false,
       "marketValue": "€80.00m",
       "name": "Willian Pacho",
-      "position": "Centre-Back"
+      "overall_score": 88,
+      "position": "Centre-Back",
+      "potential": 90
     },
     {
       "calledUp": true,
@@ -110,7 +120,9 @@
       "injured": false,
       "marketValue": "€33.00m",
       "name": "Joel Ordóñez",
-      "position": "Centre-Back"
+      "overall_score": 76,
+      "position": "Centre-Back",
+      "potential": 86
     },
     {
       "calledUp": true,
@@ -125,7 +137,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Félix Torres",
-      "position": "Centre-Back"
+      "overall_score": 72,
+      "position": "Centre-Back",
+      "potential": 73
     },
     {
       "calledUp": false,
@@ -161,7 +175,9 @@
       "injured": false,
       "marketValue": "€12.00m",
       "name": "Pervis Estupiñán",
-      "position": "Left-Back"
+      "overall_score": 79,
+      "position": "Left-Back",
+      "potential": 79
     },
     {
       "calledUp": false,
@@ -187,7 +203,9 @@
       "injured": false,
       "marketValue": "€4.00m",
       "name": "Yaimar Medina",
-      "position": "Left-Back"
+      "overall_score": 70,
+      "position": "Left-Back",
+      "potential": 84
     },
     {
       "calledUp": false,
@@ -213,7 +231,9 @@
       "injured": false,
       "marketValue": "€3.50m",
       "name": "Angelo Preciado",
-      "position": "Right-Back"
+      "overall_score": 75,
+      "position": "Right-Back",
+      "potential": 75
     },
     {
       "calledUp": true,
@@ -228,7 +248,9 @@
       "injured": false,
       "marketValue": "€2.50m",
       "name": "Jackson Porozo",
-      "position": "Centre-Back"
+      "overall_score": 71,
+      "position": "Centre-Back",
+      "potential": 78
     },
     {
       "calledUp": true,
@@ -243,7 +265,9 @@
       "injured": false,
       "marketValue": "€110.00m",
       "name": "Moisés Caicedo",
-      "position": "Defensive Midfield"
+      "overall_score": 88,
+      "position": "Defensive Midfield",
+      "potential": 90
     },
     {
       "calledUp": false,
@@ -269,7 +293,9 @@
       "injured": false,
       "marketValue": "€1.80m",
       "name": "Jordy Alcívar",
-      "position": "Defensive Midfield"
+      "overall_score": 70,
+      "position": "Defensive Midfield",
+      "potential": 74
     },
     {
       "calledUp": true,
@@ -284,7 +310,9 @@
       "injured": false,
       "marketValue": "€4.50m",
       "name": "Alan Franco",
-      "position": "Central Midfield"
+      "overall_score": 70,
+      "position": "Central Midfield",
+      "potential": 73
     },
     {
       "calledUp": true,
@@ -299,7 +327,9 @@
       "injured": false,
       "marketValue": "€7.00m",
       "name": "Denil Castillo",
-      "position": "Central Midfield"
+      "overall_score": 69,
+      "position": "Central Midfield",
+      "potential": 77
     },
     {
       "calledUp": false,
@@ -323,7 +353,9 @@
       "injured": false,
       "marketValue": "€8.00m",
       "name": "Kendry Páez",
-      "position": "Attacking Midfield"
+      "overall_score": 73,
+      "position": "Attacking Midfield",
+      "potential": 84
     },
     {
       "calledUp": true,
@@ -338,7 +370,9 @@
       "injured": false,
       "marketValue": "€6.00m",
       "name": "Pedro Vite",
-      "position": "Attacking Midfield"
+      "overall_score": 73,
+      "position": "Attacking Midfield",
+      "potential": 78
     },
     {
       "calledUp": false,
@@ -375,7 +409,9 @@
       "injured": false,
       "marketValue": "€17.00m",
       "name": "Nilson Angulo",
-      "position": "Left Winger"
+      "overall_score": 71,
+      "position": "Left Winger",
+      "potential": 81
     },
     {
       "calledUp": true,
@@ -390,7 +426,9 @@
       "injured": false,
       "marketValue": "€9.00m",
       "name": "Gonzalo Plata",
-      "position": "Right Winger"
+      "overall_score": 78,
+      "position": "Right Winger",
+      "potential": 81
     },
     {
       "calledUp": true,
@@ -405,7 +443,9 @@
       "injured": false,
       "marketValue": "€3.00m",
       "name": "Alan Minda",
-      "position": "Right Winger"
+      "overall_score": 70,
+      "position": "Right Winger",
+      "potential": 79
     },
     {
       "calledUp": false,
@@ -452,7 +492,9 @@
       "injured": false,
       "marketValue": "€5.00m",
       "name": "John Yeboah",
-      "position": "Second Striker"
+      "overall_score": 72,
+      "position": "Second Striker",
+      "potential": 76
     },
     {
       "calledUp": false,
@@ -478,7 +520,9 @@
       "injured": false,
       "marketValue": "€5.00m",
       "name": "Kevin Rodríguez",
-      "position": "Centre-Forward"
+      "overall_score": 71,
+      "position": "Centre-Forward",
+      "potential": 74
     },
     {
       "calledUp": true,
@@ -493,7 +537,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Enner Valencia",
-      "position": "Centre-Forward"
+      "overall_score": 75,
+      "position": "Centre-Forward",
+      "potential": 75
     },
     {
       "calledUp": true,
@@ -508,7 +554,9 @@
       "injured": false,
       "marketValue": "€7.00m",
       "name": "Jeremy Arévalo",
-      "position": "Centre-Forward"
+      "overall_score": 66,
+      "position": "Centre-Forward",
+      "potential": 80
     },
     {
       "calledUp": true,
@@ -523,7 +571,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Anthony Valencia",
-      "position": "Right Winger"
+      "overall_score": 66,
+      "position": "Right Winger",
+      "potential": 76
     },
     {
       "calledUp": true,
@@ -538,7 +588,9 @@
       "injured": false,
       "marketValue": "€2.00m",
       "name": "Jordy Caicedo",
-      "position": "Centre-Forward"
+      "overall_score": 64,
+      "position": "Centre-Forward",
+      "potential": 64
     }
   ],
   "stadiumName": null,

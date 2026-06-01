@@ -15,7 +15,9 @@
       "injured": false,
       "marketValue": "€6.00m",
       "name": "Orlando Gill",
-      "position": "Goalkeeper"
+      "overall_score": 67,
+      "position": "Goalkeeper",
+      "potential": 73
     },
     {
       "calledUp": false,
@@ -53,7 +55,9 @@
       "injured": false,
       "marketValue": "€100k",
       "name": "Roberto Fernández",
-      "position": "Goalkeeper"
+      "overall_score": 68,
+      "position": "Goalkeeper",
+      "potential": 68
     },
     {
       "calledUp": true,
@@ -68,7 +72,9 @@
       "injured": false,
       "marketValue": "€500k",
       "name": "Gastón Olveira",
-      "position": "Goalkeeper"
+      "overall_score": 73,
+      "position": "Goalkeeper",
+      "potential": 73
     },
     {
       "calledUp": true,
@@ -83,7 +89,9 @@
       "injured": false,
       "marketValue": "€15.00m",
       "name": "Omar Alderete",
-      "position": "Centre-Back"
+      "overall_score": 80,
+      "position": "Centre-Back",
+      "potential": 81
     },
     {
       "calledUp": true,
@@ -98,7 +106,9 @@
       "injured": false,
       "marketValue": "€3.50m",
       "name": "Gustavo Gómez",
-      "position": "Centre-Back"
+      "overall_score": 78,
+      "position": "Centre-Back",
+      "potential": 78
     },
     {
       "calledUp": true,
@@ -113,7 +123,9 @@
       "injured": false,
       "marketValue": "€1.50m",
       "name": "Júnior Alonso",
-      "position": "Centre-Back"
+      "overall_score": 74,
+      "position": "Centre-Back",
+      "potential": 74
     },
     {
       "calledUp": false,
@@ -140,7 +152,9 @@
       "injured": false,
       "marketValue": "€400k",
       "name": "Gustavo Velázquez",
-      "position": "Centre-Back"
+      "overall_score": 73,
+      "position": "Centre-Back",
+      "potential": 73
     },
     {
       "calledUp": false,
@@ -191,7 +205,9 @@
       "injured": false,
       "marketValue": "€5.00m",
       "name": "Juan José Cáceres",
-      "position": "Right-Back"
+      "overall_score": 73,
+      "position": "Right-Back",
+      "potential": 78
     },
     {
       "calledUp": false,
@@ -217,7 +233,9 @@
       "injured": false,
       "marketValue": "€2.20m",
       "name": "José Canale",
-      "position": "Centre-Back"
+      "overall_score": 70,
+      "position": "Centre-Back",
+      "potential": 70
     },
     {
       "calledUp": true,
@@ -232,7 +250,9 @@
       "injured": false,
       "marketValue": "€900k",
       "name": "Fabián Balbuena",
-      "position": "Centre-Back"
+      "overall_score": 74,
+      "position": "Centre-Back",
+      "potential": 74
     },
     {
       "calledUp": true,
@@ -247,7 +267,9 @@
       "injured": false,
       "marketValue": "€2.50m",
       "name": "Alexandro Maidana",
-      "position": "Left-Back"
+      "overall_score": 62,
+      "position": "Left-Back",
+      "potential": 76
     },
     {
       "calledUp": true,
@@ -262,7 +284,9 @@
       "injured": false,
       "marketValue": "€4.00m",
       "name": "Andrés Cubas",
-      "position": "Defensive Midfield"
+      "overall_score": 74,
+      "position": "Defensive Midfield",
+      "potential": 74
     },
     {
       "calledUp": true,
@@ -277,7 +301,9 @@
       "injured": false,
       "marketValue": "€3.50m",
       "name": "Braian Ojeda",
-      "position": "Defensive Midfield"
+      "overall_score": 76,
+      "position": "Defensive Midfield",
+      "potential": 77
     },
     {
       "calledUp": false,
@@ -304,7 +330,9 @@
       "injured": false,
       "marketValue": "€25.00m",
       "name": "Diego Gómez",
-      "position": "Central Midfield"
+      "overall_score": 77,
+      "position": "Central Midfield",
+      "potential": 84
     },
     {
       "calledUp": true,
@@ -319,7 +347,9 @@
       "injured": false,
       "marketValue": "€6.00m",
       "name": "Damián Bobadilla",
-      "position": "Central Midfield"
+      "overall_score": 73,
+      "position": "Central Midfield",
+      "potential": 78
     },
     {
       "calledUp": true,
@@ -334,7 +364,9 @@
       "injured": false,
       "marketValue": "€3.00m",
       "name": "Matías Galarza",
-      "position": "Central Midfield"
+      "overall_score": 73,
+      "position": "Central Midfield",
+      "potential": 81
     },
     {
       "calledUp": true,
@@ -349,7 +381,9 @@
       "injured": false,
       "marketValue": "€4.50m",
       "name": "Kaku",
-      "position": "Attacking Midfield"
+      "overall_score": 79,
+      "position": "Attacking Midfield",
+      "potential": 79
     },
     {
       "calledUp": false,
@@ -375,7 +409,9 @@
       "injured": false,
       "marketValue": "€25.00m",
       "name": "Julio Enciso",
-      "position": "Attacking Midfield"
+      "overall_score": 75,
+      "position": "Attacking Midfield",
+      "potential": 84
     },
     {
       "calledUp": true,
@@ -390,7 +426,9 @@
       "injured": false,
       "marketValue": "€15.00m",
       "name": "Mauricio",
-      "position": "Attacking Midfield"
+      "overall_score": 76,
+      "position": "Attacking Midfield",
+      "potential": 80
     },
     {
       "calledUp": true,
@@ -405,7 +443,9 @@
       "injured": false,
       "marketValue": "€9.00m",
       "name": "Miguel Almirón",
-      "position": "Right Winger"
+      "overall_score": 76,
+      "position": "Right Winger",
+      "potential": 76
     },
     {
       "calledUp": false,
@@ -444,7 +484,9 @@
       "injured": false,
       "marketValue": "€10.00m",
       "name": "Ramón Sosa",
-      "position": "Second Striker"
+      "overall_score": 74,
+      "position": "Second Striker",
+      "potential": 75
     },
     {
       "calledUp": false,
@@ -471,7 +513,9 @@
       "injured": false,
       "marketValue": "€3.50m",
       "name": "Álex Arce",
-      "position": "Centre-Forward"
+      "overall_score": 75,
+      "position": "Centre-Forward",
+      "potential": 75
     },
     {
       "calledUp": true,
@@ -486,7 +530,9 @@
       "injured": false,
       "marketValue": "€1.80m",
       "name": "Antonio Sanabria",
-      "position": "Centre-Forward"
+      "overall_score": 75,
+      "position": "Centre-Forward",
+      "potential": 75
     },
     {
       "calledUp": false,
@@ -512,7 +558,9 @@
       "injured": false,
       "marketValue": "€750k",
       "name": "Gabriel Ávalos",
-      "position": "Centre-Forward"
+      "overall_score": 74,
+      "position": "Centre-Forward",
+      "potential": 74
     },
     {
       "calledUp": true,
@@ -527,7 +575,9 @@
       "injured": false,
       "marketValue": "€1.00m",
       "name": "Gustavo Caballero",
-      "position": "Left Winger"
+      "overall_score": 67,
+      "position": "Left Winger",
+      "potential": 73
     },
     {
       "calledUp": true,
@@ -542,7 +592,9 @@
       "injured": false,
       "marketValue": "€7.50m",
       "name": "Isidro Pitta",
-      "position": "Centre-Forward"
+      "overall_score": 74,
+      "position": "Centre-Forward",
+      "potential": 77
     }
   ],
   "stadiumName": null,
