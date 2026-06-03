@@ -79,6 +79,10 @@ class GameNotification extends Model
 
     // Priorities
     public const PRIORITY_MILESTONE = 'milestone';
+    // CRITICAL interrupts the user with a blocking, must-dismiss popup on the
+    // next page load (see the critical-alert modal in game-header). Reserve it
+    // for the rare highest-stakes events the user must not miss (e.g. losing a
+    // player to a release clause); everything merely important is WARNING.
     public const PRIORITY_CRITICAL = 'critical';
     public const PRIORITY_WARNING = 'warning';
     public const PRIORITY_INFO = 'info';
@@ -216,6 +220,16 @@ class GameNotification extends Model
     }
 
     /**
+     * Positive critical alerts (qualifying for the next round, winning a cup —
+     * both use TYPE_COMPETITION_ADVANCEMENT) render as a celebration in the
+     * critical-alert popup rather than as a red "important alert".
+     */
+    public function isCelebratory(): bool
+    {
+        return $this->type === self::TYPE_COMPETITION_ADVANCEMENT;
+    }
+
+    /**
      * Get the route name for navigation based on notification type.
      */
     public function getNavigationRoute(): string
@@ -256,6 +270,23 @@ class GameNotification extends Model
         }
 
         return $params;
+    }
+
+    /**
+     * Contextual call-to-action label for the critical-alert popup's primary
+     * button. Mirrors getNavigationRoute(): it tells the user what acting on the
+     * alert will do (e.g. a purchase offer → "Review offer"). Any type without a
+     * bespoke label (including loan-request results) falls back to "View details".
+     */
+    public function getActionLabel(): string
+    {
+        return match ($this->type) {
+            self::TYPE_TRANSFER_OFFER_RECEIVED => __('notifications.action_review_offer'),
+            self::TYPE_COMPETITION_ADVANCEMENT,
+            self::TYPE_COMPETITION_ELIMINATION,
+            self::TYPE_TOURNAMENT_WELCOME => __('notifications.action_view_competition'),
+            default => __('notifications.action_view_details'),
+        };
     }
 
     /**

@@ -11,6 +11,17 @@
     // Notifications for mobile bell icon + modal
     $unreadCount = $game->notifications()->whereNull('read_at')->count();
     $recentNotifications = $game->notifications()->orderByDesc('game_date')->limit(20)->get();
+
+    // Highest-stakes (CRITICAL) notifications that haven't been acknowledged yet
+    // surface as a blocking, must-dismiss popup on the next page load so they
+    // can't be missed (e.g. a purchase offer for one of your players). Shown one
+    // at a time — the most recent — so each gets its own contextual action; any
+    // others follow on subsequent loads.
+    $criticalAlert = $game->notifications()
+        ->whereNull('read_at')
+        ->where('priority', \App\Models\GameNotification::PRIORITY_CRITICAL)
+        ->orderByDesc('game_date')
+        ->first();
 @endphp
 
 <div x-data>
@@ -320,6 +331,10 @@
             </div>
         </x-modal>
     </div>
+
+    {{-- Critical-alert popup: blocking, must-dismiss alert for the highest-stakes
+         (PRIORITY_CRITICAL) notifications. Renders nothing when none are pending. --}}
+    <x-critical-alert-modal :alert="$criticalAlert" :game="$game" />
 
     {{-- Mobile Bottom Tab Bar --}}
     <x-bottom-tab-bar :game="$game" :next-match="$nextMatch" :team-competitions="$teamCompetitions" />

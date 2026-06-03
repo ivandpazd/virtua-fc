@@ -72,6 +72,28 @@ class NotificationService
     }
 
     /**
+     * Acknowledge (mark read) unread CRITICAL notifications for a game.
+     * Backs the critical-alert popup's dismiss button: once acknowledged the
+     * alert no longer pops on subsequent page loads. The popup shows one alert
+     * at a time, so it passes the shown alert's id to scope the dismiss to that
+     * single notification; with no id (legacy callers) every critical is cleared.
+     * Always game- and critical-scoped, so a foreign id posted in the form is a
+     * no-op rather than a way to clear unrelated notifications.
+     */
+    public function markCriticalAsRead(string $gameId, ?string $notificationId = null): int
+    {
+        $query = GameNotification::where('game_id', $gameId)
+            ->unread()
+            ->where('priority', GameNotification::PRIORITY_CRITICAL);
+
+        if ($notificationId !== null) {
+            $query->where('id', $notificationId);
+        }
+
+        return $query->update(['read_at' => now()]);
+    }
+
+    /**
      * Get unread count for a game.
      */
     public function getUnreadCount(string $gameId): int
@@ -142,7 +164,7 @@ class NotificationService
                 'location' => $translatedLocation,
                 'date' => $player->injury_until?->translatedFormat('j M Y'),
             ]),
-            priority: GameNotification::PRIORITY_CRITICAL,
+            priority: GameNotification::PRIORITY_WARNING,
             metadata: [
                 'player_id' => $player->id,
                 'injury_type' => $injuryType,
@@ -166,7 +188,7 @@ class NotificationService
                 'reason' => $reason,
                 'competition' => __($competition),
             ]),
-            priority: GameNotification::PRIORITY_CRITICAL,
+            priority: GameNotification::PRIORITY_WARNING,
             metadata: [
                 'player_id' => $player->id,
                 'matches' => $matches,
@@ -236,7 +258,7 @@ class NotificationService
                 'team_el' => Str::ucfirst($offer->offeringTeam->nameWithEl()),
                 'fee' => $fee,
             ]),
-            priority: GameNotification::PRIORITY_INFO,
+            priority: GameNotification::PRIORITY_CRITICAL,
             metadata: [
                 'offer_id' => $offer->id,
                 'player_id' => $player->id,
@@ -335,7 +357,7 @@ class NotificationService
                 'player' => $player->name,
                 'team' => $seller?->name ?? '',
             ]),
-            priority: GameNotification::PRIORITY_CRITICAL,
+            priority: GameNotification::PRIORITY_WARNING,
             metadata: [
                 'player_id' => $player->id,
                 'team_id' => $seller?->id,
@@ -469,7 +491,7 @@ class NotificationService
                 'player' => $player->name,
                 'months' => $monthsLeft,
             ]),
-            priority: $monthsLeft <= 3 ? GameNotification::PRIORITY_CRITICAL : GameNotification::PRIORITY_WARNING,
+            priority: GameNotification::PRIORITY_WARNING,
             metadata: [
                 'player_id' => $player->id,
                 'months_left' => $monthsLeft,
@@ -579,7 +601,7 @@ class NotificationService
             type: GameNotification::TYPE_COMPETITION_ADVANCEMENT,
             title: __('notifications.trophy_won_title', ['competition' => __($competitionName)]),
             message: __('cup.champion_message', ['competition' => __($competitionName)]),
-            priority: GameNotification::PRIORITY_MILESTONE,
+            priority: GameNotification::PRIORITY_CRITICAL,
             metadata: [
                 'competition_id' => $competitionId,
             ],
@@ -664,7 +686,7 @@ class NotificationService
             type: GameNotification::TYPE_JOB_OFFER_RECEIVED,
             title: __($titleKey, ['count' => $offerCount]),
             message: __('notifications.job_offer_received_message', ['count' => $offerCount]),
-            priority: $fired ? GameNotification::PRIORITY_CRITICAL : GameNotification::PRIORITY_MILESTONE,
+            priority: $fired ? GameNotification::PRIORITY_WARNING : GameNotification::PRIORITY_MILESTONE,
             metadata: [
                 'offer_count' => $offerCount,
                 'fired' => $fired,
@@ -790,7 +812,7 @@ class NotificationService
                 'count' => count($playerNames),
                 'players' => implode(', ', $playerNames),
             ]),
-            priority: GameNotification::PRIORITY_CRITICAL,
+            priority: GameNotification::PRIORITY_WARNING,
         );
     }
 
@@ -804,7 +826,7 @@ class NotificationService
             type: GameNotification::TYPE_MATCH_FORFEIT,
             title: __('notifications.match_forfeit_title'),
             message: __('notifications.match_forfeit_message'),
-            priority: GameNotification::PRIORITY_CRITICAL,
+            priority: GameNotification::PRIORITY_WARNING,
         );
     }
 
@@ -910,7 +932,7 @@ class NotificationService
             type: GameNotification::TYPE_SQUAD_REGISTRATION_REQUIRED,
             title: __('notifications.squad_registration_required_title'),
             message: __('notifications.squad_registration_required_message', ['count' => $unenrolledCount]),
-            priority: GameNotification::PRIORITY_CRITICAL,
+            priority: GameNotification::PRIORITY_WARNING,
         );
     }
 
