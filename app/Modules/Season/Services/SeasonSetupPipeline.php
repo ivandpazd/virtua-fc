@@ -7,10 +7,12 @@ use App\Modules\Season\Contracts\SeasonProcessor;
 use App\Modules\Season\DTOs\SeasonTransitionData;
 use App\Modules\Season\Processors\BudgetProjectionProcessor;
 use App\Modules\Season\Processors\ContinentalAndCupInitProcessor;
+use App\Modules\Season\Processors\GenerateNamingRightsOffersProcessor;
 use App\Modules\Season\Processors\LeagueFixtureProcessor;
 use App\Modules\Season\Processors\NewSeasonResetProcessor;
 use App\Modules\Season\Processors\PreSeasonFixtureProcessor;
 use App\Modules\Season\Processors\SeasonTicketDefaultsProcessor;
+use App\Modules\Season\Processors\SeedInitialNamingDealProcessor;
 use App\Modules\Season\Processors\SquadRegistrationEnforcementProcessor;
 use App\Modules\Season\Processors\StandingsResetProcessor;
 use App\Modules\Season\Processors\TransferMarketSeedProcessor;
@@ -43,6 +45,8 @@ class SeasonSetupPipeline
         NewSeasonResetProcessor $newSeasonReset,
         TransferMarketSeedProcessor $transferMarketSeed,
         SeasonTicketDefaultsProcessor $seasonTicketDefaults,
+        SeedInitialNamingDealProcessor $seedInitialNamingDeal,
+        GenerateNamingRightsOffersProcessor $namingRightsOffers,
     ) {
         $this->processors = [
             $applyPendingTeamSwitch,
@@ -57,6 +61,8 @@ class SeasonSetupPipeline
             $newSeasonReset,
             $transferMarketSeed,
             $seasonTicketDefaults,
+            $seedInitialNamingDeal,
+            $namingRightsOffers,
         ];
 
         usort($this->processors, fn ($a, $b) => $a->priority() <=> $b->priority());

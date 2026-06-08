@@ -6,7 +6,18 @@ return [
     'nav' => [
         'finances' => 'Finanzas',
         'stadium' => 'Estadio',
+        'commercial' => 'Comercial',
         'reputation' => 'Reputación',
+    ],
+
+    'commercial' => [
+        'title' => 'Patrocinios comerciales',
+        'intro' => 'Busca patrocinadores para generar ingresos recurrentes que refuercen el presupuesto del club.',
+        'naming_rights_title' => 'Derechos de nombre del estadio',
+        'seek_explainer' => 'Contrata a una agencia para sondear patrocinadores. Cada búsqueda cuesta :fee y debes esperar :days días entre búsquedas.',
+        'seek_button' => 'Buscar patrocinadores (:fee)',
+        'seek_cooldown' => '{1} Podrás volver a buscar en :days día.|[2,*] Podrás volver a buscar en :days días.',
+        'seek_unaffordable' => 'No tienes presupuesto para la comisión de la agencia (:fee).',
     ],
 
     'stadium' => [
@@ -167,6 +178,41 @@ return [
                 'vip'           => 'VIP',
                 'palco'         => 'Palco',
             ],
+        ],
+
+        'identity' => [
+            'subtitle' => 'Renombra tu estadio sin coste (una vez por temporada, en pretemporada). Vender el nombre a un patrocinador se gestiona en la página Comercial.',
+            'sponsor_owns_name' => 'Un patrocinador (:sponsor) posee el nombre del estadio hasta que expire el acuerdo, así que no puedes renombrarlo.',
+            'manage_in_commercial' => 'Gestionar en Comercial',
+            'sell_naming_rights' => 'Vender los derechos de nombre',
+        ],
+
+        'naming_rights' => [
+            'title' => 'Identidad del estadio y derechos de nombre',
+            'current_name' => 'Nombre actual',
+            'source_historic' => 'Histórico',
+            'source_custom' => 'Renombrado',
+            'source_sponsor' => 'Patrocinado',
+
+            'seasons_remaining' => '{1} queda :count temporada|[2,*] quedan :count temporadas',
+
+            'offers_title' => 'Ofertas de patrocinio',
+            'becomes' => 'El estadio pasa a llamarse «:name»',
+            'annual_value' => 'Valor anual',
+            'contract_length' => 'Contrato',
+            'seasons' => '{1} :count temporada|[2,*] :count temporadas',
+            'accept_button' => 'Aceptar acuerdo',
+            'accept_confirm' => '¿Vender los derechos de nombre a :sponsor? Esto bloquea el nombre del estadio durante el contrato y resta apoyo de la afición.',
+            'renewal_badge' => 'Renovación',
+            'renew_button' => 'Renovar acuerdo',
+            'renew_confirm' => '¿Renovar el acuerdo con :sponsor? Mantiene el nombre del estadio sin coste de apoyo de la afición.',
+
+            'rename_button' => 'Renombrar estadio',
+            'rename_placeholder' => 'Nuevo nombre del estadio',
+            'rename_save' => 'Guardar nombre',
+            'rename_locked_season' => 'El estadio ya se ha renombrado esta temporada.',
+
+            'window_closed_notice' => 'La identidad del estadio se fija en pretemporada. Los acuerdos y renombres se reabren antes del primer partido de liga de la próxima temporada.',
         ],
     ],
 

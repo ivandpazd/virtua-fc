@@ -15,6 +15,7 @@ return [
     'tv_rights' => 'TV Rights',
     'matchday' => 'Matchday',
     'commercial' => 'Commercial',
+    'naming_rights' => 'Naming rights',
     'solidarity_funds' => 'FA/UEFA Solidarity Funds',
     'public_subsidy' => 'Public Subsidies',
     'total_revenue' => 'Total Revenue',
@@ -67,6 +68,7 @@ return [
     // Budget flow tooltips
     'tooltip_tv_rights' => 'TV revenue distribution based on your final league position. The higher you finish, the larger your share.',
     'tooltip_commercial' => 'Sponsorship and merchandising income. Depends on your stadium capacity and club reputation.',
+    'tooltip_naming_rights' => 'Income from selling your stadium name to a sponsor. A fixed annual fee for as long as the deal runs.',
     'tooltip_matchday' => 'Ticket sales revenue. Improves with facilities investment and a good league position.',
     'tooltip_solidarity_funds' => 'FA/UEFA solidarity funds for lower-division clubs to promote competitiveness.',
     'tooltip_public_subsidy' => 'Public subsidy guaranteeing a minimum viable budget for infrastructure and transfers.',
@@ -189,6 +191,7 @@ return [
     'category_severance' => 'Severance',
     'category_infrastructure' => 'Infrastructure',
     'category_stadium' => 'Stadium',
+    'category_agent_fee' => 'Agency fee',
     'category_budget_loan' => 'Budget Loan',
     'category_loan_repayment' => 'Loan Repayment',
 
@@ -213,6 +216,7 @@ return [
     'tx_stadium_rebuild_payment' => 'Stadium rebuild (:capacity seats)',
     'tx_stadium_uefa_upgrade_payment' => 'Upgrade to UEFA Category :level',
     'tx_stadium_loan_instalment' => 'Stadium loan annual instalment: :amount',
+    'tx_naming_rights_search_fee' => 'Commercial agency fee (sponsor search)',
 
     'stadium_debt_service' => 'Stadium Debt Service',
     'tooltip_stadium_debt_service' => 'Annual instalment of the stadium-rebuild loan (principal + interest on outstanding balance). Deducted from available surplus.',

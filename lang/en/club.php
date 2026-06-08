@@ -6,7 +6,18 @@ return [
     'nav' => [
         'finances' => 'Finances',
         'stadium' => 'Stadium',
+        'commercial' => 'Commercial',
         'reputation' => 'Reputation',
+    ],
+
+    'commercial' => [
+        'title' => 'Commercial sponsorships',
+        'intro' => 'Seek sponsors to grow recurring income that strengthens the club budget.',
+        'naming_rights_title' => 'Stadium naming rights',
+        'seek_explainer' => 'Hire an agency to canvass sponsors. Each search costs :fee and you must wait :days days between searches.',
+        'seek_button' => 'Seek sponsors (:fee)',
+        'seek_cooldown' => '{1} You can search again in :days day.|[2,*] You can search again in :days days.',
+        'seek_unaffordable' => 'You can\'t afford the agency fee (:fee).',
     ],
 
     'stadium' => [
@@ -167,6 +178,41 @@ return [
                 'vip'           => 'VIP',
                 'palco'         => 'Skybox',
             ],
+        ],
+
+        'identity' => [
+            'subtitle' => 'Rename your ground for free (once per season, in pre-season). Selling the name to a sponsor is handled on the Commercial page.',
+            'sponsor_owns_name' => 'A sponsor (:sponsor) owns the stadium name until the deal expires, so it can\'t be renamed.',
+            'manage_in_commercial' => 'Manage in Commercial',
+            'sell_naming_rights' => 'Sell the naming rights',
+        ],
+
+        'naming_rights' => [
+            'title' => 'Stadium identity & naming rights',
+            'current_name' => 'Current name',
+            'source_historic' => 'Historic',
+            'source_custom' => 'Renamed',
+            'source_sponsor' => 'Sponsored',
+
+            'seasons_remaining' => '{1} :count season left|[2,*] :count seasons left',
+
+            'offers_title' => 'Sponsor offers',
+            'becomes' => 'Stadium becomes “:name”',
+            'annual_value' => 'Annual value',
+            'contract_length' => 'Contract',
+            'seasons' => '{1} :count season|[2,*] :count seasons',
+            'accept_button' => 'Accept deal',
+            'accept_confirm' => 'Sell the naming rights to :sponsor? This locks the stadium name for the contract and dents fan support.',
+            'renewal_badge' => 'Renewal',
+            'renew_button' => 'Renew deal',
+            'renew_confirm' => 'Renew the deal with :sponsor? It keeps the stadium name with no fan-support cost.',
+
+            'rename_button' => 'Rename stadium',
+            'rename_placeholder' => 'New stadium name',
+            'rename_save' => 'Save name',
+            'rename_locked_season' => 'The stadium has already been renamed this season.',
+
+            'window_closed_notice' => 'Stadium identity is set in pre-season. Naming deals and renames reopen before next season’s first league match.',
         ],
     ],
 

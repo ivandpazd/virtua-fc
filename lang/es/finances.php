@@ -15,6 +15,7 @@ return [
     'tv_rights' => 'Derechos de TV',
     'matchday' => 'Día de Partido',
     'commercial' => 'Comercial',
+    'naming_rights' => 'Derechos de nombre',
     'solidarity_funds' => 'Ayudas RFEF/UEFA',
     'public_subsidy' => 'Subvenciones Públicas',
     'total_revenue' => 'Ingresos Totales',
@@ -67,6 +68,7 @@ return [
     // Budget flow tooltips
     'tooltip_tv_rights' => 'Distribución televisiva basada en tu posición final en liga. Cuanto más alto termines, mayor será tu reparto.',
     'tooltip_commercial' => 'Ingresos por patrocinios y merchandising. Dependen del tamaño de tu estadio y la reputación del club.',
+    'tooltip_naming_rights' => 'Ingresos por vender el nombre de tu estadio a un patrocinador. Es una cuota anual fija mientras dure el acuerdo.',
     'tooltip_matchday' => 'Recaudación por venta de entradas. Mejora con la inversión en instalaciones y una buena posición en liga.',
     'tooltip_solidarity_funds' => 'Ayudas de la RFEF/UEFA destinadas a clubes de divisiones inferiores para fomentar la competitividad.',
     'tooltip_public_subsidy' => 'Subvención pública que garantiza un presupuesto mínimo viable para infraestructura y fichajes.',
@@ -189,6 +191,7 @@ return [
     'category_severance' => 'Indemnización',
     'category_infrastructure' => 'Infraestructura',
     'category_stadium' => 'Estadio',
+    'category_agent_fee' => 'Comisión de agencia',
     'category_budget_loan' => 'Préstamo Presupuestario',
     'category_loan_repayment' => 'Devolución de Préstamo',
 
@@ -213,6 +216,7 @@ return [
     'tx_stadium_rebuild_payment' => 'Reforma del estadio (:capacity asientos)',
     'tx_stadium_uefa_upgrade_payment' => 'Mejora a Categoría UEFA :level',
     'tx_stadium_loan_instalment' => 'Cuota anual del préstamo del estadio: :amount',
+    'tx_naming_rights_search_fee' => 'Comisión de agencia comercial (búsqueda de patrocinador)',
 
     'stadium_debt_service' => 'Servicio de Deuda del Estadio',
     'tooltip_stadium_debt_service' => 'Cuota anual del préstamo de reforma del estadio (capital + intereses sobre el saldo). Se descuenta del superávit disponible.',
