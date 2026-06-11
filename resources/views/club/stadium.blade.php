@@ -90,100 +90,67 @@
                      exists and the user has no way to set prices mid-season. --}}
                 @if($pricing)
                 <x-section-card :title="__('club.stadium.season_tickets.title')">
+                    {{-- Pricing-policy help moved into a tooltip to keep the card uncluttered. --}}
+                    <x-slot:badge>
+                        @if($canEditTickets)
+                            <x-info-icon :tooltip="__('club.stadium.season_tickets.subtitle')" />
+                        @endif
+                    </x-slot:badge>
                     @if($canEditTickets)
                         <div class="px-5 py-4"
                              x-data="seasonTicketEditor({
-                                gameId: @js($game->id),
-                                previewUrl: @js(route('game.club.stadium.season-tickets.preview', $game->id)),
-                                prices: @js($alpinePrices),
-                                baselines: @js($alpineBaselines),
-                                minMultiplier: {{ $minMultiplier }},
-                                maxMultiplier: {{ $maxMultiplier }},
-                                initialAreas: @js($ticketAreas),
-                                initialFill: {{ $overallFill }},
-                                initialRevenue: @js((int) ($pricing->total_revenue ?? 0)),
-                                initialSold: @js((int) ($pricing->total_sold ?? 0)),
-                                initialMatchday: {{ $projectedMatchday }},
-                                totalCapacity: {{ $capacity }},
-                                csrf: @js(csrf_token()),
+                                presets: @js($ticketPresets),
+                                current: @js($currentPreset),
+                                expectedAttendance: @js($matchdayFactors['expected_attendance']),
+                                perAttendeeCents: @js($matchdayFactors['per_attendee_cents']),
+                                capacity: @js($capacity),
+                                noShowRate: @js($seasonTicketNoShowRate),
                              })">
 
-                            <p class="text-xs text-text-muted leading-relaxed mb-4">
-                                {{ __('club.stadium.season_tickets.subtitle') }}
-                            </p>
-
-                            {{-- Per-area pricing rows --}}
-                            <div class="mt-6 space-y-2">
-                                @foreach($ticketAreas as $i => $area)
-                                    <div class="px-3.5 py-2.5 bg-surface-700/50 border border-border-default rounded-lg space-y-2">
-                                        <div class="flex items-baseline justify-between gap-4">
-                                            <div class="min-w-0">
-                                                <span class="text-xs font-semibold text-text-primary uppercase tracking-wide">{{ __('club.stadium.season_tickets.area.' . $area['slug']) }}</span>
-                                                <span class="text-[11px] text-text-muted ml-1.5">{{ Number::format($area['capacity']) }}</span>
-                                            </div>
-                                            <span class="font-heading text-base font-bold text-text-primary tabular-nums leading-none shrink-0"
-                                                  x-text="formatPrice(prices[{{ $i }}])"></span>
-                                        </div>
-
-                                        <input type="range"
-                                               min="{{ $area['min_price_cents'] }}"
-                                               max="{{ $area['max_price_cents'] }}"
-                                               step="500"
-                                               :value="prices[{{ $i }}]"
-                                               :style="`--fill: ${sliderFill({{ $i }})}`"
-                                               @input="setPriceCents({{ $i }}, $event.target.value)"
-                                               class="season-ticket-slider w-full block">
-
-                                        <div class="text-[11px] tabular-nums flex items-baseline gap-1.5">
-                                            <span class="text-text-body font-semibold"><span x-text="Math.round((areas[{{ $i }}]?.fill_rate ?? 0) * 100)"></span>%</span>
-                                            <span class="text-text-muted">{{ __('club.stadium.season_tickets.predicted_fill') }}</span>
-                                            <span class="text-text-faint">·</span>
-                                            <span class="text-text-muted"><span x-text="$fmt(areas[{{ $i }}]?.sold ?? 0)"></span> / {{ Number::format($area['capacity']) }}</span>
-                                        </div>
-                                    </div>
+                            {{-- Pricing preset selector --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                @foreach($ticketPresets as $key => $preset)
+                                    <button type="button"
+                                            @click="select(@js($key))"
+                                            :class="selected === @js($key)
+                                                ? 'border-accent-blue bg-accent-blue/10 text-text-primary'
+                                                : 'border-border-default bg-surface-700/50 text-text-body hover:border-border-strong'"
+                                            class="text-left px-3.5 py-3 rounded-lg border transition-colors">
+                                        <div class="text-sm font-semibold">{{ __('club.stadium.season_tickets.preset.' . $key) }}</div>
+                                        <div class="text-[11px] text-text-muted mt-0.5">{{ __('club.stadium.season_tickets.preset_hint.' . $key) }}</div>
+                                    </button>
                                 @endforeach
                             </div>
 
-                            {{-- Aggregates --}}
+                            {{-- Aggregates for the selected preset --}}
                             <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div class="bg-surface-700/50 border border-border-default rounded-lg px-4 py-3">
                                     <div class="text-[10px] text-text-muted uppercase tracking-widest flex items-center gap-1.5">
-                                        {{ __('club.stadium.season_tickets.predicted_fill') }}
-                                        <x-info-icon :tooltip="__('club.stadium.season_tickets.predicted_fill_tooltip')" />
+                                        {{ __('club.stadium.season_tickets.projected_season_tickets') }}
+                                        <x-info-icon :tooltip="__('club.stadium.season_tickets.projected_season_tickets_tooltip')" />
                                     </div>
-                                    <div class="font-heading text-2xl font-bold text-text-primary">
-                                        <span x-text="overallFill"></span>%
-                                    </div>
-                                    <div class="mt-2 h-1.5 bg-surface-900/40 rounded-full overflow-hidden">
-                                        <div class="h-full bg-accent-blue rounded-full" :style="`width: ${overallFill}%`"></div>
+                                    <div class="font-heading text-2xl font-bold text-text-primary" x-text="fmt(current.total_sold)"></div>
+                                    {{-- Stacked: solid = abono penetration, faded = walk-up on top → total match-day occupancy. --}}
+                                    <div class="mt-2 h-1.5 bg-surface-900/40 rounded-full overflow-hidden flex">
+                                        <div class="h-full bg-accent-blue" :style="`width: ${current.overall_fill}%`"></div>
+                                        <div class="h-full bg-accent-blue/40" :style="`width: ${Math.max(0, matchdayFillPercent - current.overall_fill)}%`"></div>
                                     </div>
                                     <div class="text-[11px] text-text-muted mt-1">
-                                        <span x-text="$fmt(totalSold)"></span> / {{ Number::format($capacity) }}
+                                        <span x-text="current.overall_fill"></span>% {{ __('club.stadium.season_tickets.of_capacity') }}
+                                        · ~<span x-text="matchdayFillPercent"></span>% {{ __('club.stadium.season_tickets.matchday_occupancy') }}
                                     </div>
                                 </div>
                                 <div class="bg-surface-700/50 border border-border-default rounded-lg px-4 py-3">
-                                    <div class="text-[10px] text-text-muted uppercase tracking-widest">{{ __('club.stadium.stadium_revenue.title') }}</div>
-                                    <div class="font-heading text-2xl font-bold text-accent-green flex items-center gap-2">
-                                        <span class="transition-opacity duration-150" :class="isUpdating ? 'opacity-40' : 'opacity-100'" x-text="formatRevenue(totalRevenue + projectedMatchday)"></span>
-                                        <svg x-show="isUpdating" x-cloak class="animate-spin h-4 w-4 text-text-muted shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="mt-2 space-y-1 text-[11px]" :class="isUpdating ? 'opacity-60' : 'opacity-100'">
-                                        <div class="flex justify-between gap-2">
-                                            <span class="text-text-muted">{{ __('club.stadium.stadium_revenue.season_tickets') }}</span>
-                                            <span class="text-text-body font-semibold" x-text="formatRevenue(totalRevenue)"></span>
-                                        </div>
+                                    <div class="text-[10px] text-text-muted uppercase tracking-widest">{{ __('club.stadium.stadium_revenue.season_tickets') }}</div>
+                                    <div class="font-heading text-2xl font-bold text-accent-green" x-text="formatRevenue(current.total_revenue)"></div>
+                                    <div class="mt-2 space-y-1 text-[11px]">
                                         <div class="flex justify-between gap-2">
                                             <span class="text-text-muted">{{ __('club.stadium.stadium_revenue.matchday') }}</span>
-                                            <span class="text-text-body font-semibold" x-text="formatRevenue(projectedMatchday)"></span>
+                                            <span class="text-text-body font-semibold" x-text="formatRevenue(matchday)"></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <p class="text-[11px] text-text-muted mt-3 leading-relaxed">{{ __('club.stadium.stadium_revenue.help') }}</p>
 
                             <p class="text-[11px] text-accent-gold mt-4">{{ __('club.stadium.season_tickets.deadline_notice') }}</p>
 
@@ -191,15 +158,10 @@
                                   action="{{ route('game.club.stadium.season-tickets.save', $game->id) }}"
                                   class="mt-4 flex flex-col sm:flex-row gap-3">
                                 @csrf
-                                @foreach($ticketAreas as $i => $area)
-                                    <input type="hidden" :name="`prices[{{ $i }}]`" :value="prices[{{ $i }}]">
-                                @endforeach
+                                <input type="hidden" name="preset" :value="selected">
                                 <x-primary-button>
                                     {{ __('club.stadium.season_tickets.save_button') }}
                                 </x-primary-button>
-                                <x-secondary-button @click="resetToDefaults()">
-                                    {{ __('club.stadium.season_tickets.reset_defaults') }}
-                                </x-secondary-button>
                             </form>
                         </div>
                     @else
@@ -211,7 +173,7 @@
                                 <div class="bg-surface-700/50 border border-border-default rounded-lg px-4 py-3">
                                     <div class="text-[10px] text-text-muted uppercase tracking-widest">{{ __('club.stadium.season_tickets.tickets_sold') }}</div>
                                     <div class="font-heading text-2xl font-bold text-text-primary">{{ Number::format((int) ($pricing->total_sold ?? 0)) }}</div>
-                                    <div class="text-[11px] text-text-muted mt-1">{{ $overallFill }}% {{ __('club.stadium.season_tickets.predicted_fill') }}</div>
+                                    <div class="text-[11px] text-text-muted mt-1">{{ $overallFill }}% {{ __('club.stadium.season_tickets.of_capacity') }}</div>
                                 </div>
                                 <div class="bg-surface-700/50 border border-border-default rounded-lg px-4 py-3">
                                     <div class="text-[10px] text-text-muted uppercase tracking-widest">{{ __('club.stadium.stadium_revenue.title') }}</div>
@@ -228,8 +190,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <p class="text-[11px] text-text-muted mt-3 leading-relaxed">{{ __('club.stadium.stadium_revenue.help') }}</p>
                         </div>
                     @endif
                 </x-section-card>
@@ -237,7 +197,7 @@
 
             </div>
 
-            {{-- RIGHT column (1/3): Last home-match attendance --}}
+            {{-- RIGHT column (1/3): last home-match attendance + fan support --}}
             <div class="space-y-6">
                 <x-section-card :title="__('club.stadium.last_attendance')">
                     <div class="px-5 py-4">
@@ -279,6 +239,8 @@
                         @endif
                     </div>
                 </x-section-card>
+
+                <x-fan-support-card :loyalty="$loyaltyPoints" />
             </div>
         </div>
 

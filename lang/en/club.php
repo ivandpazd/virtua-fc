@@ -43,7 +43,6 @@ return [
             'title' => 'Stadium revenue',
             'season_tickets' => 'Season tickets',
             'matchday' => 'Matchday',
-            'help' => 'Season tickets are pre-paid up front; matchday revenue accrues per home fixture.',
         ],
 
         'upgrades' => [
@@ -154,29 +153,24 @@ return [
 
         'season_tickets' => [
             'title' => 'Pricing',
-            'subtitle' => 'Set your season ticket prices for each seating area. Pricing is locked once your first league match has been played.',
+            'subtitle' => 'Pick a pricing policy for your season tickets. Lower prices fill more of the ground; higher prices earn more per seat. Locked once your first league match has been played.',
             'deadline_notice' => 'Deadline: prices lock once the first league match of the season has been played.',
             'locked_notice' => 'Season tickets are locked for the season. New prices can be set in pre-season next year.',
             'tickets_sold' => 'Tickets sold',
-            'predicted_fill' => 'predicted fill',
-            'predicted_fill_tooltip' => 'Pricing and your fans\' support both shape season ticket demand.',
-            'baseline_price' => 'Baseline',
-            'capacity' => 'Capacity',
-            'save_button' => 'Save prices',
-            'reset_defaults' => 'Reset to defaults',
-
-            'area' => [
-                'general'       => 'General',
-                'lateral'       => 'Lateral',
-                'lateral_alta'  => 'Lateral upper',
-                'lateral_baja'  => 'Lateral lower',
-                'tribuna'       => 'Main stand',
-                'tribuna_alta'  => 'Main stand upper',
-                'tribuna_baja'  => 'Main stand lower',
-                'fondo_norte'   => 'North end',
-                'fondo_sur'     => 'South end',
-                'vip'           => 'VIP',
-                'palco'         => 'Skybox',
+            'projected_season_tickets' => 'Projected season tickets',
+            'projected_season_tickets_tooltip' => 'Season tickets you expect to sell (paid up front). Match-day attendance differs — it adds walk-up buyers and subtracts no-show holders.',
+            'of_capacity' => 'of capacity',
+            'matchday_occupancy' => 'match-day occupancy',
+            'save_button' => 'Save',
+            'preset' => [
+                'accessible' => 'Accessible',
+                'standard' => 'Standard',
+                'premium' => 'Premium',
+            ],
+            'preset_hint' => [
+                'accessible' => 'Cheaper, fuller stadium.',
+                'standard' => 'Baseline prices.',
+                'premium' => 'Pricier, lower attendance.',
             ],
         ],
 

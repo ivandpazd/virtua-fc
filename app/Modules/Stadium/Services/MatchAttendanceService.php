@@ -31,7 +31,7 @@ class MatchAttendanceService
     public function __construct(
         private readonly DemandCurveService $demandCurve,
         private readonly SeasonTicketPricingService $seasonTicketPricingService,
-        private readonly StadiumCapacityResolver $capacityResolver,
+        private readonly GameStadiumResolver $stadiumResolver,
     ) {}
 
     /** Per-request caches — MatchAttendanceService is resolved fresh per request. */
@@ -186,19 +186,19 @@ class MatchAttendanceService
      */
     public function describeForMatch(GameMatch $match, Game $game): ?array
     {
-        if ($this->isSoldOutRound($match)) {
-            $capacity = $this->soldOutCapacity($match, $game);
-            if ($capacity > 0) {
-                return ['attendance' => $capacity, 'capacity' => $capacity];
-            }
+        if ($house = $this->soldOutHouse($match, $game)) {
+            return $house;
         }
 
-        if ($match->isNeutralVenue() && $match->neutral_venue_capacity !== null) {
-            $capacity = (int) $match->neutral_venue_capacity;
-            return ['attendance' => $capacity, 'capacity' => $capacity];
+        if ($match->isNeutralVenue()) {
+            // A designated neutral venue plays to its set capacity; without
+            // one we have no home club to run the demand curve against.
+            return $match->neutral_venue_capacity !== null
+                ? $this->fullHouse((int) $match->neutral_venue_capacity)
+                : null;
         }
 
-        return $this->projectForMatch($match, $game);
+        return $this->projectGeneral($match, $game);
     }
 
     /**
@@ -211,17 +211,26 @@ class MatchAttendanceService
      */
     public function projectForMatch(GameMatch $match, Game $game): ?array
     {
-        if ($this->isSoldOutRound($match)) {
-            $capacity = $this->soldOutCapacity($match, $game);
-            if ($capacity > 0) {
-                return ['attendance' => $capacity, 'capacity' => $capacity];
-            }
+        if ($house = $this->soldOutHouse($match, $game)) {
+            return $house;
         }
 
         if ($match->isNeutralVenue()) {
             return null;
         }
 
+        return $this->projectGeneral($match, $game);
+    }
+
+    /**
+     * General demand-curve projection for a normal home fixture (not a
+     * sold-out round, not a neutral venue — those are resolved by the
+     * callers first). Returns null when the home team can't be resolved.
+     *
+     * @return array{attendance: int, capacity: int}|null
+     */
+    private function projectGeneral(GameMatch $match, Game $game): ?array
+    {
         $home = $this->loadTeam($match->home_team_id);
         if (!$home) {
             return null;
@@ -232,7 +241,7 @@ class MatchAttendanceService
         $homeRep = $this->loadReputation($game->id, $home->id);
         $awayRep = $this->loadReputation($game->id, $match->away_team_id);
 
-        $capacity = $this->capacityResolver->effectiveCapacity(
+        $capacity = $this->stadiumResolver->effectiveCapacity(
             $game->id,
             $home->id,
             (int) ($home->stadium_seats ?? 0),
@@ -246,7 +255,7 @@ class MatchAttendanceService
             $capacity,
         );
 
-        $attendance = $this->applySeasonTicketFloor($match, $game, $attendance, $capacity);
+        $attendance = $this->composeSeasonTicketAttendance($match, $game, $attendance, $capacity);
 
         return [
             'attendance' => $attendance,
@@ -255,30 +264,46 @@ class MatchAttendanceService
     }
 
     /**
-     * Bumps attendance up to a season-ticket-driven floor for the user's
-     * home games. Season ticket holders always show up (they paid up
-     * front), so the gate can never dip below that count. Adds a small
-     * walk-up jitter on top so consecutive matches don't read identically;
-     * jitter is deterministic per match so the figure is stable across
-     * page reloads.
+     * Recompose attendance for the user's home games around the season-ticket
+     * base. A configurable share of holders are no-shows: they paid up front,
+     * so an empty paid seat costs nothing and earns nothing. The rest attend,
+     * and walk-up buyers fill the demand BEYOND the abono base. So the gate is
+     * `attending holders + walk-ups`, not the raw demand-curve figure — which
+     * lets a club that sold abonos to most of its crowd still report a few
+     * empty seats, and a club with demand above its abono base still draw a
+     * walk-up gate. A small deterministic per-match jitter on the walk-up keeps
+     * consecutive fixtures from reading identically (stable across reloads, no
+     * global PRNG touch). For non-user / away fixtures holders is 0 and the
+     * demand-curve attendance passes through unchanged.
+     *
+     * The chosen preset's occupancy factor scales total demand first (cheaper
+     * prices draw a bigger crowd, premium prices some out), so the walk-up that
+     * fills in beyond the abono base — and the resulting occupancy — respond to
+     * the pricing stance, not just the abono/walk-up split.
+     *
+     * `$attendance` is the demand-curve crowd (total match-going appetite).
      */
-    private function applySeasonTicketFloor(GameMatch $match, Game $game, int $attendance, int $capacity): int
+    private function composeSeasonTicketAttendance(GameMatch $match, Game $game, int $attendance, int $capacity): int
     {
         $holders = $this->seasonTicketPricingService->soldSeasonTicketsForMatch($game, $match);
         if ($holders <= 0 || $capacity <= 0) {
             return $attendance;
         }
 
-        // Deterministic walk-up jitter: −1% to +5% of capacity. Derived
-        // from the match id so the same fixture always reports the same
-        // number, without touching the global PRNG seed.
+        $demand = (int) round($attendance * $this->seasonTicketPricingService->currentOccupancyFactor($game));
+
+        $noShowRate = (float) config('stadium.season_ticket_noshow_rate', 0.05);
+        $attendingHolders = (int) round($holders * (1.0 - $noShowRate));
+
+        // Walk-up = the demand beyond the abono base. Deterministic jitter
+        // (−1% to +5% of capacity) derived from the match id so the same
+        // fixture always reports the same number.
         $bucket = crc32($match->id) % 601; // 0..600 inclusive
         $jitterPercent = ($bucket - 100) / 10_000.0; // −0.01 to +0.05
         $jitterSeats = (int) round($capacity * $jitterPercent);
+        $walkup = max(0, $demand - $holders + $jitterSeats);
 
-        $floor = $holders + $jitterSeats;
-
-        return max($attendance, min($capacity, $floor));
+        return min($capacity, $attendingHolders + $walkup);
     }
 
     /**
@@ -289,13 +314,42 @@ class MatchAttendanceService
     public function projectBaselineForTeam(string $gameId, Team $home): int
     {
         $homeRep = $this->loadReputation($gameId, $home->id);
-        $capacity = $this->capacityResolver->effectiveCapacity(
+        $capacity = $this->stadiumResolver->effectiveCapacity(
             $gameId,
             $home->id,
             (int) ($home->stadium_seats ?? 0),
         );
 
         return $this->demandCurve->projectBaseline($home, $homeRep, $capacity);
+    }
+
+    /**
+     * The sold-out full house for a round that always sells out (cup
+     * finals/semis), or null when this isn't such a round or its capacity
+     * can't be resolved. The single source of truth for the sold-out rule,
+     * shared by describeForMatch() and projectForMatch().
+     *
+     * @return array{attendance: int, capacity: int}|null
+     */
+    private function soldOutHouse(GameMatch $match, Game $game): ?array
+    {
+        if (! $this->isSoldOutRound($match)) {
+            return null;
+        }
+
+        $capacity = $this->soldOutCapacity($match, $game);
+
+        return $capacity > 0 ? $this->fullHouse($capacity) : null;
+    }
+
+    /**
+     * A full-capacity house: attendance equals capacity.
+     *
+     * @return array{attendance: int, capacity: int}
+     */
+    private function fullHouse(int $capacity): array
+    {
+        return ['attendance' => $capacity, 'capacity' => $capacity];
     }
 
     private function isSoldOutRound(GameMatch $match): bool
@@ -318,7 +372,7 @@ class MatchAttendanceService
             return 0;
         }
 
-        return $this->capacityResolver->effectiveCapacity(
+        return $this->stadiumResolver->effectiveCapacity(
             $game->id,
             $home->id,
             (int) ($home->stadium_seats ?? 0),

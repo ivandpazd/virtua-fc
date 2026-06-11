@@ -1,20 +1,62 @@
 export default function seasonTicketEditor(config) {
     return {
-        prices: { ...config.prices },
-        baselines: { ...config.baselines },
-        areas: config.initialAreas.map((a) => ({ ...a })),
-        overallFill: config.initialFill,
-        totalRevenue: config.initialRevenue,
-        totalSold: config.initialSold,
-        projectedMatchday: config.initialMatchday,
-        totalCapacity: config.totalCapacity,
-        minMultiplier: config.minMultiplier,
-        maxMultiplier: config.maxMultiplier,
-        pendingFetch: null,
-        isUpdating: false,
+        presets: config.presets,
+        selected: config.current,
 
-        formatPrice(cents) {
-            return '€ ' + new Intl.NumberFormat('es-ES').format(Math.round(cents / 100));
+        // Fixed inputs to the walk-up matchday projection (see
+        // BudgetProjectionService::matchdayProjectionFactors). Only the
+        // season-ticket holder count varies per preset, so the taquilla figure
+        // is recomputed here as the user toggles presets — no save round-trip.
+        expectedAttendance: config.expectedAttendance,
+        perAttendeeCents: config.perAttendeeCents,
+        capacity: config.capacity,
+        noShowRate: config.noShowRate,
+
+        // The aggregates (fill, sold, revenue) for the selected preset. Every
+        // preset is precomputed server-side, so switching is instant and needs
+        // no network round-trip.
+        get current() {
+            return this.presets[this.selected] ?? Object.values(this.presets)[0] ?? {
+                overall_fill: 0, total_sold: 0, total_revenue: 0,
+            };
+        },
+
+        // Projected walk-up matchday revenue for the selected preset. Mirrors
+        // BudgetProjectionService::calculateMatchdayRevenue exactly: holders
+        // are subtracted from the expected gate, and the server's (int) cast
+        // matches Math.trunc here. Selling more season tickets (a fuller
+        // preset) shrinks walk-up, so this falls as season-ticket revenue rises.
+        // Total match demand scaled by the preset's occupancy factor (cheaper →
+        // bigger crowd). Walk-up and occupancy both derive from this, so they
+        // respond to the pricing stance, not just the abono/walk-up split.
+        get scaledDemand() {
+            return this.expectedAttendance * (this.current.occupancy_factor ?? 1);
+        },
+
+        get matchday() {
+            const walkup = Math.max(0, this.scaledDemand - (this.current.total_sold ?? 0));
+            return Math.trunc(walkup * this.perAttendeeCents);
+        },
+
+        // Projected typical match-day attendance for the selected preset:
+        // attending holders (after no-show) + walk-up demand beyond the abono
+        // base. Mirrors MatchAttendanceService::composeSeasonTicketAttendance,
+        // so the bar shows how full the ground gets — distinct from the abono
+        // penetration. A pricier preset sells fewer abonos but walk-up takes up
+        // the slack, so occupancy moves far less than the abono count.
+        get matchdayAttendance() {
+            const holders = this.current.total_sold ?? 0;
+            const attendingHolders = Math.round(holders * (1 - this.noShowRate));
+            const walkup = Math.max(0, this.scaledDemand - holders);
+            return Math.min(this.capacity, attendingHolders + walkup);
+        },
+
+        get matchdayFillPercent() {
+            return this.capacity > 0 ? Math.round((this.matchdayAttendance / this.capacity) * 100) : 0;
+        },
+
+        select(key) {
+            this.selected = key;
         },
 
         formatRevenue(cents) {
@@ -24,65 +66,8 @@ export default function seasonTicketEditor(config) {
             return '€ ' + Math.round(euros);
         },
 
-        updatePrice(index, raw) {
-            const cents = Math.round(parseFloat(raw || '0') * 100);
-            this.setPriceCents(index, cents);
-        },
-
-        setPriceCents(index, raw) {
-            const baseline = this.baselines[index] ?? 0;
-            let cents = parseInt(raw, 10);
-            if (!Number.isFinite(cents)) cents = 0;
-            const min = Math.round(baseline * this.minMultiplier);
-            const max = Math.round(baseline * this.maxMultiplier);
-            cents = Math.max(min, Math.min(max, cents));
-            this.prices = { ...this.prices, [index]: cents };
-            this.refresh();
-        },
-
-        sliderFill(index) {
-            const baseline = this.baselines[index] ?? 0;
-            if (!baseline) return '0%';
-            const min = Math.round(baseline * this.minMultiplier);
-            const max = Math.round(baseline * this.maxMultiplier);
-            if (max <= min) return '0%';
-            const cents = this.prices[index] ?? min;
-            const pct = Math.max(0, Math.min(100, ((cents - min) / (max - min)) * 100));
-            return pct.toFixed(2) + '%';
-        },
-
-        resetToDefaults() {
-            this.prices = { ...this.baselines };
-            this.refresh();
-        },
-
-        refresh() {
-            if (this.pendingFetch) clearTimeout(this.pendingFetch);
-            this.isUpdating = true;
-            this.pendingFetch = setTimeout(async () => {
-                try {
-                    const res = await fetch(config.previewUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': config.csrf,
-                        },
-                        body: JSON.stringify({ prices: this.prices }),
-                    });
-                    if (!res.ok) return;
-                    const data = await res.json();
-                    this.areas = data.areas ?? this.areas;
-                    this.overallFill = data.overall_fill_rate ?? this.overallFill;
-                    this.totalRevenue = data.total_revenue ?? this.totalRevenue;
-                    this.totalSold = data.total_sold ?? this.totalSold;
-                    this.projectedMatchday = data.projected_matchday_revenue ?? this.projectedMatchday;
-                } catch (e) {
-                    /* network blip — keep last preview */
-                } finally {
-                    this.isUpdating = false;
-                }
-            }, 250);
+        fmt(n) {
+            return new Intl.NumberFormat('es-ES').format(n ?? 0);
         },
     };
 }

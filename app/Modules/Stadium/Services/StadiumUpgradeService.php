@@ -75,47 +75,47 @@ class StadiumUpgradeService
 
     public function supplementaryCostPerSeat(): int
     {
-        return (int) config('finances.stadium_costs.supplementary_per_seat_cents', 400_000);
+        return (int) config('stadium.stadium_costs.supplementary_per_seat_cents', 400_000);
     }
 
     public function supplementaryMaxSeatsPerProject(): int
     {
-        return (int) config('finances.stadium_costs.supplementary_max_seats_per_project', 8_000);
+        return (int) config('stadium.stadium_costs.supplementary_max_seats_per_project', 8_000);
     }
 
     public function supplementaryConstructionDays(): int
     {
-        return (int) config('finances.stadium_costs.supplementary_construction_days', 30);
+        return (int) config('stadium.stadium_costs.supplementary_construction_days', 30);
     }
 
     public function standExpansionCostPerSeat(): int
     {
-        return (int) config('finances.stadium_costs.stand_expansion_per_seat_cents', 800_000);
+        return (int) config('stadium.stadium_costs.stand_expansion_per_seat_cents', 800_000);
     }
 
     public function standExpansionMinSeats(): int
     {
-        return (int) config('finances.stadium_costs.stand_expansion_min_seats', 3_000);
+        return (int) config('stadium.stadium_costs.stand_expansion_min_seats', 3_000);
     }
 
     public function standExpansionMaxSeats(): int
     {
-        return (int) config('finances.stadium_costs.stand_expansion_max_seats', 12_000);
+        return (int) config('stadium.stadium_costs.stand_expansion_max_seats', 12_000);
     }
 
     public function standExpansionConstructionDays(): int
     {
-        return (int) config('finances.stadium_costs.stand_expansion_construction_days', 270);
+        return (int) config('stadium.stadium_costs.stand_expansion_construction_days', 270);
     }
 
     public function rebuildConstructionDays(): int
     {
-        return (int) config('finances.stadium_costs.rebuild_construction_days', 540);
+        return (int) config('stadium.stadium_costs.rebuild_construction_days', 540);
     }
 
     public function uefaUpgradeConstructionDays(): int
     {
-        return (int) config('finances.stadium_costs.uefa_upgrade_construction_days', 270);
+        return (int) config('stadium.stadium_costs.uefa_upgrade_construction_days', 270);
     }
 
     /**
@@ -233,7 +233,7 @@ class StadiumUpgradeService
      */
     private function rebuildBands(): array
     {
-        $raw = config('finances.stadium_costs.rebuild_per_seat_bands');
+        $raw = config('stadium.stadium_costs.rebuild_per_seat_bands');
         if (! is_array($raw) || $raw === []) {
             // Legacy fallback: behave like a single €15k band.
             return [['up_to' => null, 'per_seat_cents' => 1_500_000]];
@@ -253,6 +253,57 @@ class StadiumUpgradeService
         $currentIndex = ClubProfile::getReputationTierIndex($level);
 
         return $currentIndex >= $minIndex;
+    }
+
+    /**
+     * Shared commit tail for every project type: stamp a completion date,
+     * create the project row, settle the financing (deduct cash or open a
+     * loan), and notify — all inside one transaction. Callers run the
+     * type-specific validation and the cash/loan-cap pre-check first.
+     */
+    private function commitProject(
+        Game $game,
+        StadiumProjectType $type,
+        int $targetValue,
+        int $cost,
+        StadiumProjectFinancing $financing,
+        int $constructionDays,
+        string $txDescription,
+        int $notifyValue,
+    ): GameStadiumProject {
+        $completionDate = $game->current_date->copy()->addDays($constructionDays);
+
+        return DB::transaction(function () use ($game, $type, $targetValue, $cost, $financing, $completionDate, $txDescription, $notifyValue) {
+            $project = GameStadiumProject::create([
+                'game_id' => $game->id,
+                'team_id' => $game->team_id,
+                'type' => $type,
+                'status' => StadiumProjectStatus::InProgress,
+                'target_capacity' => $targetValue,
+                'committed_season' => (int) $game->season,
+                'committed_date' => $game->current_date,
+                'completion_date' => $completionDate,
+                'completion_season' => null,
+                'total_cost_cents' => $cost,
+                'financing' => $financing,
+                'paid_cents' => $financing === StadiumProjectFinancing::Cash ? $cost : 0,
+            ]);
+
+            if ($financing === StadiumProjectFinancing::Cash) {
+                $this->deductCash($game, $cost, $txDescription);
+            } else {
+                $this->loanService->request($game, $project, $cost);
+            }
+
+            $this->notificationService->notifyStadiumProjectCommitted(
+                $game,
+                $type,
+                $notifyValue,
+                $completionDate->isoFormat('LL'),
+            );
+
+            return $project->fresh();
+        });
     }
 
     /**
@@ -282,37 +333,18 @@ class StadiumUpgradeService
         $cost = $seats * $this->supplementaryCostPerSeat();
         $this->assertCashAvailable($game, $cost);
 
-        $completionDate = $game->current_date->copy()->addDays($this->supplementaryConstructionDays());
-
-        return DB::transaction(function () use ($game, $seats, $cost, $completionDate) {
-            $project = GameStadiumProject::create([
-                'game_id' => $game->id,
-                'team_id' => $game->team_id,
-                'type' => StadiumProjectType::Supplementary,
-                'status' => StadiumProjectStatus::InProgress,
-                'target_capacity' => $seats,
-                'committed_season' => (int) $game->season,
-                'committed_date' => $game->current_date,
-                'completion_date' => $completionDate,
-                'completion_season' => null,
-                'total_cost_cents' => $cost,
-                'financing' => StadiumProjectFinancing::Cash,
-                'paid_cents' => $cost,
-            ]);
-
-            $this->deductCash($game, $cost, __('finances.tx_stadium_supplementary_payment', [
+        return $this->commitProject(
+            $game,
+            StadiumProjectType::Supplementary,
+            $seats,
+            $cost,
+            StadiumProjectFinancing::Cash,
+            $this->supplementaryConstructionDays(),
+            __('finances.tx_stadium_supplementary_payment', [
                 'seats' => number_format($seats, 0, ',', '.'),
-            ]));
-
-            $this->notificationService->notifyStadiumProjectCommitted(
-                $game,
-                StadiumProjectType::Supplementary,
-                $seats,
-                $completionDate->isoFormat('LL'),
-            );
-
-            return $project;
-        });
+            ]),
+            $seats,
+        );
     }
 
     /**
@@ -348,42 +380,21 @@ class StadiumUpgradeService
         if ($financing === StadiumProjectFinancing::Cash) {
             $this->assertCashAvailable($game, $cost);
         }
+        // No explicit loan-cap check: a target capacity above the loan cap is
+        // already rejected by the maxRebuildCapacity() guard above.
 
-        $completionDate = $game->current_date->copy()->addDays($this->rebuildConstructionDays());
-
-        return DB::transaction(function () use ($game, $targetCapacity, $cost, $financing, $completionDate) {
-            $project = GameStadiumProject::create([
-                'game_id' => $game->id,
-                'team_id' => $game->team_id,
-                'type' => StadiumProjectType::Rebuild,
-                'status' => StadiumProjectStatus::InProgress,
-                'target_capacity' => $targetCapacity,
-                'committed_season' => (int) $game->season,
-                'committed_date' => $game->current_date,
-                'completion_date' => $completionDate,
-                'completion_season' => null,
-                'total_cost_cents' => $cost,
-                'financing' => $financing,
-                'paid_cents' => $financing === StadiumProjectFinancing::Cash ? $cost : 0,
-            ]);
-
-            if ($financing === StadiumProjectFinancing::Cash) {
-                $this->deductCash($game, $cost, __('finances.tx_stadium_rebuild_payment', [
-                    'capacity' => number_format($targetCapacity, 0, ',', '.'),
-                ]));
-            } else {
-                $this->loanService->request($game, $project, $cost);
-            }
-
-            $this->notificationService->notifyStadiumProjectCommitted(
-                $game,
-                StadiumProjectType::Rebuild,
-                $targetCapacity,
-                $completionDate->isoFormat('LL'),
-            );
-
-            return $project->fresh();
-        });
+        return $this->commitProject(
+            $game,
+            StadiumProjectType::Rebuild,
+            $targetCapacity,
+            $cost,
+            $financing,
+            $this->rebuildConstructionDays(),
+            __('finances.tx_stadium_rebuild_payment', [
+                'capacity' => number_format($targetCapacity, 0, ',', '.'),
+            ]),
+            $targetCapacity,
+        );
     }
 
     /**
@@ -401,61 +412,31 @@ class StadiumUpgradeService
         }
 
         if ($seats < $this->standExpansionMinSeats()) {
-            throw new InvalidArgumentException('messages.stadium_supplementary_too_few_seats');
+            throw new InvalidArgumentException('messages.stadium_stand_expansion_too_few_seats');
         }
 
         if ($seats > $this->standExpansionMaxSeats()) {
-            throw new InvalidArgumentException('messages.stadium_supplementary_exceeds_cap');
+            throw new InvalidArgumentException('messages.stadium_stand_expansion_exceeds_cap');
         }
 
         $cost = $seats * $this->standExpansionCostPerSeat();
 
-        if ($financing === StadiumProjectFinancing::Cash) {
-            $this->assertCashAvailable($game, $cost);
-        } else {
-            // Reuse the rebuild loan cap as the bank's ceiling on
-            // stand-expansion borrowing — same affordability/reputation
-            // signal applies.
-            if ($cost > $this->loanService->maxLoanCap($game)) {
-                throw new InvalidArgumentException('messages.stadium_rebuild_exceeds_max_capacity');
-            }
-        }
+        // Reuse the rebuild loan cap as the bank's ceiling on stand-expansion
+        // borrowing — the same affordability/reputation signal applies.
+        $this->assertFinanceable($game, $cost, $financing);
 
-        $completionDate = $game->current_date->copy()->addDays($this->standExpansionConstructionDays());
-
-        return DB::transaction(function () use ($game, $seats, $cost, $financing, $completionDate) {
-            $project = GameStadiumProject::create([
-                'game_id' => $game->id,
-                'team_id' => $game->team_id,
-                'type' => StadiumProjectType::StandExpansion,
-                'status' => StadiumProjectStatus::InProgress,
-                'target_capacity' => $seats,
-                'committed_season' => (int) $game->season,
-                'committed_date' => $game->current_date,
-                'completion_date' => $completionDate,
-                'completion_season' => null,
-                'total_cost_cents' => $cost,
-                'financing' => $financing,
-                'paid_cents' => $financing === StadiumProjectFinancing::Cash ? $cost : 0,
-            ]);
-
-            if ($financing === StadiumProjectFinancing::Cash) {
-                $this->deductCash($game, $cost, __('finances.tx_stadium_stand_expansion_payment', [
-                    'seats' => number_format($seats, 0, ',', '.'),
-                ]));
-            } else {
-                $this->loanService->request($game, $project, $cost);
-            }
-
-            $this->notificationService->notifyStadiumProjectCommitted(
-                $game,
-                StadiumProjectType::StandExpansion,
-                $seats,
-                $completionDate->isoFormat('LL'),
-            );
-
-            return $project->fresh();
-        });
+        return $this->commitProject(
+            $game,
+            StadiumProjectType::StandExpansion,
+            $seats,
+            $cost,
+            $financing,
+            $this->standExpansionConstructionDays(),
+            __('finances.tx_stadium_stand_expansion_payment', [
+                'seats' => number_format($seats, 0, ',', '.'),
+            ]),
+            $seats,
+        );
     }
 
     /**
@@ -465,7 +446,7 @@ class StadiumUpgradeService
      */
     public function uefaUpgradeCost(int $fromLevel): int
     {
-        $bands = (array) config('finances.stadium_costs.uefa_upgrade_cost_cents', []);
+        $bands = (array) config('stadium.stadium_costs.uefa_upgrade_cost_cents', []);
 
         return (int) ($bands[$fromLevel] ?? 0);
     }
@@ -523,53 +504,23 @@ class StadiumUpgradeService
             throw new InvalidArgumentException('messages.stadium_uefa_already_max');
         }
 
-        if ($financing === StadiumProjectFinancing::Cash) {
-            $this->assertCashAvailable($game, $cost);
-        } else {
-            if ($cost > $this->loanService->maxLoanCap($game)) {
-                throw new InvalidArgumentException('messages.stadium_rebuild_exceeds_max_capacity');
-            }
-        }
+        $this->assertFinanceable($game, $cost, $financing);
 
-        $completionDate = $game->current_date->copy()->addDays($this->uefaUpgradeConstructionDays());
-
-        return DB::transaction(function () use ($game, $targetLevel, $cost, $financing, $completionDate) {
-            $project = GameStadiumProject::create([
-                'game_id' => $game->id,
-                'team_id' => $game->team_id,
-                'type' => StadiumProjectType::UefaUpgrade,
-                'status' => StadiumProjectStatus::InProgress,
-                // target_capacity stores the target UEFA level (1–4) for
-                // this project type. The history view branches on type
-                // before rendering, so the integer never gets mistaken
-                // for a seat count.
-                'target_capacity' => $targetLevel,
-                'committed_season' => (int) $game->season,
-                'committed_date' => $game->current_date,
-                'completion_date' => $completionDate,
-                'completion_season' => null,
-                'total_cost_cents' => $cost,
-                'financing' => $financing,
-                'paid_cents' => $financing === StadiumProjectFinancing::Cash ? $cost : 0,
-            ]);
-
-            if ($financing === StadiumProjectFinancing::Cash) {
-                $this->deductCash($game, $cost, __('finances.tx_stadium_uefa_upgrade_payment', [
-                    'level' => $targetLevel,
-                ]));
-            } else {
-                $this->loanService->request($game, $project, $cost);
-            }
-
-            $this->notificationService->notifyStadiumProjectCommitted(
-                $game,
-                StadiumProjectType::UefaUpgrade,
-                $targetLevel,
-                $completionDate->isoFormat('LL'),
-            );
-
-            return $project->fresh();
-        });
+        // target_capacity stores the target UEFA level (1–4) for this project
+        // type. The history view branches on type before rendering, so the
+        // integer never gets mistaken for a seat count.
+        return $this->commitProject(
+            $game,
+            StadiumProjectType::UefaUpgrade,
+            $targetLevel,
+            $cost,
+            $financing,
+            $this->uefaUpgradeConstructionDays(),
+            __('finances.tx_stadium_uefa_upgrade_payment', [
+                'level' => $targetLevel,
+            ]),
+            $targetLevel,
+        );
     }
 
     /**
@@ -596,6 +547,21 @@ class StadiumUpgradeService
 
         if ($cost > $this->availableCashFor($game)) {
             throw new InvalidArgumentException('messages.stadium_insufficient_budget');
+        }
+    }
+
+    /**
+     * Pre-flight affordability check for a financeable project: a cash project
+     * must fit the available transfer cash; a loan project must fit the bank's
+     * loan cap. (Rebuild skips this — its loan ceiling is already enforced via
+     * the maxRebuildCapacity() guard before cost is known.)
+     */
+    private function assertFinanceable(Game $game, int $cost, StadiumProjectFinancing $financing): void
+    {
+        if ($financing === StadiumProjectFinancing::Cash) {
+            $this->assertCashAvailable($game, $cost);
+        } elseif ($cost > $this->loanService->maxLoanCap($game)) {
+            throw new InvalidArgumentException('messages.stadium_loan_exceeds_cap');
         }
     }
 
