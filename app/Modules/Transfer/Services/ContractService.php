@@ -366,7 +366,12 @@ class ContractService
      */
     public function getMinimumWageForClub(?int $tier, ?string $reputation): int
     {
-        $base = self::MINIMUM_WAGES[$tier] ?? self::DEFAULT_MINIMUM_WAGE;
+        // $tier can be null when a team has no league membership or a
+        // competition lookup misses; null array offsets are deprecated in
+        // PHP 8.5, so guard the lookup and fall back to the default floor.
+        $base = $tier !== null
+            ? (self::MINIMUM_WAGES[$tier] ?? self::DEFAULT_MINIMUM_WAGE)
+            : self::DEFAULT_MINIMUM_WAGE;
 
         if ($tier !== null && $tier >= 3 && $reputation !== null) {
             $multiplier = self::REPUTATION_WAGE_MULTIPLIERS[$reputation] ?? 1.0;
