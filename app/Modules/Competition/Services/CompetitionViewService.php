@@ -9,7 +9,6 @@ use App\Models\GameMatch;
 use App\Models\GamePlayer;
 use App\Models\GameStanding;
 use App\Models\MatchEvent;
-use App\Models\Team;
 use Illuminate\Support\Collection;
 
 class CompetitionViewService
@@ -119,12 +118,15 @@ class CompetitionViewService
 
     public function getTopScorers(string $gameId, string $competitionId): Collection
     {
+        // Sum goals per player across the whole competition, regardless of which
+        // club they scored each goal for. A mid-season transfer keeps a single
+        // cumulative tally rather than splitting into one row per former club.
         $scorerRows = MatchEvent::where('match_events.game_id', $gameId)
             ->where('match_events.event_type', MatchEvent::TYPE_GOAL)
             ->join('game_matches', 'game_matches.id', '=', 'match_events.game_match_id')
             ->where('game_matches.competition_id', $competitionId)
-            ->selectRaw('match_events.game_player_id, match_events.team_id, COUNT(*) as goals')
-            ->groupBy('match_events.game_player_id', 'match_events.team_id')
+            ->selectRaw('match_events.game_player_id, COUNT(*) as goals')
+            ->groupBy('match_events.game_player_id')
             ->orderByDesc('goals')
             ->limit(10)
             ->get();
@@ -133,23 +135,22 @@ class CompetitionViewService
             return collect();
         }
 
-        $players = GamePlayer::with(['matchState'])
+        $players = GamePlayer::with(['matchState', 'team'])
             ->whereIn('id', $scorerRows->pluck('game_player_id')->unique())
             ->get()
             ->keyBy('id');
 
-        $teams = Team::whereIn('id', $scorerRows->pluck('team_id')->unique())
-            ->get()
-            ->keyBy('id');
-
-        return $scorerRows->map(function ($row) use ($players, $teams) {
+        return $scorerRows->map(function ($row) use ($players) {
             $player = $players[$row->game_player_id] ?? null;
             if (!$player) {
                 return null;
             }
             $player = clone $player;
             $player->goals = $row->goals;
-            $player->scorer_team = $teams[$row->team_id] ?? null;
+            // Attribute to the player's CURRENT club — not the club they scored
+            // for — so a signed top scorer shows under your crest (mirrors
+            // getBestGoalkeepers and the real Pichichi ranking).
+            $player->scorer_team = $player->team;
 
             return $player;
         })->filter()->sortByDesc('goals')->values();
