@@ -52,7 +52,7 @@ class ClubProfilesSeeder extends Seeder
         // =============================================
 
         // Established (historic clubs) - Objetivo: Playoff ascenso
-        'Deportivo de La Coruña' => ClubProfile::REPUTATION_ESTABLISHED,
+        'Deportivo de A Coruña' => ClubProfile::REPUTATION_ESTABLISHED,
         'Málaga CF' => ClubProfile::REPUTATION_ESTABLISHED,
         'Sporting Gijón' => ClubProfile::REPUTATION_ESTABLISHED,
         'UD Las Palmas' => ClubProfile::REPUTATION_ESTABLISHED,
@@ -516,7 +516,7 @@ class ClubProfilesSeeder extends Seeder
         // ── Spain — La Liga 2 ────────────────────────────────────────
         'Racing Santander' => 7,        // 93.7%
         'Málaga CF' => 7,               // 82.6%
-        'Deportivo de La Coruña' => 6,   // 71.0%
+        'Deportivo de A Coruña' => 6,   // 71.0%
         'Sporting Gijón' => 5,          // 70.8%
         'Real Zaragoza' => 5,            // 74.1%
         'Córdoba CF' => 5,              // 72.2%
@@ -665,7 +665,7 @@ class ClubProfilesSeeder extends Seeder
         'Real Oviedo' => '4-2-1-3',
 
         // ── Spain — La Liga 2 ────────────────────────────────────────
-        'Deportivo de La Coruña' => '4-2-3-1',
+        'Deportivo de A Coruña' => '4-2-3-1',
         'Málaga CF' => '4-2-3-1',
         'Sporting Gijón' => '4-2-3-1',
         'UD Las Palmas' => '4-3-3',
